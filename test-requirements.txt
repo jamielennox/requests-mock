@@ -1,3 +1,4 @@
+discover
 fixtures
 testrepository>=0.0.18
 testtools
