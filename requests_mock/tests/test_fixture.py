@@ -12,6 +12,7 @@
 
 import requests
 import requests_mock
+from requests_mock import fixture
 from requests_mock.tests import base
 
 
@@ -19,19 +20,20 @@ class MockingTests(base.TestCase):
 
     def setUp(self):
         super(MockingTests, self).setUp()
-        self.mocker = self.useFixture(requests_mock.Mock())
+        self.mocker = self.useFixture(fixture.Fixture())
 
     def test_basic_install(self):
         pass
 
     def test_failure(self):
         self.assertRaises(requests_mock.NoMockAddress,
-                          requests.get, 'http://www.google.com')
+                          requests.get,
+                          'http://www.google.com')
 
-    def test_mock(self):
+    def test_basic(self):
         test_url = 'http://www.google.com/'
-        self.mocker.register_uri('GET', test_url, body='response')
+        self.mocker.register_uri('GET', test_url, text='response')
 
         resp = requests.get(test_url)
         self.assertEqual('response', resp.text)
-        self.assertEqual(test_url, self.mocker.latest_request().url)
+        self.assertEqual(test_url, self.mocker.last_request().url)

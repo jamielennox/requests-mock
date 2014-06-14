@@ -16,10 +16,13 @@ import requests
 from requests_mock import adapter
 
 
-class Mock(fixtures.Fixture):
+class Fixture(fixtures.Fixture):
+
+    PROXY_FUNCS = set(['last_request',
+                       'register_uri'])
 
     def __init__(self):
-        super(Mock, self).__init__()
+        super(Fixture, self).__init__()
         self.adapter = adapter.Adapter()
         self._original_get_adapter = None
 
@@ -34,15 +37,18 @@ class Mock(fixtures.Fixture):
         return self.adapter
 
     def setUp(self):
-        super(Mock, self).setUp()
+        super(Fixture, self).setUp()
 
         self._original_get_adapter = requests.Session.get_adapter
         requests.Session.get_adapter = self._get_adapter
 
         self.addCleanup(self._cleanup)
 
-    def register_uri(self, *args, **kwargs):
-        return self.adapter.register_uri(*args, **kwargs)
+    def __getattr__(self, name):
+        if name in self.PROXY_FUNCS:
+            try:
+                return getattr(self.adapter, name)
+            except AttributeError:
+                pass
 
-    def latest_request(self):
-        return self.adapter.latest_request()
+        return super(Fixture, self)._getattr__(name)

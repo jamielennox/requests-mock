@@ -10,36 +10,104 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import requests
-from requests import adapters
+import json as jsonutils
 
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
+from requests.adapters import BaseAdapter, HTTPAdapter
+from requests.packages.urllib3.response import HTTPResponse
+from six import BytesIO
+from six.moves.urllib import parse as urlparse
 
 from requests_mock import exceptions
 
 
+class Context(object):
+
+    def __init__(self, request, headers, status_code):
+        self.request = request
+        self.headers = headers.copy()
+        self.status_code = status_code
+
+    def call(self, f, *args, **kwargs):
+        if callable(f):
+            status_code, headers, data = f(self.request, *args, **kwargs)
+            if status_code:
+                self.status_code = status_code
+            if headers:
+                self.headers.update(headers)
+            return data
+        else:
+            return f
+
+
 class Matcher(object):
 
-    def __init__(self, url, method, status_code, body, headers):
-        self.url = urlparse.urlsplit(url.lower())
+    _http_adapter = HTTPAdapter()
+
+    def __init__(self,
+                 method,
+                 url,
+                 status_code=200,
+                 raw=None,
+                 body=None,
+                 content=None,
+                 text=None,
+                 json=None,
+                 headers=None):
         self.method = method
+        self.url = urlparse.urlsplit(url.lower())
         self.status_code = status_code
-        self.body = body.encode('utf-8')
-        self.headers = headers
+        self.raw = raw
+        self.body = body
+        self.content = content
+        self.text = text
+        self.json = json
+        self.headers = headers or {}
+
+        if sum([bool(x) for x in (self.raw,
+                                  self.body,
+                                  self.content,
+                                  self.text,
+                                  self.json)]) > 1:
+            raise RuntimeError('You may only supply one body element')
+
+    def _get_response(self, request):
+        encoding = None
+        context = Context(request, self.headers, self.status_code)
+
+        content = self.content
+        text = self.text
+        body = self.body
+        raw = self.raw
+
+        if self.json:
+            data = context.call(self.json)
+            text = jsonutils.dumps(data)
+        if text:
+            data = context.call(text)
+            encoding = 'utf-8'
+            content = data.encode(encoding)
+        if content:
+            data = context.call(content)
+            body = BytesIO(data)
+        if body:
+            data = context.call(body)
+            raw = HTTPResponse(status=context.status_code,
+                               body=data,
+                               headers=context.headers,
+                               decode_content=False,
+                               preload_content=False)
+
+        return encoding, raw
 
     def create_response(self, request):
-        response = requests.Response()
-        response.status_code = self.status_code
-        response.request = request
-        response._content = self.body
+        encoding, response = self._get_response(request)
+        req_resp = self._http_adapter.build_response(request, response)
+        req_resp.connection = self
+        req_resp.encoding = encoding
+        return req_resp
 
-        if self.headers:
-            response.headers.update(self.headers)
-
-        return response
+    def close(self):
+        pass
 
 
 def match(request, matcher):
@@ -60,7 +128,7 @@ def match(request, matcher):
     return True
 
 
-class Adapter(adapters.BaseAdapter):
+class Adapter(BaseAdapter):
 
     def __init__(self):
         self._matchers = []
@@ -78,17 +146,10 @@ class Adapter(adapters.BaseAdapter):
     def close(self):
         pass
 
-    def register_uri(self, method, url,
-                     status_code=200,
-                     body='',
-                     headers=None):
-        self._matchers.append(Matcher(url,
-                                      method,
-                                      status_code,
-                                      body,
-                                      headers))
+    def register_uri(self, *args, **kwargs):
+        self._matchers.append(Matcher(*args, **kwargs))
 
-    def latest_request(self):
+    def last_request(self):
         """Retrieve the latest request sent"""
         try:
             return self._request_history[-1]
