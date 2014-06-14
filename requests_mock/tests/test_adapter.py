@@ -36,20 +36,19 @@ class SessionAdapterTests(base.TestCase):
             self.assertEqual(v, resp.headers[k])
 
     def assertLastRequest(self, method='GET', body=None):
-        last = self.adapter.last_request()
-        self.assertEqual(self.url, last.url)
-        self.assertEqual(method, last.method)
-        self.assertEqual(body, last.body)
+        self.assertEqual(self.url, self.adapter.last_request.url)
+        self.assertEqual(method, self.adapter.last_request.method)
+        self.assertEqual(body, self.adapter.last_request.body)
 
     def test_content(self):
-        data = 'testdata'
+        data = six.b('testdata')
 
         self.adapter.register_uri('GET',
                                   self.url,
                                   content=data,
                                   headers=self.headers)
         resp = self.session.get(self.url)
-        self.assertEqual(six.b(data), resp.content)
+        self.assertEqual(data, resp.content)
         self.assertHeaders(resp)
         self.assertLastRequest()
 
@@ -131,6 +130,12 @@ class SessionAdapterTests(base.TestCase):
         self.assertHeaders(resp)
         self.assertLastRequest()
 
+    def test_no_body(self):
+        self.adapter.register_uri('GET', self.url)
+        resp = self.session.get(self.url)
+        self.assertEqual(six.b(''), resp.content)
+        self.assertEqual(200, resp.status_code)
+
     def test_multiple_body_elements(self):
         self.assertRaises(RuntimeError,
                           self.adapter.register_uri,
@@ -138,3 +143,19 @@ class SessionAdapterTests(base.TestCase):
                           'GET',
                           content=six.b('b'),
                           text=six.u('u'))
+
+    def test_multiple_responses(self):
+        inp = [{'status_code': 400, 'text': 'abcd'},
+               {'status_code': 300, 'text': 'defg'},
+               {'status_code': 200, 'text': 'hijk'}]
+
+        self.adapter.register_uri('GET', self.url, inp)
+        out = [self.session.get(self.url) for i in range(0, len(inp))]
+
+        for i, o in zip(inp, out):
+            for k, v in six.iteritems(i):
+                self.assertEqual(v, getattr(o, k))
+
+        last = self.session.get(self.url)
+        for k, v in six.iteritems(inp[-1]):
+            self.assertEqual(v, getattr(last, k))

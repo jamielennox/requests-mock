@@ -36,4 +36,4 @@ class MockingTests(base.TestCase):
 
         resp = requests.get(test_url)
         self.assertEqual('response', resp.text)
-        self.assertEqual(test_url, self.mocker.last_request().url)
+        self.assertEqual(test_url, self.mocker.last_request.url)
