@@ -11,6 +11,8 @@ requests-mock
 .. image:: https://pypip.in/d/requests-mock/badge.png
         :target: https://crate.io/packages/requests-mock?version=latest
 
+.. image:: https://coveralls.io/repos/jamielennox/requests-mock/badge.png
+        :target: https://coveralls.io/r/jamielennox/requests-mock
 
 Intro
 -----
