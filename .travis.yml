@@ -16,3 +16,12 @@ script: coverage run -m testtools.run discover
 
 after_success:
     coveralls
+
+deploy:
+    provider: pypi
+    user: jamielennox
+    password:
+        secure: jVdHbMX5JlkscdUM0mufIm1JS7KYKUmul2/4z28aDFmxZeI2G+9SEbJjWN6eRzux+BIhXkBlwWCYpP1JakcKESVX3MbiLMVlzeAEWLV4YXZuuqe/IxUDC9WTrW+n9kRg0gWHFL/MrK7J5bpf+v6CWWdQh5Q9rnuNKB1bagGVPAg=
+    on:
+        tags: true
+        repo: jamielennox/requests-mock
