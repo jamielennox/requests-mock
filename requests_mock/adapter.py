@@ -187,6 +187,7 @@ class Adapter(BaseAdapter):
 
     """
     def __init__(self):
+        super(Adapter, self).__init__()
         self._matchers = []
         self.request_history = []
 
