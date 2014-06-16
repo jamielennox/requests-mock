@@ -47,6 +47,8 @@ class _Context(object):
 
 class _MatcherResponse(object):
 
+    _BODY_ARGS = ['raw', 'body', 'content', 'text', 'json']
+
     def __init__(self, **kwargs):
         """
         :param int status_code: The status code to return upon a successful
@@ -62,28 +64,27 @@ class _MatcherResponse(object):
         :param dict headers: A dictionary object containing headers that are
             returned upon a successful match.
         """
+        # mutual exclusion, only 1 body method may be provided
+        provided = [x for x in self._BODY_ARGS if kwargs.get(x) is not None]
+
         self.status_code = kwargs.pop('status_code', 200)
         self.raw = kwargs.pop('raw', None)
         self.body = kwargs.pop('body', None)
         self.content = kwargs.pop('content', None)
         self.text = kwargs.pop('text', None)
         self.json = kwargs.pop('json', None)
+        self.reason = kwargs.pop('reason', None)
         self.headers = kwargs.pop('headers', {})
 
         if kwargs:
-            raise TypeError('Too many arguments provided to _MatcherResponse')
+            raise TypeError('Too many arguments provided. Unexpected '
+                            'arguments %s' % ', '.join(kwargs.keys()))
 
-        # mutual exclusion, only 1 body method may be provided
-        provided = sum([bool(x) for x in (self.raw,
-                                          self.body,
-                                          self.content,
-                                          self.text,
-                                          self.json)])
-
-        if provided == 0:
+        if len(provided) == 0:
             self.body = six.BytesIO(six.b(''))
-        elif provided > 1:
-            raise RuntimeError('You may only supply one body element')
+        elif len(provided) > 1:
+            raise RuntimeError('You may only supply one body element. You '
+                               'supplied %s' % ', '.join(provided))
 
         # whilst in general you shouldn't do type checking in python this
         # makes sure we don't end up with differences between the way types
@@ -104,21 +105,22 @@ class _MatcherResponse(object):
         body = self.body
         raw = self.raw
 
-        if self.json:
+        if self.json is not None:
             data = context.call(self.json)
             text = jsonutils.dumps(data)
-        if text:
+        if text is not None:
             data = context.call(text)
             encoding = 'utf-8'
             content = data.encode(encoding)
-        if content:
+        if content is not None:
             data = context.call(content)
             body = six.BytesIO(data)
-        if body:
+        if body is not None:
             data = context.call(body)
             raw = HTTPResponse(status=context.status_code,
                                body=data,
                                headers=context.headers,
+                               reason=self.reason,
                                decode_content=False,
                                preload_content=False)
 
@@ -138,7 +140,7 @@ class _Matcher(object):
             require that the entire query string needs to match.
         """
         self.method = method
-        self.url = urlparse.urlsplit(url.lower())
+        self.url = urlparse.urlparse(url.lower())
         self.responses = responses
         self.complete_qs = complete_qs
 
@@ -161,7 +163,7 @@ class _Matcher(object):
         if request.method.lower() != self.method.lower():
             return False
 
-        url = urlparse.urlsplit(request.url.lower())
+        url = urlparse.urlparse(request.url.lower())
 
         if self.url.scheme and url.scheme != self.url.scheme:
             return False
@@ -199,7 +201,7 @@ class Adapter(BaseAdapter):
         self.request_history = []
 
     def send(self, request, **kwargs):
-        for matcher in self._matchers:
+        for matcher in reversed(self._matchers):
             if matcher.match(request):
                 self.request_history.append(request)
                 return matcher.create_response(request)
@@ -209,7 +211,7 @@ class Adapter(BaseAdapter):
     def close(self):
         pass
 
-    def register_uri(self, method, url, request_list=None, **kwargs):
+    def register_uri(self, method, url, response_list=None, **kwargs):
         """Register a new URI match and fake response.
 
         :param str method: The HTTP method to match.
@@ -217,13 +219,13 @@ class Adapter(BaseAdapter):
         """
         complete_qs = kwargs.pop('complete_qs', False)
 
-        if request_list and kwargs:
+        if response_list and kwargs:
             raise RuntimeError('You should specify either a list of '
                                'responses OR response kwargs. Not both.')
-        elif not request_list:
-            request_list = [kwargs]
+        elif not response_list:
+            response_list = [kwargs]
 
-        responses = [_MatcherResponse(**k) for k in request_list]
+        responses = [_MatcherResponse(**k) for k in response_list]
         self._matchers.append(_Matcher(method,
                                        url,
                                        responses,

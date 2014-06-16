@@ -37,3 +37,6 @@ class MockingTests(base.TestCase):
         resp = requests.get(test_url)
         self.assertEqual('response', resp.text)
         self.assertEqual(test_url, self.mocker.last_request.url)
+
+    def test_fixture_has_normal_attr_error(self):
+        self.assertRaises(AttributeError, lambda: self.mocker.unknown)

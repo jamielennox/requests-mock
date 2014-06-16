@@ -19,7 +19,8 @@ from requests_mock import adapter
 class Fixture(fixtures.Fixture):
 
     PROXY_FUNCS = set(['last_request',
-                       'register_uri'])
+                       'register_uri',
+                       'request_history'])
 
     def __init__(self):
         super(Fixture, self).__init__()
@@ -51,4 +52,4 @@ class Fixture(fixtures.Fixture):
             except AttributeError:
                 pass
 
-        return super(Fixture, self)._getattr__(name)
+        raise AttributeError(name)

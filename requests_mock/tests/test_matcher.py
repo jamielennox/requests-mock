@@ -18,26 +18,100 @@ from requests_mock.tests import base
 
 class TestMatcher(base.TestCase):
 
-    def match(self, target, url, complete_qs=False):
-        matcher = adapter._Matcher('GET', target, [], complete_qs)
-        request = requests.Request('GET', url).prepare()
+    def match(self,
+              target,
+              url,
+              matcher_method='GET',
+              request_method='GET',
+              complete_qs=False):
+        matcher = adapter._Matcher(matcher_method, target, [], complete_qs)
+        request = requests.Request(request_method, url).prepare()
         return matcher.match(request)
 
-    def assertMatch(self, target, url, **kwargs):
-        self.assertEqual(True, self.match(target, url, **kwargs),
-                         'Matcher %s failed to match %s' % (target, url))
+    def assertMatch(self,
+                    target,
+                    url,
+                    matcher_method='GET',
+                    request_method='GET',
+                    **kwargs):
+        self.assertEqual(True,
+                         self.match(target,
+                                    url,
+                                    matcher_method=matcher_method,
+                                    request_method=request_method,
+                                    **kwargs),
+                         'Matcher %s %s failed to match %s %s' %
+                         (matcher_method, target, request_method, url))
 
-    def assertMatchBoth(self, target, url, **kwargs):
-        self.assertMatch(target, url, **kwargs)
-        self.assertMatch(url, target, **kwargs)
+    def assertMatchBoth(self,
+                        target,
+                        url,
+                        matcher_method='GET',
+                        request_method='GET',
+                        **kwargs):
+        self.assertMatch(target,
+                         url,
+                         matcher_method=matcher_method,
+                         request_method=request_method,
+                         **kwargs)
+        self.assertMatch(url,
+                         target,
+                         matcher_method=request_method,
+                         request_method=matcher_method,
+                         **kwargs)
 
-    def assertNoMatch(self, target, url, **kwargs):
-        self.assertEqual(False, self.match(target, url, **kwargs),
-                         'Matcher %s unexpectedly matched %s' % (target, url))
+    def assertNoMatch(self,
+                      target,
+                      url,
+                      matcher_method='GET',
+                      request_method='GET',
+                      **kwargs):
+        self.assertEqual(False,
+                         self.match(target,
+                                    url,
+                                    matcher_method=matcher_method,
+                                    request_method=request_method,
+                                    **kwargs),
+                         'Matcher %s %s unexpectedly matched %s %s' %
+                         (matcher_method, target, request_method, url))
 
-    def assertNoMatchBoth(self, target, url, **kwargs):
-        self.assertNoMatch(target, url, **kwargs)
-        self.assertNoMatch(url, target, **kwargs)
+    def assertNoMatchBoth(self,
+                          target,
+                          url,
+                          matcher_method='GET',
+                          request_method='GET',
+                          **kwargs):
+        self.assertNoMatch(target,
+                           url,
+                           matcher_method=matcher_method,
+                           request_method=request_method,
+                           **kwargs)
+        self.assertNoMatch(url,
+                           target,
+                           matcher_method=request_method,
+                           request_method=matcher_method,
+                           **kwargs)
+
+    def assertMatchMethodBoth(self, matcher_method, request_method, **kwargs):
+        url = 'http://www.test.com'
+
+        self.assertMatchBoth(url,
+                             url,
+                             request_method=request_method,
+                             matcher_method=matcher_method,
+                             **kwargs)
+
+    def assertNoMatchMethodBoth(self,
+                                matcher_method,
+                                request_method,
+                                **kwargs):
+        url = 'http://www.test.com'
+
+        self.assertNoMatchBoth(url,
+                               url,
+                               request_method=request_method,
+                               matcher_method=matcher_method,
+                               **kwargs)
 
     def test_url_matching(self):
         self.assertMatchBoth('http://www.test.com',
@@ -83,3 +157,8 @@ class TestMatcher(base.TestCase):
                            complete_qs=True)
         self.assertNoMatch('/path?a=1&b=2',
                            'http://www.test.com/path?a=1')
+
+    def test_method_match(self):
+        self.assertNoMatchMethodBoth('GET', 'POST')
+        self.assertMatchMethodBoth('GET', 'get')
+        self.assertMatchMethodBoth('GeT', 'geT')

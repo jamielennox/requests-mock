@@ -159,3 +159,126 @@ class SessionAdapterTests(base.TestCase):
         last = self.session.get(self.url)
         for k, v in six.iteritems(inp[-1]):
             self.assertEqual(v, getattr(last, k))
+
+    def test_callback_optional_status(self):
+        headers = {'a': 'b'}
+
+        def _test_cb(request):
+            return None, headers, ''
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=_test_cb,
+                                  status_code=300)
+        resp = self.session.get(self.url)
+        self.assertEqual(300, resp.status_code)
+
+        for k, v in six.iteritems(headers):
+            self.assertEqual(v, resp.headers[k])
+
+    def test_callback_optional_headers(self):
+        headers = {'a': 'b'}
+
+        def _test_cb(request):
+            return 300, None, ''
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=_test_cb,
+                                  headers=headers)
+
+        resp = self.session.get(self.url)
+        self.assertEqual(300, resp.status_code)
+
+        for k, v in six.iteritems(headers):
+            self.assertEqual(v, resp.headers[k])
+
+    def test_callback_adds_headers(self):
+        headers_a = {'a': 'b'}
+        headers_b = {'c': 'd'}
+
+        def _test_cb(request):
+            return 200, headers_b, ''
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=_test_cb,
+                                  headers=headers_a)
+
+        resp = self.session.get(self.url)
+        self.assertEqual(200, resp.status_code)
+
+        for headers in (headers_a, headers_b):
+            for k, v in six.iteritems(headers):
+                self.assertEqual(v, resp.headers[k])
+
+    def test_latest_register_overrides(self):
+        self.adapter.register_uri('GET', self.url, text='abc')
+        self.adapter.register_uri('GET', self.url, text='def')
+
+        resp = self.session.get(self.url)
+        self.assertEqual('def', resp.text)
+
+    def test_no_last_request(self):
+        self.assertIsNone(self.adapter.last_request)
+        self.assertEqual(0, len(self.adapter.request_history))
+
+    def test_dont_pass_list_and_kwargs(self):
+        self.assertRaises(RuntimeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          [{'text': 'a'}],
+                          headers={'a': 'b'})
+
+    def test_empty_string_return(self):
+        # '' evaluates as False, so make sure an empty string is not ignored.
+        self.adapter.register_uri('GET', self.url, text='')
+        resp = self.session.get(self.url)
+        self.assertEqual('', resp.text)
+
+    def test_dont_pass_multiple_bodies(self):
+        self.assertRaises(RuntimeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          json={'abc': 'def'},
+                          text='ghi')
+
+    def test_dont_pass_unexpected_kwargs(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          unknown='argument')
+
+    def test_dont_pass_unicode_as_content(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          content=six.u('unicode'))
+
+    def test_dont_pass_bytes_as_text(self):
+        if six.PY2:
+            self.skipTest('Cannot enforce byte behaviour in PY2')
+
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          text=six.b('bytes'))
+
+    def test_dont_pass_non_str_as_content(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          content=5)
+
+    def test_dont_pass_non_str_as_text(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          text=5)
