@@ -56,8 +56,10 @@ class SessionAdapterTests(base.TestCase):
         status_code = 401
         data = six.b('testdata')
 
-        def _content_cb(request):
-            return status_code, self.headers, data
+        def _content_cb(request, context):
+            context.status_code = status_code
+            context.headers.update(self.headers)
+            return data
 
         self.adapter.register_uri('GET',
                                   self.url,
@@ -86,8 +88,10 @@ class SessionAdapterTests(base.TestCase):
         status_code = 401
         data = 'testdata'
 
-        def _text_cb(request):
-            return status_code, self.headers, six.u(data)
+        def _text_cb(request, context):
+            context.status_code = status_code
+            context.headers.update(self.headers)
+            return six.u(data)
 
         self.adapter.register_uri('GET', self.url, text=_text_cb)
         resp = self.session.get(self.url)
@@ -117,8 +121,10 @@ class SessionAdapterTests(base.TestCase):
         json_data = {'hello': 'world'}
         data = '{"hello": "world"}'
 
-        def _json_cb(request):
-            return status_code, self.headers, json_data
+        def _json_cb(request, context):
+            context.status_code = status_code
+            context.headers.update(self.headers)
+            return json_data
 
         self.adapter.register_uri('GET', self.url, json=_json_cb)
         resp = self.session.get(self.url)
@@ -163,8 +169,9 @@ class SessionAdapterTests(base.TestCase):
     def test_callback_optional_status(self):
         headers = {'a': 'b'}
 
-        def _test_cb(request):
-            return None, headers, ''
+        def _test_cb(request, context):
+            context.headers.update(headers)
+            return ''
 
         self.adapter.register_uri('GET',
                                   self.url,
@@ -179,8 +186,9 @@ class SessionAdapterTests(base.TestCase):
     def test_callback_optional_headers(self):
         headers = {'a': 'b'}
 
-        def _test_cb(request):
-            return 300, None, ''
+        def _test_cb(request, context):
+            context.status_code = 300
+            return ''
 
         self.adapter.register_uri('GET',
                                   self.url,
@@ -192,25 +200,6 @@ class SessionAdapterTests(base.TestCase):
 
         for k, v in six.iteritems(headers):
             self.assertEqual(v, resp.headers[k])
-
-    def test_callback_adds_headers(self):
-        headers_a = {'a': 'b'}
-        headers_b = {'c': 'd'}
-
-        def _test_cb(request):
-            return 200, headers_b, ''
-
-        self.adapter.register_uri('GET',
-                                  self.url,
-                                  text=_test_cb,
-                                  headers=headers_a)
-
-        resp = self.session.get(self.url)
-        self.assertEqual(200, resp.status_code)
-
-        for headers in (headers_a, headers_b):
-            for k, v in six.iteritems(headers):
-                self.assertEqual(v, resp.headers[k])
 
     def test_latest_register_overrides(self):
         self.adapter.register_uri('GET', self.url, text='abc')

@@ -23,26 +23,10 @@ from requests_mock import exceptions
 class _Context(object):
     """Stores the data being used to process a current URL match."""
 
-    def __init__(self, request, headers, status_code):
-        self.request = request
+    def __init__(self, headers, status_code, reason):
         self.headers = headers
         self.status_code = status_code
-
-    def call(self, f, *args, **kwargs):
-        """Test and call a callback if one was provided.
-
-        If the object provided is callable, then call it and return otherwise
-        just return the object.
-        """
-        if callable(f):
-            status_code, headers, data = f(self.request, *args, **kwargs)
-            if status_code:
-                self.status_code = status_code
-            if headers:
-                self.headers.update(headers)
-            return data
-        else:
-            return f
+        self.reason = reason
 
 
 class _MatcherResponse(object):
@@ -98,7 +82,13 @@ class _MatcherResponse(object):
 
     def get_response(self, request):
         encoding = None
-        context = _Context(request, self.headers.copy(), self.status_code)
+        context = _Context(self.headers.copy(),
+                           self.status_code,
+                           self.reason)
+
+        # if a body element is a callback then execute it
+        def _call(f, *args, **kwargs):
+            return f(request, context, *args, **kwargs) if callable(f) else f
 
         content = self.content
         text = self.text
@@ -106,21 +96,21 @@ class _MatcherResponse(object):
         raw = self.raw
 
         if self.json is not None:
-            data = context.call(self.json)
+            data = _call(self.json)
             text = jsonutils.dumps(data)
         if text is not None:
-            data = context.call(text)
+            data = _call(text)
             encoding = 'utf-8'
             content = data.encode(encoding)
         if content is not None:
-            data = context.call(content)
+            data = _call(content)
             body = six.BytesIO(data)
         if body is not None:
-            data = context.call(body)
+            data = _call(body)
             raw = HTTPResponse(status=context.status_code,
                                body=data,
                                headers=context.headers,
-                               reason=self.reason,
+                               reason=context.reason,
                                decode_content=False,
                                preload_content=False)
 
