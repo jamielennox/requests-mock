@@ -1,1 +1,3 @@
+include AUTHORS
+include ChangeLog
 include LICENSE
