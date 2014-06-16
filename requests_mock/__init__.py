@@ -10,8 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from requests_mock.adapter import Adapter
+from requests_mock.adapter import Adapter, ANY
 from requests_mock.exceptions import MockException, NoMockAddress
 
 
-__all__ = ['Adapter', 'MockException', 'NoMockAddress']
+__all__ = ['Adapter', 'ANY', 'MockException', 'NoMockAddress']

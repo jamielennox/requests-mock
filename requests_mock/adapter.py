@@ -19,6 +19,8 @@ from six.moves.urllib import parse as urlparse
 
 from requests_mock import exceptions
 
+ANY = object()
+
 
 class _Context(object):
     """Stores the data being used to process a current URL match."""
@@ -130,7 +132,11 @@ class _Matcher(object):
             require that the entire query string needs to match.
         """
         self.method = method
-        self.url = urlparse.urlparse(url.lower())
+        self.url = url
+        try:
+            self.url_parts = urlparse.urlparse(url.lower())
+        except:
+            self.url_parts = None
         self.responses = responses
         self.complete_qs = complete_qs
 
@@ -149,22 +155,31 @@ class _Matcher(object):
     def close(self):
         pass
 
-    def match(self, request):
-        if request.method.lower() != self.method.lower():
-            return False
+    def _match_method(self, request):
+        if self.method is ANY:
+            return True
+
+        if request.method.lower() == self.method.lower():
+            return True
+
+        return False
+
+    def _match_url(self, request):
+        if self.url is ANY:
+            return True
 
         url = urlparse.urlparse(request.url.lower())
 
-        if self.url.scheme and url.scheme != self.url.scheme:
+        if self.url_parts.scheme and url.scheme != self.url_parts.scheme:
             return False
 
-        if self.url.netloc and url.netloc != self.url.netloc:
+        if self.url_parts.netloc and url.netloc != self.url_parts.netloc:
             return False
 
-        if (url.path or '/') != (self.url.path or '/'):
+        if (url.path or '/') != (self.url_parts.path or '/'):
             return False
 
-        matcher_qs = urlparse.parse_qs(self.url.query)
+        matcher_qs = urlparse.parse_qs(self.url_parts.query)
         request_qs = urlparse.parse_qs(url.query)
 
         for k, vals in six.iteritems(matcher_qs):
@@ -180,6 +195,9 @@ class _Matcher(object):
                     return False
 
         return True
+
+    def match(self, request):
+        return self._match_method(request) and self._match_url(request)
 
 
 class Adapter(BaseAdapter):

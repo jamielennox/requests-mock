@@ -16,6 +16,8 @@ import six
 from requests_mock import adapter
 from requests_mock.tests import base
 
+ANY = adapter.ANY
+
 
 class SessionAdapterTests(base.TestCase):
 
@@ -271,3 +273,17 @@ class SessionAdapterTests(base.TestCase):
                           'GET',
                           self.url,
                           text=5)
+
+    def test_with_any_method(self):
+        self.adapter.register_uri(ANY, self.url, text='resp')
+
+        for m in ('GET', 'HEAD', 'POST', 'UNKNOWN'):
+            resp = self.session.request(m, self.url)
+            self.assertEqual('resp', resp.text)
+
+    def test_with_any_url(self):
+        self.adapter.register_uri('GET', ANY, text='resp')
+
+        for u in ('mock://a', 'mock://b', 'mock://c'):
+            resp = self.session.get(u)
+            self.assertEqual('resp', resp.text)

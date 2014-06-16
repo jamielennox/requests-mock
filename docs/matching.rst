@@ -25,6 +25,7 @@ or you can specify just a path:
     >>> session.get('mock://another.com/6').text
     'resp'
 
+
 Query Strings
 =============
 
@@ -50,3 +51,26 @@ This can be a problem in certain situations, so if you wish to match only the co
     Traceback (most recent call last):
        ...
     requests_mock.exceptions.NoMockAddress: No mock address: GET mock://test.com/8?a=1&b=2
+
+
+Matching ANY
+============
+
+There is a special symbol at `requests_mock.ANY` which acts as the wildcard to match anything.
+It can be used as a replace for the method and/or the URL.
+
+.. code:: python
+
+    >>> adapter.register_uri(requests_mock.ANY, 'mock://test.com/8', text='resp')
+    >>> session.get('mock://test.com/8').text
+    'resp'
+    >>> session.post('mock://test.com/8').text
+    'resp'
+
+.. code:: python
+
+    >>> adapter.register_uri(requests_mock.ANY, requests_mock.ANY, text='resp')
+    >>> session.get('mock://whatever/you/like')
+    'resp'
+    >>> session.post('mock://whatever/you/like')
+    'resp'

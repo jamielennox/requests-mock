@@ -15,6 +15,8 @@ import requests
 from requests_mock import adapter
 from requests_mock.tests import base
 
+ANY = adapter.ANY
+
 
 class TestMatcher(base.TestCase):
 
@@ -162,3 +164,19 @@ class TestMatcher(base.TestCase):
         self.assertNoMatchMethodBoth('GET', 'POST')
         self.assertMatchMethodBoth('GET', 'get')
         self.assertMatchMethodBoth('GeT', 'geT')
+
+    def test_match_ANY_url(self):
+        self.assertMatch(ANY, 'http://anything')
+        self.assertMatch(ANY, 'http://somethingelse')
+        self.assertNoMatch(ANY, 'http://somethingelse', request_method='POST')
+
+    def test_match_ANY_method(self):
+        for m in ('GET', 'POST', 'HEAD', 'OPTION'):
+            self.assertMatch('http://www.test.com',
+                             'http://www.test.com',
+                             matcher_method=ANY,
+                             request_method=m)
+
+        self.assertNoMatch('http://www.test.com',
+                           'http://another',
+                           matcher_method=ANY)
