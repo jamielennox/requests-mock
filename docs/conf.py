@@ -38,7 +38,9 @@ import requests_mock  # noqa
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.intersphinx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -261,3 +263,8 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+requests_uri = 'http://docs.python-requests.org/en/latest/'
+urllib3_uri = 'http://urllib3.readthedocs.org/en/latest'
+intersphinx_mapping = {'requests': (requests_uri, None),
+                       'urllib3': (urllib3_uri, None)}
