@@ -9,7 +9,7 @@ python:
   - "pypy"
 
 # command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
-install: pip install coverage coveralls -r requirements.txt -r test-requirements.txt
+install: pip install coverage coveralls wheel -r requirements.txt -r test-requirements.txt
 
 # command to run tests, e.g. python setup.py test
 script: coverage run -m testtools.run discover
