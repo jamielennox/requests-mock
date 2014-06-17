@@ -266,5 +266,7 @@ texinfo_documents = [
 
 requests_uri = 'http://docs.python-requests.org/en/latest/'
 urllib3_uri = 'http://urllib3.readthedocs.org/en/latest'
+python_uri = 'http://docs.python.org/3.3'
 intersphinx_mapping = {'requests': (requests_uri, None),
-                       'urllib3': (urllib3_uri, None)}
+                       'urllib3': (urllib3_uri, None),
+                       'python': (python_uri, None)}

@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import re
+
 import requests
 import six
 
@@ -285,5 +287,12 @@ class SessionAdapterTests(base.TestCase):
         self.adapter.register_uri('GET', ANY, text='resp')
 
         for u in ('mock://a', 'mock://b', 'mock://c'):
+            resp = self.session.get(u)
+            self.assertEqual('resp', resp.text)
+
+    def test_with_regexp(self):
+        self.adapter.register_uri('GET', re.compile('tester.com'), text='resp')
+
+        for u in ('mocK://www.tester.com/a', 'mock://abc.tester.com'):
             resp = self.session.get(u)
             self.assertEqual('resp', resp.text)

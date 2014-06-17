@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import re
+
 import requests
 
 from requests_mock import adapter
@@ -180,3 +182,15 @@ class TestMatcher(base.TestCase):
         self.assertNoMatch('http://www.test.com',
                            'http://another',
                            matcher_method=ANY)
+
+    def test_match_with_regex(self):
+        r1 = re.compile('test.com/a')
+        r2 = re.compile('/b/c')
+
+        self.assertMatch(r1, 'http://mock.test.com/a/b')
+        self.assertMatch(r1, 'http://test.com/a/')
+        self.assertMatch(r1, 'mock://test.com/a/b')
+        self.assertNoMatch(r1, 'mock://test.com/')
+
+        self.assertMatch(r2, 'http://anything/a/b/c/d')
+        self.assertMatch(r2, 'mock://anything/a/b/c/d')

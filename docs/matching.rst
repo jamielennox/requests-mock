@@ -74,3 +74,22 @@ It can be used as a replace for the method and/or the URL.
     'resp'
     >>> session.post('mock://whatever/you/like')
     'resp'
+
+
+Regular Expressions
+===================
+
+URLs can be specified with a regular expression using the python :py:mod:`re` module.
+To use this you should pass an object created by :py:meth:`re.compile`.
+
+The URL is then matched using :py:meth:`re.regex.search` which means that it will match any component of the url, so if you want to match the start of a URL you will have to anchor it.
+
+.. code:: python
+
+    >>> import re
+    >>> matcher = re.compile('tester.com/a')
+    >>> adapter.register_uri('GET', matcher, text='resp')
+    >>> session.get('mock://www.tester.com/a/b').text
+    'resp'
+
+If you use regular expression matching then *requests-mock* can't do it's normal query string or path only matching, that will need to be part of the expression.

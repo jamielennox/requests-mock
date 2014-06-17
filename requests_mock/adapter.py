@@ -168,6 +168,10 @@ class _Matcher(object):
         if self.url is ANY:
             return True
 
+        # regular expression matching
+        if hasattr(self.url, 'search'):
+            return self.url.search(request.url) is not None
+
         url = urlparse.urlparse(request.url.lower())
 
         if self.url_parts.scheme and url.scheme != self.url_parts.scheme:
