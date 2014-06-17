@@ -80,7 +80,7 @@ Regular Expressions
 ===================
 
 URLs can be specified with a regular expression using the python :py:mod:`re` module.
-To use this you should pass an object created by :py:meth:`re.compile`.
+To use this you should pass an object created by :py:func:`re.compile`.
 
 The URL is then matched using :py:meth:`re.regex.search` which means that it will match any component of the url, so if you want to match the start of a URL you will have to anchor it.
 
