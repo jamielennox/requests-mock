@@ -7,9 +7,6 @@ Fixtures
 To use the *requests-mock* fixture your tests need to have a dependency on the `fixtures`_ library and the `mock`_ library.
 These are not provided by *requests-mock*.
 
-Overview
-========
-
 The fixture mocks the :py:meth:`requests.Session.get_adapter` method so that all requests will be served by the mock adapter.
 
 The fixture provides the same interfaces as the adapter.
