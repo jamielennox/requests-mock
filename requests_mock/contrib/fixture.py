@@ -10,15 +10,18 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from requests_mock.adapter import Adapter, ANY
-from requests_mock.exceptions import MockException, NoMockAddress
-from requests_mock.mocker import Mocker, MockerCore
+import fixtures
+
+from requests_mock import mocker
 
 
-__all__ = ['Adapter',
-           'ANY',
-           'Mocker',
-           'MockerCore',
-           'MockException',
-           'NoMockAddress'
-           ]
+class Fixture(fixtures.Fixture, mocker.Mocker):
+
+    def __init__(self, **kwargs):
+        fixtures.Fixture.__init__(self)
+        mocker.Mocker.__init__(self, **kwargs)
+
+    def setUp(self):
+        super(Fixture, self).setUp()
+        self.start()
+        self.addCleanup(self.stop)

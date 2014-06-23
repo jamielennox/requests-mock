@@ -1,4 +1,5 @@
 discover
 fixtures
+mock
 testrepository>=0.0.18
 testtools

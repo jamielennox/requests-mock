@@ -1,6 +1,6 @@
-=======
-Fixture
-=======
+========
+Fixtures
+========
 
 `Fixtures`_ provide a way to create reusable state and helper methods in test cases.
 
@@ -17,7 +17,7 @@ The fixture provides the same interfaces as the adapter.
 .. code:: python
 
     >>> import requests
-    >>> from requests_mock import fixture
+    >>> from requests_mock.contrib import fixture
     >>> import testtools
 
     >>> class MyTestCase(testtools.TestCase):

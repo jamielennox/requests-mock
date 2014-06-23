@@ -12,7 +12,7 @@
 
 import requests
 import requests_mock
-from requests_mock import fixture
+from requests_mock.contrib import fixture
 from requests_mock.tests import base
 
 
@@ -21,9 +21,6 @@ class MockingTests(base.TestCase):
     def setUp(self):
         super(MockingTests, self).setUp()
         self.mocker = self.useFixture(fixture.Fixture())
-
-    def test_basic_install(self):
-        pass
 
     def test_failure(self):
         self.assertRaises(requests_mock.NoMockAddress,
