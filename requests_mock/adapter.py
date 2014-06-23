@@ -124,7 +124,7 @@ class _Matcher(object):
 
     _http_adapter = HTTPAdapter()
 
-    def __init__(self, method, url, responses, complete_qs):
+    def __init__(self, method, url, responses, complete_qs, request_headers):
         """
         :param bool complete_qs: Match the entire query string. By default URLs
             match if all the provided matcher query arguments are matched and
@@ -139,6 +139,7 @@ class _Matcher(object):
             self.url_parts = None
         self.responses = responses
         self.complete_qs = complete_qs
+        self.request_headers = request_headers
 
     def create_response(self, request):
         if len(self.responses) > 1:
@@ -200,8 +201,22 @@ class _Matcher(object):
 
         return True
 
+    def _match_headers(self, request):
+        for k, vals in six.iteritems(self.request_headers):
+            try:
+                header = request.headers[k]
+            except KeyError:
+                return False
+            else:
+                if header != vals:
+                    return False
+
+        return True
+
     def match(self, request):
-        return self._match_method(request) and self._match_url(request)
+        return (self._match_method(request) and
+                self._match_url(request) and
+                self._match_headers(request))
 
 
 class Adapter(BaseAdapter):
@@ -231,6 +246,7 @@ class Adapter(BaseAdapter):
         :param str url: The URL to match.
         """
         complete_qs = kwargs.pop('complete_qs', False)
+        request_headers = kwargs.pop('request_headers', {})
 
         if response_list and kwargs:
             raise RuntimeError('You should specify either a list of '
@@ -242,7 +258,8 @@ class Adapter(BaseAdapter):
         self._matchers.append(_Matcher(method,
                                        url,
                                        responses,
-                                       complete_qs=complete_qs))
+                                       complete_qs=complete_qs,
+                                       request_headers=request_headers))
 
     @property
     def last_request(self):

@@ -27,9 +27,15 @@ class TestMatcher(base.TestCase):
               url,
               matcher_method='GET',
               request_method='GET',
-              complete_qs=False):
-        matcher = adapter._Matcher(matcher_method, target, [], complete_qs)
-        request = requests.Request(request_method, url).prepare()
+              complete_qs=False,
+              headers=None,
+              request_headers={}):
+        matcher = adapter._Matcher(matcher_method,
+                                   target,
+                                   [],
+                                   complete_qs,
+                                   request_headers)
+        request = requests.Request(request_method, url, headers).prepare()
         return matcher.match(request)
 
     def assertMatch(self,
@@ -194,3 +200,23 @@ class TestMatcher(base.TestCase):
 
         self.assertMatch(r2, 'http://anything/a/b/c/d')
         self.assertMatch(r2, 'mock://anything/a/b/c/d')
+
+    def test_match_with_headers(self):
+        self.assertMatch('/path',
+                         'http://www.test.com/path',
+                         headers={'A': 'abc', 'b': 'def'},
+                         request_headers={'a': 'abc'})
+
+        self.assertMatch('/path',
+                         'http://www.test.com/path',
+                         headers={'A': 'abc', 'b': 'def'})
+
+        self.assertNoMatch('/path',
+                           'http://www.test.com/path',
+                           headers={'A': 'abc', 'b': 'def'},
+                           request_headers={'b': 'abc'})
+
+        self.assertNoMatch('/path',
+                           'http://www.test.com/path',
+                           headers={'A': 'abc', 'b': 'def'},
+                           request_headers={'c': 'ghi'})

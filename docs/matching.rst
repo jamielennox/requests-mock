@@ -93,3 +93,20 @@ The URL is then matched using :py:meth:`re.regex.search` which means that it wil
     'resp'
 
 If you use regular expression matching then *requests-mock* can't do it's normal query string or path only matching, that will need to be part of the expression.
+
+
+Request Headers
+===============
+
+A dictionary of headers can be supplied such that the request will only match if the available headers also match.
+Only the headers that are provided need match, any additional headers will be ignored.
+
+.. code:: python
+
+    >>> adapter.register_uri('POST', 'mock://test.com', request_headers={'key', 'val'}, text='resp')
+    >>> session.post('mock://test.com', headers={'key': 'val', 'another': 'header'}).text
+    'resp'
+    >>> session.post('mock://test.com')
+    Traceback (most recent call last):
+       ...
+    requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/
