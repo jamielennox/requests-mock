@@ -18,6 +18,7 @@ Intro
 =====
 
 `requests-mock` provides a building block to stub out the HTTP `requests`_ portions of your testing code.
+You should checkout the `docs`_ for more information.
 
 The Basics
 ==========
@@ -35,7 +36,7 @@ A simple example:
     >>> import requests_mock
 
     >>> session = requests.Session()
-    >>> adapter = requests_mock.Adater()
+    >>> adapter = requests_mock.Adapter()
     >>> session.mount('mock', adapter)
 
     >>> adapter.register_uri('GET', 'mock://test.com', text='data')
@@ -43,7 +44,29 @@ A simple example:
     >>> resp.status_code, resp.text
     (200, 'data')
 
-Obviously having all URLs be `mock://` prefixed isn't going to useful, so there are a number of ways to get the adapter into place.
+Obviously having all URLs be `mock://` prefixed isn't going to useful, so you use the :py:class:`~requests_mock.Mocker` to get the adapter into place.
+
+As a context manager:
+
+.. code:: python
+
+    >>> with requests_mock.Mocker() as m:
+    ...     m.register_uri('GET', 'http://test.com', text='data')
+    ...     requests.get('http://test.com').text
+    ...
+    'data'
+
+Or as a decorator:
+
+.. code:: python
+
+    >>> @requests_mock.Mocker()
+    ... def test_func(m):
+    ...     m.register_uri('GET', 'http://test.com', text='data')
+    ...     return requests.get('http://test.com').text
+    ...
+    >>> test_func()
+    'data'
 
 For more information checkout the `docs`_.
 
