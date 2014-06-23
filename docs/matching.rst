@@ -4,38 +4,69 @@ Request Matching
 
 Whilst it is preferable to provide the whole URI to :py:meth:`requests_mock.Adapter.register_uri` it is possible to just specify components.
 
+The examples in this file are loaded with:
+
+.. doctest::
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
 Basic
 =====
 
+.. doctest::
+    :hide:
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
 You can specify a protocol-less path:
 
-.. code:: python
+.. doctest::
 
-    >>> adapter.register_uri('GET', '//test.com/5', text='resp')
-    >>> session.get('mock://test.com/5').text
-    'resp'
+    .. >>> adapter.register_uri('GET', '//test.com/', text='resp')
+    .. >>> session.get('mock://test.com/').text
+    .. 'resp'
 
 or you can specify just a path:
 
-.. code:: python
+.. doctest::
 
-    >>> adapter.register_uri('GET', '/6', text='resp')
-    >>> session.get('mock://test.com/6').text
-    'resp'
-    >>> session.get('mock://another.com/6').text
-    'resp'
-
+    .. >>> adapter.register_uri('GET', '/path', text='resp')
+    .. >>> session.get('mock://test.com/path').text
+    .. 'resp'
+    .. >>> session.get('mock://another.com/path').text
+    .. 'resp'
 
 Query Strings
 =============
 
+.. doctest::
+    :hide:
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
 Query strings provided to a register will match so long as at least those provided form part of the request.
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri('GET', '/7?a=1', text='resp')
     >>> session.get('mock://test.com/7?a=1&b=2').text
     'resp'
+
+If any part of the query string is wrong then it will not match.
+
+.. doctest::
 
     >>> session.get('mock://test.com/7?a=3')
     Traceback (most recent call last):
@@ -44,7 +75,7 @@ Query strings provided to a register will match so long as at least those provid
 
 This can be a problem in certain situations, so if you wish to match only the complete query string there is a flag `complete_qs`:
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri('GET', '/8?a=1', complete_qs=True, text='resp')
     >>> session.get('mock://test.com/8?a=1&b=2')
@@ -59,7 +90,16 @@ Matching ANY
 There is a special symbol at `requests_mock.ANY` which acts as the wildcard to match anything.
 It can be used as a replace for the method and/or the URL.
 
-.. code:: python
+.. doctest::
+    :hide:
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
+.. doctest::
 
     >>> adapter.register_uri(requests_mock.ANY, 'mock://test.com/8', text='resp')
     >>> session.get('mock://test.com/8').text
@@ -67,14 +107,13 @@ It can be used as a replace for the method and/or the URL.
     >>> session.post('mock://test.com/8').text
     'resp'
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri(requests_mock.ANY, requests_mock.ANY, text='resp')
-    >>> session.get('mock://whatever/you/like')
+    >>> session.get('mock://whatever/you/like').text
     'resp'
-    >>> session.post('mock://whatever/you/like')
+    >>> session.post('mock://whatever/you/like').text
     'resp'
-
 
 Regular Expressions
 ===================
@@ -84,13 +123,22 @@ To use this you should pass an object created by :py:func:`re.compile`.
 
 The URL is then matched using :py:meth:`re.regex.search` which means that it will match any component of the url, so if you want to match the start of a URL you will have to anchor it.
 
-.. code:: python
+.. doctest::
+    :hide:
 
-    >>> import re
-    >>> matcher = re.compile('tester.com/a')
-    >>> adapter.register_uri('GET', matcher, text='resp')
-    >>> session.get('mock://www.tester.com/a/b').text
-    'resp'
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
+.. doctest::
+
+    .. >>> import re
+    .. >>> matcher = re.compile('tester.com/a')
+    .. >>> adapter.register_uri('GET', matcher, text='resp')
+    .. >>> session.get('mock://www.tester.com/a/b').text
+    .. 'resp'
 
 If you use regular expression matching then *requests-mock* can't do it's normal query string or path only matching, that will need to be part of the expression.
 
@@ -101,12 +149,21 @@ Request Headers
 A dictionary of headers can be supplied such that the request will only match if the available headers also match.
 Only the headers that are provided need match, any additional headers will be ignored.
 
-.. code:: python
+.. doctest::
+    :hide:
 
-    >>> adapter.register_uri('POST', 'mock://test.com', request_headers={'key', 'val'}, text='resp')
-    >>> session.post('mock://test.com', headers={'key': 'val', 'another': 'header'}).text
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
+.. doctest::
+
+    >>> adapter.register_uri('POST', 'mock://test.com/headers', request_headers={'key': 'val'}, text='resp')
+    >>> session.post('mock://test.com/headers', headers={'key': 'val', 'another': 'header'}).text
     'resp'
-    >>> session.post('mock://test.com')
+    >>> resp = session.post('mock://test.com/headers')
     Traceback (most recent call last):
        ...
-    requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/
+    requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/headers

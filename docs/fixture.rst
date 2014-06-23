@@ -14,16 +14,16 @@ The fixture mocks the :py:meth:`requests.Session.get_adapter` method so that all
 
 The fixture provides the same interfaces as the adapter.
 
-.. code:: python
+.. doctest::
 
     >>> import requests
     >>> from requests_mock.contrib import fixture
     >>> import testtools
 
     >>> class MyTestCase(testtools.TestCase):
-
+    ...
     ...     TEST_URL = 'http://www.google.com'
-
+    ...
     ...     def setUp(self):
     ...         super(MyTestCase, self).setUp()
     ...         self.requests_mock = self.useFixture(requests_mock.Mock())

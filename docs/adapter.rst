@@ -5,9 +5,9 @@ Adapter Usage
 Creating an Adapter
 ===================
 
-The standard `requests`_ means of using an adapter is to :py:meth:`requests.Session.mount` it on a created session. This is not the only way to load the adapter, however the same interactions will be used.
+The standard `requests`_ means of using an adapter is to :py:meth:`~requests.Session.mount` it on a created session. This is not the only way to load the adapter, however the same interactions will be used.
 
-.. code:: python
+.. doctest::
 
     >>> import requests
     >>> import requests_mock
@@ -24,14 +24,14 @@ Registering Responses
 
 Responses are registered with the :py:meth:`requests_mock.Adapter.register_uri` function on the adapter.
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri('GET', 'mock://test.com', text='Success')
     >>> resp = session.get('mock://test.com')
     >>> resp.text
     'Success'
 
-:py:meth:`requests_mock.Adapter.register_uri` takes the HTTP method, the URI and then information that is used to build the response. This information includes:
+:py:meth:`~requests_mock.Adapter.register_uri` takes the HTTP method, the URI and then information that is used to build the response. This information includes:
 
 :status_code: The HTTP status response to return. Defaults to 200.
 :reason: The reason text that accompanies the Status (e.g. 'OK' in '200 OK')
@@ -47,7 +47,7 @@ To specify the body of the response there are a number of options that depend on
 
 These options are named to coincide with the parameters on a :py:class:`requests.Response` object. For example:
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri('GET', 'mock://test.com/1', json={'a': 'b'}, status_code=200)
     >>> resp = session.get('mock://test.com/1')
@@ -85,9 +85,9 @@ The available properties on the `context` are:
 :status_code: The status code that is to be returned in the response.
 :reason: The string HTTP status code reason that is to be returned in the response.
 
-These parameters are populated initially from the variables provided to the :py:meth:`requests_mock.Adapter.register_uri` function and if they are modified on the context object then those changes will be reflected in the response.
+These parameters are populated initially from the variables provided to the :py:meth:`~requests_mock.Adapter.register_uri` function and if they are modified on the context object then those changes will be reflected in the response.
 
-.. code:: python
+.. doctest::
 
     >>> def text_callback(request, context):
     ...     context.status_code = 200
@@ -109,7 +109,7 @@ Response Lists
 Multiple responses can be provided to be returned in order by specifying the keyword parameters in a list.
 If the list is exhausted then the last response will continue to be returned.
 
-.. code:: python
+.. doctest::
 
     >>> adapter.register_uri('GET', 'mock://test.com/4', [{'text': 'resp1', 'status_code': 300},
     ...                                                   {'text': 'resp2', 'status_code': 200}])
