@@ -1,27 +1,17 @@
-# Config file for automatic testing at travis-ci.org
-
 language: python
-
 python:
-  - "3.3"
-  - "2.7"
-  - "2.6"
-  - "pypy"
-
-# command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+- '3.3'
+- '2.7'
+- '2.6'
+- pypy
 install: pip install coverage coveralls wheel -r requirements.txt -r test-requirements.txt
-
-# command to run tests, e.g. python setup.py test
 script: coverage run -m testtools.run discover
-
-after_success:
-    coveralls
-
+after_success: coveralls
 deploy:
-    provider: pypi
-    user: jamielennox
-    password:
-        secure: jVdHbMX5JlkscdUM0mufIm1JS7KYKUmul2/4z28aDFmxZeI2G+9SEbJjWN6eRzux+BIhXkBlwWCYpP1JakcKESVX3MbiLMVlzeAEWLV4YXZuuqe/IxUDC9WTrW+n9kRg0gWHFL/MrK7J5bpf+v6CWWdQh5Q9rnuNKB1bagGVPAg=
-    on:
-        tags: true
-        repo: jamielennox/requests-mock
+  provider: pypi
+  user: jamielennox
+  password:
+    secure: Ar54IZ/Qp67JQDHS1REfNw/1rbkR8OaGGDuv0UEbpjHVC1zXVTJkqdSnbCMpKPNSTtK6Me44eD0UO58BUvjg6sNAWZbooE5Ni5BOPhSIWXMcsU/M7oGKL7vCD7UIxgtp3CXvPgFm1Mo6ILkpu3MhZeHkZa7E/59lR/MerY6uu58=
+  on:
+    tags: true
+    repo: jamielennox/requests-mock
