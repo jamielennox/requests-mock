@@ -218,6 +218,10 @@ class _Matcher(object):
                 self._match_url(request) and
                 self._match_headers(request))
 
+    def __call__(self, request):
+        if self.match(request):
+            return self.create_response(request)
+
 
 class Adapter(BaseAdapter):
     """A fake adapter than can return predefined responses.
@@ -230,9 +234,10 @@ class Adapter(BaseAdapter):
 
     def send(self, request, **kwargs):
         for matcher in reversed(self._matchers):
-            if matcher.match(request):
+            response = matcher(request)
+            if response is not None:
                 self.request_history.append(request)
-                return matcher.create_response(request)
+                return response
 
         raise exceptions.NoMockAddress(request)
 
