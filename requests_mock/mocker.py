@@ -27,6 +27,7 @@ class MockerCore(object):
 
     _PROXY_FUNCS = set(['last_request',
                         'register_uri',
+                        'add_matcher',
                         'request_history'])
 
     def __init__(self, **kwargs):

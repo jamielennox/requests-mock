@@ -260,11 +260,21 @@ class Adapter(BaseAdapter):
             response_list = [kwargs]
 
         responses = [_MatcherResponse(**k) for k in response_list]
-        self._matchers.append(_Matcher(method,
-                                       url,
-                                       responses,
-                                       complete_qs=complete_qs,
-                                       request_headers=request_headers))
+        self.add_matcher(_Matcher(method,
+                                  url,
+                                  responses,
+                                  complete_qs=complete_qs,
+                                  request_headers=request_headers))
+
+    def add_matcher(self, matcher):
+        """Register a custom matcher.
+
+        A matcher is a callable that takes a `requests.Request` and returns a
+        `requests.Response` if it matches or None if not.
+
+        :param callable matcher: The matcher to execute.
+        """
+        self._matchers.append(matcher)
 
     @property
     def last_request(self):

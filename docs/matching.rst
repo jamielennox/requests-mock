@@ -167,3 +167,39 @@ Only the headers that are provided need match, any additional headers will be ig
     Traceback (most recent call last):
        ...
     requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/headers
+
+
+Custom Matching
+===============
+
+Internally calling :py:meth:`~requests_mock.Adapter.register_uri` creates a *matcher* object for you and adds it to the list of matchers to check against.
+
+A *matcher* is any callable that takes a :py:class:`requests.Request` and returns a :py:class:`requests.Response` on a successful match or *None* if it does not handle the request.
+
+If you need more flexibility than provided by :py:meth:`~requests_mock.Adapter.register_uri` then you can add your own *matcher* to the :py:class:`~requests_mock.Adapter`. Custom *matchers* can be used in conjunction with the inbuilt *matchers*. If a matcher returns *None* then the request will be passed to the next *matcher* as with using :py:meth:`~requests_mock.Adapter.register_uri`.
+
+.. doctest::
+    :hide:
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
+.. doctest::
+
+    >>> def custom_matcher(request):
+    ...     if request.path_url == '/test':
+    ...         resp = requests.Response()
+    ...         resp.status_code = 200
+    ...         return resp
+    ...     return None
+    ...
+    >>> adapter.add_matcher(custom_matcher)
+    >>> session.get('mock://test.com/test').status_code
+    200
+    >>> session.get('mock://test.com/other')
+    Traceback (most recent call last):
+       ...
+    requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/other
