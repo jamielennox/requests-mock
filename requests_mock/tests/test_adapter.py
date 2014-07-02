@@ -15,10 +15,8 @@ import re
 import requests
 import six
 
-from requests_mock import adapter
+import requests_mock
 from requests_mock.tests import base
-
-ANY = adapter.ANY
 
 
 class SessionAdapterTests(base.TestCase):
@@ -28,7 +26,7 @@ class SessionAdapterTests(base.TestCase):
     def setUp(self):
         super(SessionAdapterTests, self).setUp()
 
-        self.adapter = adapter.Adapter()
+        self.adapter = requests_mock.Adapter()
         self.session = requests.Session()
         self.session.mount(self.PREFIX, self.adapter)
 
@@ -277,14 +275,14 @@ class SessionAdapterTests(base.TestCase):
                           text=5)
 
     def test_with_any_method(self):
-        self.adapter.register_uri(ANY, self.url, text='resp')
+        self.adapter.register_uri(requests_mock.ANY, self.url, text='resp')
 
         for m in ('GET', 'HEAD', 'POST', 'UNKNOWN'):
             resp = self.session.request(m, self.url)
             self.assertEqual('resp', resp.text)
 
     def test_with_any_url(self):
-        self.adapter.register_uri('GET', ANY, text='resp')
+        self.adapter.register_uri('GET', requests_mock.ANY, text='resp')
 
         for u in ('mock://a', 'mock://b', 'mock://c'):
             resp = self.session.get(u)
@@ -296,3 +294,26 @@ class SessionAdapterTests(base.TestCase):
         for u in ('mocK://www.tester.com/a', 'mock://abc.tester.com'):
             resp = self.session.get(u)
             self.assertEqual('resp', resp.text)
+
+    def test_requests_in_history_on_no_match(self):
+        self.assertRaises(requests_mock.NoMockAddress,
+                          self.session.get,
+                          self.url)
+
+        self.assertEqual(self.url, self.adapter.last_request.url)
+
+    def test_requests_in_history_on_exception(self):
+
+        class MyExc(Exception):
+            pass
+
+        def _test_cb(request, ctx):
+            raise MyExc()
+
+        self.adapter.register_uri('GET', self.url, text=_test_cb)
+
+        self.assertRaises(MyExc,
+                          self.session.get,
+                          self.url)
+
+        self.assertEqual(self.url, self.adapter.last_request.url)

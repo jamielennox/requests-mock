@@ -233,10 +233,11 @@ class Adapter(BaseAdapter):
         self.request_history = []
 
     def send(self, request, **kwargs):
+        self.request_history.append(request)
+
         for matcher in reversed(self._matchers):
             response = matcher(request)
             if response is not None:
-                self.request_history.append(request)
                 return response
 
         raise exceptions.NoMockAddress(request)
