@@ -14,4 +14,5 @@ deploy:
     secure: Ar54IZ/Qp67JQDHS1REfNw/1rbkR8OaGGDuv0UEbpjHVC1zXVTJkqdSnbCMpKPNSTtK6Me44eD0UO58BUvjg6sNAWZbooE5Ni5BOPhSIWXMcsU/M7oGKL7vCD7UIxgtp3CXvPgFm1Mo6ILkpu3MhZeHkZa7E/59lR/MerY6uu58=
   on:
     tags: true
+    all_branches: true
     repo: jamielennox/requests-mock
