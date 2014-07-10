@@ -79,3 +79,54 @@ class MockerTests(base.TestCase):
         self.assertMockStopped()
         inner()
         self.assertMockStopped()
+
+
+class MockerHttpMethodsTests(base.TestCase):
+
+    URL = 'http://test.com/path'
+    TEXT = 'resp'
+
+    def assertResponse(self, resp):
+        self.assertEqual(self.TEXT, resp.text)
+
+    @requests_mock.Mocker()
+    def test_mocker_request(self, m):
+        method = 'XXX'
+        m.request(method, self.URL, text=self.TEXT)
+        resp = requests.request(method, self.URL)
+        self.assertResponse(resp)
+
+    @requests_mock.Mocker()
+    def test_mocker_get(self, m):
+        m.get(self.URL, text=self.TEXT)
+        self.assertResponse(requests.get(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_options(self, m):
+        m.options(self.URL, text=self.TEXT)
+        self.assertResponse(requests.options(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_head(self, m):
+        m.head(self.URL, text=self.TEXT)
+        self.assertResponse(requests.head(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_post(self, m):
+        m.post(self.URL, text=self.TEXT)
+        self.assertResponse(requests.post(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_put(self, m):
+        m.put(self.URL, text=self.TEXT)
+        self.assertResponse(requests.put(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_patch(self, m):
+        m.patch(self.URL, text=self.TEXT)
+        self.assertResponse(requests.patch(self.URL))
+
+    @requests_mock.Mocker()
+    def test_mocker_delete(self, m):
+        m.delete(self.URL, text=self.TEXT)
+        self.assertResponse(requests.delete(self.URL))

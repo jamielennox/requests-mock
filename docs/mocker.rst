@@ -47,6 +47,35 @@ If the position of the mock is likely to conflict with other arguments you can p
     >>> test_kw_function()
     'resp'
 
+Methods
+=======
+
+The mocker object can be used with a similar interface to requests itself. Mocker objects can be called with simply the
+
+.. doctest::
+
+    >>> with requests_mock.Mocker() as mock:
+    ...     mock.get('http://test.com', text='resp')
+    ...     requests.get('http://test.com').text
+    ...
+    'resp'
+
+
+The functions exist for the common HTTP method:
+
+  - :py:meth:`~requests_mock.MockerCore.delete`
+  - :py:meth:`~requests_mock.MockerCore.get`
+  - :py:meth:`~requests_mock.MockerCore.head`
+  - :py:meth:`~requests_mock.MockerCore.options`
+  - :py:meth:`~requests_mock.MockerCore.patch`
+  - :py:meth:`~requests_mock.MockerCore.post`
+  - :py:meth:`~requests_mock.MockerCore.put`
+
+As well as the base:
+
+  - :py:meth:`~requests_mock.MockerCore.request`
+
+
 Real HTTP Requests
 ==================
 
