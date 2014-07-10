@@ -64,7 +64,7 @@ class _MatcherResponse(object):
 
         if kwargs:
             raise TypeError('Too many arguments provided. Unexpected '
-                            'arguments %s' % ', '.join(kwargs.keys()))
+                            'arguments %s.' % ', '.join(kwargs.keys()))
 
         if len(provided) == 0:
             self.body = six.BytesIO(six.b(''))
