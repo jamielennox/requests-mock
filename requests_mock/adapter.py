@@ -10,15 +10,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import json as jsonutils
-
 import requests
-from requests.adapters import BaseAdapter, HTTPAdapter
-from requests.packages.urllib3.response import HTTPResponse
+from requests.adapters import BaseAdapter
 import six
 from six.moves.urllib import parse as urlparse
 
 from requests_mock import exceptions
+from requests_mock import response
 
 ANY = object()
 
@@ -107,105 +105,8 @@ class _RequestHistoryTracker(object):
         return len(self.request_history)
 
 
-class _MatcherResponse(object):
-
-    _BODY_ARGS = ['raw', 'body', 'content', 'text', 'json']
-
-    def __init__(self, **kwargs):
-        """
-        :param int status_code: The status code to return upon a successful
-            match. Defaults to 200.
-        :param HTTPResponse raw: A HTTPResponse object to return upon a
-            successful match.
-        :param io.IOBase body: An IO object with a read() method that can
-            return a body on successful match.
-        :param bytes content: A byte string to return upon a successful match.
-        :param unicode text: A text string to return upon a successful match.
-        :param object json: A python object to be converted to a JSON string
-            and returned upon a successful match.
-        :param dict headers: A dictionary object containing headers that are
-            returned upon a successful match.
-        """
-        # mutual exclusion, only 1 body method may be provided
-        provided = [x for x in self._BODY_ARGS if kwargs.get(x) is not None]
-
-        self.status_code = kwargs.pop('status_code', 200)
-        self.raw = kwargs.pop('raw', None)
-        self.body = kwargs.pop('body', None)
-        self.content = kwargs.pop('content', None)
-        self.text = kwargs.pop('text', None)
-        self.json = kwargs.pop('json', None)
-        self.reason = kwargs.pop('reason', None)
-        self.headers = kwargs.pop('headers', {})
-
-        if kwargs:
-            raise TypeError('Too many arguments provided. Unexpected '
-                            'arguments %s.' % ', '.join(kwargs.keys()))
-
-        if len(provided) == 0:
-            self.body = six.BytesIO(six.b(''))
-        elif len(provided) > 1:
-            raise RuntimeError('You may only supply one body element. You '
-                               'supplied %s' % ', '.join(provided))
-
-        # whilst in general you shouldn't do type checking in python this
-        # makes sure we don't end up with differences between the way types
-        # are handled between python 2 and 3.
-        if self.content and not (callable(self.content) or
-                                 isinstance(self.content, six.binary_type)):
-            raise TypeError('Content should be a callback or binary data')
-        if self.text and not (callable(self.text) or
-                              isinstance(self.text, six.string_types)):
-            raise TypeError('Text should be a callback or string data')
-
-    def get_response(self, request):
-        encoding = None
-        context = _Context(self.headers.copy(),
-                           self.status_code,
-                           self.reason)
-
-        # if a body element is a callback then execute it
-        def _call(f, *args, **kwargs):
-            return f(request, context, *args, **kwargs) if callable(f) else f
-
-        content = self.content
-        text = self.text
-        body = self.body
-        raw = self.raw
-
-        if self.json is not None:
-            data = _call(self.json)
-            text = jsonutils.dumps(data)
-        if text is not None:
-            data = _call(text)
-            encoding = 'utf-8'
-            content = data.encode(encoding)
-        if content is not None:
-            data = _call(content)
-            body = six.BytesIO(data)
-        if body is not None:
-            data = _call(body)
-            raw = HTTPResponse(status=context.status_code,
-                               body=data,
-                               headers=context.headers,
-                               reason=context.reason,
-                               decode_content=False,
-                               preload_content=False)
-
-        return encoding, raw
-
-
-class _FakeConnection(object):
-    """An object that can mock the necessary parts of a socket interface."""
-
-    def close(self):
-        pass
-
-
 class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
-
-    _http_adapter = HTTPAdapter()
 
     def __init__(self, method, url, responses, complete_qs, request_headers):
         """
@@ -296,12 +197,7 @@ class _Matcher(_RequestHistoryTracker):
             response_matcher = self._responses[0]
 
         self._add_to_history(request)
-
-        encoding, response = response_matcher.get_response(request)
-        req_resp = self._http_adapter.build_response(request, response)
-        req_resp.connection = _FakeConnection()
-        req_resp.encoding = encoding
-        return req_resp
+        return response_matcher.get_response(request)
 
 
 class Adapter(BaseAdapter, _RequestHistoryTracker):
@@ -317,9 +213,9 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         self._add_to_history(request)
 
         for matcher in reversed(self._matchers):
-            response = matcher(request)
-            if response is not None:
-                return response
+            resp = matcher(request)
+            if resp is not None:
+                return resp
 
         raise exceptions.NoMockAddress(request)
 
@@ -341,7 +237,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         elif not response_list:
             response_list = [kwargs]
 
-        responses = [_MatcherResponse(**k) for k in response_list]
+        responses = [response._MatcherResponse(**k) for k in response_list]
         matcher = _Matcher(method,
                            url,
                            responses,
