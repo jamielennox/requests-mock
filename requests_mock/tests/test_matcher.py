@@ -36,7 +36,7 @@ class TestMatcher(base.TestCase):
                                    complete_qs,
                                    request_headers)
         request = requests.Request(request_method, url, headers).prepare()
-        return matcher.match(request)
+        return matcher._match(request)
 
     def assertMatch(self,
                     target,

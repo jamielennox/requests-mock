@@ -92,41 +92,49 @@ class MockerHttpMethodsTests(base.TestCase):
     @requests_mock.Mocker()
     def test_mocker_request(self, m):
         method = 'XXX'
-        m.request(method, self.URL, text=self.TEXT)
+        mock_obj = m.request(method, self.URL, text=self.TEXT)
         resp = requests.request(method, self.URL)
         self.assertResponse(resp)
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_get(self, m):
-        m.get(self.URL, text=self.TEXT)
+        mock_obj = m.get(self.URL, text=self.TEXT)
         self.assertResponse(requests.get(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_options(self, m):
-        m.options(self.URL, text=self.TEXT)
+        mock_obj = m.options(self.URL, text=self.TEXT)
         self.assertResponse(requests.options(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_head(self, m):
-        m.head(self.URL, text=self.TEXT)
+        mock_obj = m.head(self.URL, text=self.TEXT)
         self.assertResponse(requests.head(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_post(self, m):
-        m.post(self.URL, text=self.TEXT)
+        mock_obj = m.post(self.URL, text=self.TEXT)
         self.assertResponse(requests.post(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_put(self, m):
-        m.put(self.URL, text=self.TEXT)
+        mock_obj = m.put(self.URL, text=self.TEXT)
         self.assertResponse(requests.put(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_patch(self, m):
-        m.patch(self.URL, text=self.TEXT)
+        mock_obj = m.patch(self.URL, text=self.TEXT)
         self.assertResponse(requests.patch(self.URL))
+        self.assertTrue(mock_obj.called)
 
     @requests_mock.Mocker()
     def test_mocker_delete(self, m):
-        m.delete(self.URL, text=self.TEXT)
+        mock_obj = m.delete(self.URL, text=self.TEXT)
         self.assertResponse(requests.delete(self.URL))
+        self.assertTrue(mock_obj.called)

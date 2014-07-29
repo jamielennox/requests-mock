@@ -119,6 +119,13 @@ class _MatcherResponse(object):
         return encoding, raw
 
 
+class _FakeConnection(object):
+    """An object that can mock the necessary parts of a socket interface."""
+
+    def close(self):
+        pass
+
+
 class _Matcher(object):
     """Contains all the information about a provided URL to match."""
 
@@ -131,60 +138,47 @@ class _Matcher(object):
             extra query arguments are ignored. Set complete_qs to true to
             require that the entire query string needs to match.
         """
-        self.method = method
-        self.url = url
+        self._method = method
+        self._url = url
         try:
-            self.url_parts = urlparse.urlparse(url.lower())
+            self._url_parts = urlparse.urlparse(url.lower())
         except:
-            self.url_parts = None
-        self.responses = responses
-        self.complete_qs = complete_qs
-        self.request_headers = request_headers
+            self._url_parts = None
+        self._responses = responses
+        self._complete_qs = complete_qs
+        self._request_headers = request_headers
 
-    def create_response(self, request):
-        if len(self.responses) > 1:
-            response_matcher = self.responses.pop(0)
-        else:
-            response_matcher = self.responses[0]
-
-        encoding, response = response_matcher.get_response(request)
-        req_resp = self._http_adapter.build_response(request, response)
-        req_resp.connection = self
-        req_resp.encoding = encoding
-        return req_resp
-
-    def close(self):
-        pass
+        self._request_history = []
 
     def _match_method(self, request):
-        if self.method is ANY:
+        if self._method is ANY:
             return True
 
-        if request.method.lower() == self.method.lower():
+        if request.method.lower() == self._method.lower():
             return True
 
         return False
 
     def _match_url(self, request):
-        if self.url is ANY:
+        if self._url is ANY:
             return True
 
         # regular expression matching
-        if hasattr(self.url, 'search'):
-            return self.url.search(request.url) is not None
+        if hasattr(self._url, 'search'):
+            return self._url.search(request.url) is not None
 
         url = urlparse.urlparse(request.url.lower())
 
-        if self.url_parts.scheme and url.scheme != self.url_parts.scheme:
+        if self._url_parts.scheme and url.scheme != self._url_parts.scheme:
             return False
 
-        if self.url_parts.netloc and url.netloc != self.url_parts.netloc:
+        if self._url_parts.netloc and url.netloc != self._url_parts.netloc:
             return False
 
-        if (url.path or '/') != (self.url_parts.path or '/'):
+        if (url.path or '/') != (self._url_parts.path or '/'):
             return False
 
-        matcher_qs = urlparse.parse_qs(self.url_parts.query)
+        matcher_qs = urlparse.parse_qs(self._url_parts.query)
         request_qs = urlparse.parse_qs(url.query)
 
         for k, vals in six.iteritems(matcher_qs):
@@ -194,7 +188,7 @@ class _Matcher(object):
                 except ValueError:
                     return False
 
-        if self.complete_qs:
+        if self._complete_qs:
             for v in six.itervalues(request_qs):
                 if v:
                     return False
@@ -202,7 +196,7 @@ class _Matcher(object):
         return True
 
     def _match_headers(self, request):
-        for k, vals in six.iteritems(self.request_headers):
+        for k, vals in six.iteritems(self._request_headers):
             try:
                 header = request.headers[k]
             except KeyError:
@@ -213,14 +207,35 @@ class _Matcher(object):
 
         return True
 
-    def match(self, request):
+    def _match(self, request):
         return (self._match_method(request) and
                 self._match_url(request) and
                 self._match_headers(request))
 
     def __call__(self, request):
-        if self.match(request):
-            return self.create_response(request)
+        if not self._match(request):
+            return None
+
+        if len(self._responses) > 1:
+            response_matcher = self._responses.pop(0)
+        else:
+            response_matcher = self._responses[0]
+
+        self._request_history.append(request)
+
+        encoding, response = response_matcher.get_response(request)
+        req_resp = self._http_adapter.build_response(request, response)
+        req_resp.connection = _FakeConnection()
+        req_resp.encoding = encoding
+        return req_resp
+
+    @property
+    def called(self):
+        return self.call_count > 0
+
+    @property
+    def call_count(self):
+        return len(self._request_history)
 
 
 class Adapter(BaseAdapter):
@@ -261,11 +276,13 @@ class Adapter(BaseAdapter):
             response_list = [kwargs]
 
         responses = [_MatcherResponse(**k) for k in response_list]
-        self.add_matcher(_Matcher(method,
-                                  url,
-                                  responses,
-                                  complete_qs=complete_qs,
-                                  request_headers=request_headers))
+        matcher = _Matcher(method,
+                           url,
+                           responses,
+                           complete_qs=complete_qs,
+                           request_headers=request_headers)
+        self.add_matcher(matcher)
+        return matcher
 
     def add_matcher(self, matcher):
         """Register a custom matcher.

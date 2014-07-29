@@ -123,4 +123,22 @@ If the list is exhausted then the last response will continue to be returned.
     >>> (resp.status_code, resp.text)
     (200, 'resp2')
 
+Mock Returns
+============
+
+The object returned from a :py:meth:`~requests_mock.Adapter.register_uri` is an object representing the mock that was created at that URL.
+There are a couple of queries that can be made of this object, including `called` and `call_count`.
+
+.. doctest::
+
+    >>> mock_obj = adapter.register_uri('GET', 'mock://test.com/5', text='resp')
+    >>> resp = session.get('mock://test.com/5')
+    >>> resp.text
+    'resp'
+    >>> mock_obj.called
+    True
+    >>> mock_obj.call_count
+    1
+
 .. _requests: http://python-requests.org
+

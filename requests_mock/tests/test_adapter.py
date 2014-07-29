@@ -317,3 +317,20 @@ class SessionAdapterTests(base.TestCase):
                           self.url)
 
         self.assertEqual(self.url, self.adapter.last_request.url)
+
+    def test_not_called_and_called_count(self):
+        m = self.adapter.register_uri('GET', self.url, text='resp')
+        self.assertEqual(0, m.call_count)
+        self.assertFalse(m.called)
+
+    def test_called_and_called_count(self):
+        m = self.adapter.register_uri('GET', self.url, text='resp')
+
+        resps = [self.session.get(self.url) for i in range(0, 3)]
+
+        for r in resps:
+            self.assertEqual('resp', r.text)
+            self.assertEqual(200, r.status_code)
+
+        self.assertEqual(len(resps), m.call_count)
+        self.assertTrue(m.called)
