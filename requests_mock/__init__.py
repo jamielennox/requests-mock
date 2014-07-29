@@ -12,12 +12,13 @@
 
 from requests_mock.adapter import Adapter, ANY
 from requests_mock.exceptions import MockException, NoMockAddress
-from requests_mock.mocker import Mocker, MockerCore
+from requests_mock.mocker import mock, Mocker, MockerCore
 from requests_mock.mocker import DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 
 
 __all__ = ['Adapter',
            'ANY',
+           'mock',
            'Mocker',
            'MockerCore',
            'MockException',

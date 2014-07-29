@@ -50,7 +50,7 @@ class MockerTests(base.TestCase):
         self.assertMockStopped()
 
     @mock.patch('requests.adapters.HTTPAdapter.send')
-    @requests_mock.Mocker(real_http=True)
+    @requests_mock.mock(real_http=True)
     def test_real_http(self, real_send, mocker):
         url = 'http://www.google.com/'
 
@@ -61,17 +61,17 @@ class MockerTests(base.TestCase):
         self.assertEqual(1, real_send.call_count)
         self.assertEqual(url, real_send.call_args[0][0].url)
 
-    @requests_mock.Mocker()
+    @requests_mock.mock()
     def test_with_test_decorator(self, m):
         self._do_test(m)
 
-    @requests_mock.Mocker(kw='mock')
+    @requests_mock.mock(kw='mock')
     def test_with_mocker_kwargs(self, **kwargs):
         self._do_test(kwargs['mock'])
 
     def test_with_decorator(self):
 
-        @requests_mock.Mocker()
+        @requests_mock.mock()
         def inner(m):
             self.assertMockStarted()
             self._do_test(m)

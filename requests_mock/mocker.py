@@ -152,3 +152,6 @@ class Mocker(MockerCore):
                 return func(*args, **kwargs)
 
         return inner
+
+
+mock = Mocker
