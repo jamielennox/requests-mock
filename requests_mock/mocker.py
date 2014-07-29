@@ -17,6 +17,14 @@ import requests
 from requests_mock import adapter
 from requests_mock import exceptions
 
+DELETE = 'DELETE'
+GET = 'GET'
+HEAD = 'HEAD'
+OPTIONS = 'OPTIONS'
+PATCH = 'PATCH'
+POST = 'POST'
+PUT = 'PUT'
+
 
 class MockerCore(object):
     """A wrapper around common mocking functions.
@@ -89,25 +97,25 @@ class MockerCore(object):
         return self.register_uri(*args, **kwargs)
 
     def get(self, *args, **kwargs):
-        return self.request('GET', *args, **kwargs)
+        return self.request(GET, *args, **kwargs)
 
     def options(self, *args, **kwargs):
-        return self.request('OPTIONS', *args, **kwargs)
+        return self.request(OPTIONS, *args, **kwargs)
 
     def head(self, *args, **kwargs):
-        return self.request('HEAD', *args, **kwargs)
+        return self.request(HEAD, *args, **kwargs)
 
     def post(self, *args, **kwargs):
-        return self.request('POST', *args, **kwargs)
+        return self.request(POST, *args, **kwargs)
 
     def put(self, *args, **kwargs):
-        return self.request('PUT', *args, **kwargs)
+        return self.request(PUT, *args, **kwargs)
 
     def patch(self, *args, **kwargs):
-        return self.request('PATCH', *args, **kwargs)
+        return self.request(PATCH, *args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        return self.request('DELETE', *args, **kwargs)
+        return self.request(DELETE, *args, **kwargs)
 
 
 class Mocker(MockerCore):
