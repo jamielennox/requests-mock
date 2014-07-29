@@ -31,6 +31,31 @@ class _Context(object):
         self.reason = reason
 
 
+class _RequestHistoryTracker(object):
+
+    def __init__(self):
+        self.request_history = []
+
+    def _add_to_history(self, request):
+        self.request_history.append(request)
+
+    @property
+    def last_request(self):
+        """Retrieve the latest request sent"""
+        try:
+            return self.request_history[-1]
+        except IndexError:
+            return None
+
+    @property
+    def called(self):
+        return self.call_count > 0
+
+    @property
+    def call_count(self):
+        return len(self.request_history)
+
+
 class _MatcherResponse(object):
 
     _BODY_ARGS = ['raw', 'body', 'content', 'text', 'json']
@@ -126,7 +151,7 @@ class _FakeConnection(object):
         pass
 
 
-class _Matcher(object):
+class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
 
     _http_adapter = HTTPAdapter()
@@ -138,6 +163,7 @@ class _Matcher(object):
             extra query arguments are ignored. Set complete_qs to true to
             require that the entire query string needs to match.
         """
+        super(_Matcher, self).__init__()
         self._method = method
         self._url = url
         try:
@@ -147,8 +173,6 @@ class _Matcher(object):
         self._responses = responses
         self._complete_qs = complete_qs
         self._request_headers = request_headers
-
-        self._request_history = []
 
     def _match_method(self, request):
         if self._method is ANY:
@@ -221,7 +245,7 @@ class _Matcher(object):
         else:
             response_matcher = self._responses[0]
 
-        self._request_history.append(request)
+        self._add_to_history(request)
 
         encoding, response = response_matcher.get_response(request)
         req_resp = self._http_adapter.build_response(request, response)
@@ -229,26 +253,17 @@ class _Matcher(object):
         req_resp.encoding = encoding
         return req_resp
 
-    @property
-    def called(self):
-        return self.call_count > 0
 
-    @property
-    def call_count(self):
-        return len(self._request_history)
-
-
-class Adapter(BaseAdapter):
+class Adapter(BaseAdapter, _RequestHistoryTracker):
     """A fake adapter than can return predefined responses.
 
     """
     def __init__(self):
         super(Adapter, self).__init__()
         self._matchers = []
-        self.request_history = []
 
     def send(self, request, **kwargs):
-        self.request_history.append(request)
+        self._add_to_history(request)
 
         for matcher in reversed(self._matchers):
             response = matcher(request)
@@ -293,14 +308,6 @@ class Adapter(BaseAdapter):
         :param callable matcher: The matcher to execute.
         """
         self._matchers.append(matcher)
-
-    @property
-    def last_request(self):
-        """Retrieve the latest request sent"""
-        try:
-            return self.request_history[-1]
-        except IndexError:
-            return None
 
 
 __all__ = ['Adapter']

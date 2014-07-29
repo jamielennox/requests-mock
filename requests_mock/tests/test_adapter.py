@@ -323,6 +323,9 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(0, m.call_count)
         self.assertFalse(m.called)
 
+        self.assertEqual(0, self.adapter.call_count)
+        self.assertFalse(self.adapter.called)
+
     def test_called_and_called_count(self):
         m = self.adapter.register_uri('GET', self.url, text='resp')
 
@@ -334,3 +337,6 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual(len(resps), m.call_count)
         self.assertTrue(m.called)
+
+        self.assertEqual(len(resps), self.adapter.call_count)
+        self.assertTrue(self.adapter.called)
