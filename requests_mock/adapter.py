@@ -12,6 +12,7 @@
 
 import json as jsonutils
 
+import requests
 from requests.adapters import BaseAdapter, HTTPAdapter
 from requests.packages.urllib3.response import HTTPResponse
 import six
@@ -29,6 +30,56 @@ class _Context(object):
         self.headers = headers
         self.status_code = status_code
         self.reason = reason
+
+
+class _RequestObjectProxy(object):
+    """A wrapper around a requests.Request that gives some extra information.
+
+    This will be important both for matching and so that when it's save into
+    the request_history users will be able to access these properties.
+    """
+
+    def __init__(self, request):
+        self._request = request
+        self._url_parts_ = None
+        self._qs = None
+
+    def __getattr__(self, name):
+        return getattr(self._request, name)
+
+    @property
+    def _url_parts(self):
+        if self._url_parts_ is None:
+            self._url_parts_ = urlparse.urlparse(self._request.url.lower())
+
+        return self._url_parts_
+
+    @property
+    def scheme(self):
+        return self._url_parts.scheme
+
+    @property
+    def netloc(self):
+        return self._url_parts.netloc
+
+    @property
+    def path(self):
+        return self._url_parts.path
+
+    @property
+    def query(self):
+        return self._url_parts.query
+
+    @property
+    def qs(self):
+        if self._qs is None:
+            self._qs = urlparse.parse_qs(self.query)
+
+        return self._qs
+
+    @classmethod
+    def _create(cls, *args, **kwargs):
+        return cls(requests.Request(*args, **kwargs).prepare())
 
 
 class _RequestHistoryTracker(object):
@@ -191,19 +242,18 @@ class _Matcher(_RequestHistoryTracker):
         if hasattr(self._url, 'search'):
             return self._url.search(request.url) is not None
 
-        url = urlparse.urlparse(request.url.lower())
-
-        if self._url_parts.scheme and url.scheme != self._url_parts.scheme:
+        if self._url_parts.scheme and request.scheme != self._url_parts.scheme:
             return False
 
-        if self._url_parts.netloc and url.netloc != self._url_parts.netloc:
+        if self._url_parts.netloc and request.netloc != self._url_parts.netloc:
             return False
 
-        if (url.path or '/') != (self._url_parts.path or '/'):
+        if (request.path or '/') != (self._url_parts.path or '/'):
             return False
 
+        # construct our own qs structure as we remove items from it below
+        request_qs = urlparse.parse_qs(request.query)
         matcher_qs = urlparse.parse_qs(self._url_parts.query)
-        request_qs = urlparse.parse_qs(url.query)
 
         for k, vals in six.iteritems(matcher_qs):
             for v in vals:
@@ -263,6 +313,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         self._matchers = []
 
     def send(self, request, **kwargs):
+        request = _RequestObjectProxy(request)
         self._add_to_history(request)
 
         for matcher in reversed(self._matchers):

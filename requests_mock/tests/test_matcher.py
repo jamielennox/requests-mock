@@ -35,7 +35,9 @@ class TestMatcher(base.TestCase):
                                    [],
                                    complete_qs,
                                    request_headers)
-        request = requests.Request(request_method, url, headers).prepare()
+        request = adapter._RequestObjectProxy._create(request_method,
+                                                      url,
+                                                      headers)
         return matcher._match(request)
 
     def assertMatch(self,

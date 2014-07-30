@@ -14,6 +14,7 @@ import re
 
 import requests
 import six
+from six.moves.urllib import parse as urlparse
 
 import requests_mock
 from requests_mock.tests import base
@@ -41,6 +42,15 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(self.url, self.adapter.last_request.url)
         self.assertEqual(method, self.adapter.last_request.method)
         self.assertEqual(body, self.adapter.last_request.body)
+
+        url_parts = urlparse.urlparse(self.url)
+        qs = urlparse.parse_qs(url_parts.query)
+        self.assertEqual(url_parts.scheme, self.adapter.last_request.scheme)
+        self.assertEqual(url_parts.netloc, self.adapter.last_request.netloc)
+        self.assertEqual(url_parts.path, self.adapter.last_request.path)
+        self.assertEqual(url_parts.query, self.adapter.last_request.query)
+        self.assertEqual(url_parts.query, self.adapter.last_request.query)
+        self.assertEqual(qs, self.adapter.last_request.qs)
 
     def test_content(self):
         data = six.b('testdata')
@@ -340,3 +350,31 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual(len(resps), self.adapter.call_count)
         self.assertTrue(self.adapter.called)
+
+    def test_query_string(self):
+        qs = 'a=1&b=2'
+        self.adapter.register_uri('GET', self.url, text='resp')
+        resp = self.session.get("%s?%s" % (self.url, qs))
+
+        self.assertEqual('resp', resp.text)
+
+        self.assertEqual(qs, self.adapter.last_request.query)
+        self.assertEqual(['1'], self.adapter.last_request.qs['a'])
+        self.assertEqual(['2'], self.adapter.last_request.qs['b'])
+
+    def test_adapter_picks_correct_adatper(self):
+        good = '%s://test3.url/' % self.PREFIX
+        self.adapter.register_uri('GET',
+                                  '%s://test1.url' % self.PREFIX,
+                                  text='bad')
+        self.adapter.register_uri('GET',
+                                  '%s://test2.url' % self.PREFIX,
+                                  text='bad')
+        self.adapter.register_uri('GET', good, text='good')
+        self.adapter.register_uri('GET',
+                                  '%s://test4.url' % self.PREFIX,
+                                  text='bad')
+
+        resp = self.session.get(good)
+
+        self.assertEqual('good', resp.text)
