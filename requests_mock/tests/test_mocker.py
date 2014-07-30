@@ -80,6 +80,19 @@ class MockerTests(base.TestCase):
         inner()
         self.assertMockStopped()
 
+    @requests_mock.mock()
+    def test_query_string(self, m):
+        url = 'http://test.url/path'
+        qs = 'a=1&b=2'
+        m.register_uri('GET', url, text='resp')
+        resp = requests.get("%s?%s" % (url, qs))
+
+        self.assertEqual('resp', resp.text)
+
+        self.assertEqual(qs, m.last_request.query)
+        self.assertEqual(['1'], m.last_request.qs['a'])
+        self.assertEqual(['2'], m.last_request.qs['b'])
+
 
 class MockerHttpMethodsTests(base.TestCase):
 

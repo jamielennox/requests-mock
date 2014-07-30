@@ -351,17 +351,6 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(len(resps), self.adapter.call_count)
         self.assertTrue(self.adapter.called)
 
-    def test_query_string(self):
-        qs = 'a=1&b=2'
-        self.adapter.register_uri('GET', self.url, text='resp')
-        resp = self.session.get("%s?%s" % (self.url, qs))
-
-        self.assertEqual('resp', resp.text)
-
-        self.assertEqual(qs, self.adapter.last_request.query)
-        self.assertEqual(['1'], self.adapter.last_request.qs['a'])
-        self.assertEqual(['2'], self.adapter.last_request.qs['b'])
-
     def test_adapter_picks_correct_adatper(self):
         good = '%s://test3.url/' % self.PREFIX
         self.adapter.register_uri('GET',
