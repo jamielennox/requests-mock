@@ -1,5 +1,6 @@
 discover
 fixtures
 mock
+sphinx>=1.1.2,!=1.2.0,<1.3
 testrepository>=0.0.18
 testtools

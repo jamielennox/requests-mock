@@ -12,8 +12,6 @@
 
 import re
 
-import requests
-
 from requests_mock import adapter
 from requests_mock.tests import base
 
