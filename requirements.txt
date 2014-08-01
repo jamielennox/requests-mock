@@ -1,2 +1,3 @@
+pbr
 requests>=1.1
 six

@@ -10,11 +10,16 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import pbr.version
+
 from requests_mock.adapter import Adapter, ANY
 from requests_mock.exceptions import MockException, NoMockAddress
 from requests_mock.mocker import mock, Mocker, MockerCore
 from requests_mock.mocker import DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
 from requests_mock.response import create_response, CookieJar
+
+
+__version__ = pbr.version.VersionInfo('requests-mock').version_string()
 
 
 __all__ = ['Adapter',
