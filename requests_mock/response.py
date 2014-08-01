@@ -16,6 +16,8 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.response import HTTPResponse
 import six
 
+from requests_mock import compat
+
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
 _HTTP_ARGS = frozenset(['status_code', 'reason', 'headers'])
 
@@ -87,7 +89,8 @@ def create_response(request, **kwargs):
                            reason=kwargs.get('reason'),
                            body=body or six.BytesIO(six.b('')),
                            decode_content=False,
-                           preload_content=False)
+                           preload_content=False,
+                           original_response=compat._fake_http_response)
 
     response = _http_adapter.build_response(request, raw)
     response.connection = _FakeConnection()
