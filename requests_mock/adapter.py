@@ -21,15 +21,6 @@ from requests_mock import response
 ANY = object()
 
 
-class _Context(object):
-    """Stores the data being used to process a current URL match."""
-
-    def __init__(self, headers, status_code, reason):
-        self.headers = headers
-        self.status_code = status_code
-        self.reason = reason
-
-
 class _RequestObjectProxy(object):
     """A wrapper around a requests.Request that gives some extra information.
 
