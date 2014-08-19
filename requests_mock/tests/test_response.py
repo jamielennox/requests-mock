@@ -13,6 +13,7 @@
 import six
 
 from requests_mock import adapter
+from requests_mock import exceptions
 from requests_mock import response
 from requests_mock.tests import base
 
@@ -66,3 +67,13 @@ class ResponseTests(base.TestCase):
         self.assertEqual(value, resp.text)
         self.assertIsInstance(resp.text, six.string_types)
         self.assertIsInstance(resp.content, six.binary_type)
+
+    def test_setting_connection(self):
+        conn = object()
+        resp = self.create_response(connection=conn)
+        self.assertIs(conn, resp.connection)
+
+    def test_send_from_no_connection(self):
+        resp = self.create_response()
+        self.assertRaises(exceptions.InvalidRequest,
+                          resp.connection.send, self.request)

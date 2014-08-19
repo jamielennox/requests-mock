@@ -367,3 +367,31 @@ class SessionAdapterTests(base.TestCase):
         resp = self.session.get(good)
 
         self.assertEqual('good', resp.text)
+
+    def test_adapter_is_connection(self):
+        url = '%s://test.url' % self.PREFIX
+        text = 'text'
+        self.adapter.register_uri('GET', url, text=text)
+        resp = self.session.get(url)
+
+        self.assertEqual(text, resp.text)
+        self.assertIs(self.adapter, resp.connection)
+
+    def test_send_to_connection(self):
+        url1 = '%s://test1.url/' % self.PREFIX
+        url2 = '%s://test2.url/' % self.PREFIX
+
+        text1 = 'text1'
+        text2 = 'text2'
+
+        self.adapter.register_uri('GET', url1, text=text1)
+        self.adapter.register_uri('GET', url2, text=text2)
+
+        req = requests.Request(method='GET', url=url2)
+        req = self.session.prepare_request(req)
+
+        resp1 = self.session.get(url1)
+        self.assertEqual(text1, resp1.text)
+
+        resp2 = resp1.connection.send(req)
+        self.assertEqual(text2, resp2.text)
