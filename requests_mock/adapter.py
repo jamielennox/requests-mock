@@ -206,6 +206,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         for matcher in reversed(self._matchers):
             resp = matcher(request)
             if resp is not None:
+                resp.connection = self
                 return resp
 
         raise exceptions.NoMockAddress(request)

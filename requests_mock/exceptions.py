@@ -24,3 +24,7 @@ class NoMockAddress(MockException):
     def __str__(self):
         return "No mock address: %s %s" % (self.request.method,
                                            self.request.url)
+
+
+class InvalidRequest(MockException):
+    """This call cannot be made under a mocked environment"""

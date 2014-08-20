@@ -17,6 +17,7 @@ from requests.packages.urllib3.response import HTTPResponse
 import six
 
 from requests_mock import compat
+from requests_mock import exceptions
 
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
 _HTTP_ARGS = frozenset(['status_code', 'reason', 'headers'])
@@ -43,6 +44,11 @@ def _check_body_arguments(**kwargs):
 class _FakeConnection(object):
     """An object that can mock the necessary parts of a socket interface."""
 
+    def send(self, request, **kwargs):
+        msg = 'This response was created without a connection. You are ' \
+              'therefore unable to make a request directly on that connection.'
+        raise exceptions.InvalidRequest(msg)
+
     def close(self):
         pass
 
@@ -62,6 +68,8 @@ def create_response(request, **kwargs):
     :param dict headers: A dictionary object containing headers that are
         returned upon a successful match.
     """
+    connection = kwargs.pop('connection', _FakeConnection())
+
     _check_body_arguments(**kwargs)
 
     raw = kwargs.pop('raw', None)
@@ -93,7 +101,7 @@ def create_response(request, **kwargs):
                            original_response=compat._fake_http_response)
 
     response = _http_adapter.build_response(request, raw)
-    response.connection = _FakeConnection()
+    response.connection = connection
     response.encoding = encoding
     return response
 
