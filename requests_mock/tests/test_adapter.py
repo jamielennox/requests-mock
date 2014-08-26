@@ -301,7 +301,7 @@ class SessionAdapterTests(base.TestCase):
     def test_with_regexp(self):
         self.adapter.register_uri('GET', re.compile('tester.com'), text='resp')
 
-        for u in ('mocK://www.tester.com/a', 'mock://abc.tester.com'):
+        for u in ('mock://www.tester.com/a', 'mock://abc.tester.com'):
             resp = self.session.get(u)
             self.assertEqual('resp', resp.text)
 
