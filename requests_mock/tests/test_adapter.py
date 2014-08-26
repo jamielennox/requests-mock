@@ -387,8 +387,7 @@ class SessionAdapterTests(base.TestCase):
         self.adapter.register_uri('GET', url1, text=text1)
         self.adapter.register_uri('GET', url2, text=text2)
 
-        req = requests.Request(method='GET', url=url2)
-        req = self.session.prepare_request(req)
+        req = requests.Request(method='GET', url=url2).prepare()
 
         resp1 = self.session.get(url1)
         self.assertEqual(text1, resp1.text)
