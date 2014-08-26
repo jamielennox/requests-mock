@@ -31,6 +31,10 @@ if _requests_version < (2, 3):
         def getheaders(self, name):
             return None
 
+        def get_all(self, name, failobj=None):
+            # python 3 only, overrides email.message.Message.get_all
+            return failobj
+
     class _FakeHTTPResponse(object):
 
         def __init__(self):
