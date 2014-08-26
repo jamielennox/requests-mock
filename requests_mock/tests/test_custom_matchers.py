@@ -28,14 +28,7 @@ class FailMatcher(object):
 
 
 def match_all(request):
-    resp = requests.Response()
-    resp.status_code = 200
-    resp._content = six.b('data')
-    resp.request = request
-    resp.encoding = 'utf-8'
-    resp.close = lambda *args, **kwargs: None
-
-    return resp
+    return requests_mock.create_response(request, content=six.b('data'))
 
 
 def test_a(request):

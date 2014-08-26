@@ -14,6 +14,7 @@ import mock
 import requests
 
 import requests_mock
+from requests_mock import compat
 from requests_mock.tests import base
 
 original_send = requests.Session.send
@@ -54,8 +55,14 @@ class MockerTests(base.TestCase):
     def test_real_http(self, real_send, mocker):
         url = 'http://www.google.com/'
 
+        # NOTE(jamielennox): hack for requests 1.2.3 remove after
+        # requirements catches up.
+        class FakeHTTPResponse(object):
+            _original_response = compat._fake_http_response
+
         real_send.return_value = requests.Response()
         real_send.return_value.status_code = 200
+        real_send.return_value.raw = FakeHTTPResponse()
         requests.get(url)
 
         self.assertEqual(1, real_send.call_count)
