@@ -163,13 +163,24 @@ class _Matcher(_RequestHistoryTracker):
 
     def _match_headers(self, request):
         for k, vals in six.iteritems(self._request_headers):
+
             try:
                 header = request.headers[k]
             except KeyError:
-                return False
-            else:
-                if header != vals:
+                # NOTE(jamielennox): This seems to be a requests 1.2/2
+                # difference, in 2 they are just whatever the user inputted in
+                # 1 they are bytes. Let's optionally handle both and look at
+                # removing this when we depend on requests 2.
+                if not isinstance(k, six.text_type):
                     return False
+
+                try:
+                    header = request.headers[k.encode('utf-8')]
+                except KeyError:
+                    return False
+
+            if header != vals:
+                return False
 
         return True
 
