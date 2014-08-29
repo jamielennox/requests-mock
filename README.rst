@@ -64,6 +64,11 @@ Or as a decorator:
 
 For more information checkout the `docs`_.
 
+Reporting Bugs
+==============
+
+Please report all bugs on `LaunchPad`_.
+
 License
 =======
 
@@ -81,3 +86,4 @@ under the License.
 
 .. _requests: http://python-requests.org
 .. _docs: http://requests-mock.readthedocs.org
+.. _LaunchPad: https://bugs.launchpad.net/requests-mock
