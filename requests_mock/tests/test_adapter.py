@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import re
 
 import requests
@@ -394,3 +395,44 @@ class SessionAdapterTests(base.TestCase):
 
         resp2 = resp1.connection.send(req)
         self.assertEqual(text2, resp2.text)
+
+    def test_request_json_with_str_data(self):
+        dict_req = {'hello': 'world'}
+        dict_resp = {'goodbye': 'world'}
+
+        m = self.adapter.register_uri('POST', self.url, json=dict_resp)
+
+        data = json.dumps(dict_req)
+        resp = self.session.post(self.url, data=data)
+
+        self.assertIs(data, m.last_request.body)
+        self.assertEqual(dict_resp, resp.json())
+        self.assertEqual(dict_req, m.last_request.json())
+
+    def test_request_json_with_bytes_data(self):
+        dict_req = {'hello': 'world'}
+        dict_resp = {'goodbye': 'world'}
+
+        m = self.adapter.register_uri('POST', self.url, json=dict_resp)
+
+        data = json.dumps(dict_req).encode('utf-8')
+        resp = self.session.post(self.url, data=data)
+
+        self.assertIs(data, m.last_request.body)
+        self.assertEqual(dict_resp, resp.json())
+        self.assertEqual(dict_req, m.last_request.json())
+
+    def test_request_json_with_cb(self):
+        dict_req = {'hello': 'world'}
+        dict_resp = {'goodbye': 'world'}
+        data = json.dumps(dict_req)
+
+        def _cb(req, context):
+            self.assertEqual(dict_req, req.json())
+            return dict_resp
+
+        m = self.adapter.register_uri('POST', self.url, json=_cb)
+        resp = self.session.post(self.url, data=data)
+
+        self.assertEqual(1, m.call_count)
+        self.assertEqual(dict_resp, resp.json())

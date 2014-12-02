@@ -10,6 +10,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
+
 import requests
 from requests.adapters import BaseAdapter
 import six
@@ -69,6 +71,18 @@ class _RequestObjectProxy(object):
     @classmethod
     def _create(cls, *args, **kwargs):
         return cls(requests.Request(*args, **kwargs).prepare())
+
+    @property
+    def text(self):
+        body = self.body
+
+        if isinstance(body, six.binary_type):
+            body = body.decode('utf-8')
+
+        return body
+
+    def json(self, **kwargs):
+        return json.loads(self.text, **kwargs)
 
 
 class _RequestHistoryTracker(object):
