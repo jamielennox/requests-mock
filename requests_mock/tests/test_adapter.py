@@ -21,6 +21,10 @@ import requests_mock
 from requests_mock.tests import base
 
 
+class MyExc(Exception):
+    pass
+
+
 class SessionAdapterTests(base.TestCase):
 
     PREFIX = "mock"
@@ -315,9 +319,6 @@ class SessionAdapterTests(base.TestCase):
 
     def test_requests_in_history_on_exception(self):
 
-        class MyExc(Exception):
-            pass
-
         def _test_cb(request, ctx):
             raise MyExc()
 
@@ -436,3 +437,20 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual(1, m.call_count)
         self.assertEqual(dict_resp, resp.json())
+
+    def test_raises_exception(self):
+        self.adapter.register_uri('GET', self.url, exc=MyExc)
+
+        self.assertRaises(MyExc,
+                          self.session.get,
+                          self.url)
+
+        self.assertEqual(self.url, self.adapter.last_request.url)
+
+    def test_raises_exception_with_body_args_fails(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          exc=MyExc,
+                          text='fail')
