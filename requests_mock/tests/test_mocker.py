@@ -30,9 +30,10 @@ class MockerTests(base.TestCase):
 
     def _do_test(self, m):
         self.assertMockStarted()
-        m.register_uri('GET', 'http://www.test.com', text='resp')
+        matcher = m.register_uri('GET', 'http://www.test.com', text='resp')
         resp = requests.get('http://www.test.com')
         self.assertEqual('resp', resp.text)
+        return matcher
 
     def test_multiple_starts(self):
         mocker = requests_mock.Mocker()
@@ -99,6 +100,19 @@ class MockerTests(base.TestCase):
         self.assertEqual(qs, m.last_request.query)
         self.assertEqual(['1'], m.last_request.qs['a'])
         self.assertEqual(['2'], m.last_request.qs['b'])
+
+    @requests_mock.mock()
+    def test_mock_matcher_attributes(self, m):
+        matcher = self._do_test(m)
+
+        self.assertEqual(1, matcher.call_count)
+        self.assertEqual(1, m.call_count)
+
+        self.assertTrue(matcher.called)
+        self.assertTrue(m.called)
+
+        self.assertEqual(m.request_history, matcher.request_history)
+        self.assertIs(m.last_request, matcher.last_request)
 
 
 class MockerHttpMethodsTests(base.TestCase):
