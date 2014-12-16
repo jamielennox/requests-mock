@@ -36,7 +36,9 @@ class MockerCore(object):
     _PROXY_FUNCS = set(['last_request',
                         'register_uri',
                         'add_matcher',
-                        'request_history'])
+                        'request_history',
+                        'called',
+                        'call_count'])
 
     def __init__(self, **kwargs):
         self._adapter = adapter.Adapter()
