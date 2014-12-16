@@ -25,7 +25,7 @@ requests_mock.exceptions module
 requests_mock.fixture module
 ----------------------------
 
-.. automodule:: requests_mock.fixture
+.. automodule:: requests_mock.contrib.fixture
     :members:
     :undoc-members:
     :show-inheritance:

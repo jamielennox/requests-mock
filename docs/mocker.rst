@@ -1,11 +1,17 @@
-==============
-Mocker Loading
-==============
+================
+Using the Mocker
+================
 
-Loading of the Adapter is handled by the :py:class:`requests_mock.Mocker` class, which provides two ways to load an adapter.
+The mocker is a loading mechanism to ensure the adapter is correctly in place to intercept calls from requests.
+It's goal is to provide an interface that is as close to the real requests library interface as possible.
+
+Activation
+==========
+
+Loading of the Adapter is handled by the :py:class:`requests_mock.Mocker` class, which provides two ways to load an adapter:
 
 Context Manager
-===============
+---------------
 
 The Mocker object can work as a context manager.
 
@@ -15,13 +21,13 @@ The Mocker object can work as a context manager.
     >>> import requests_mock
 
     >>> with requests_mock.Mocker() as m:
-    ...     m.register_uri('GET', 'http://test.com', text='resp')
+    ...     m.get('http://test.com', text='resp')
     ...     requests.get('http://test.com').text
     ...
     'resp'
 
 Decorator
-=========
+---------
 
 Mocker can also be used as a decorator. The created object will then be passed as the last positional argument.
 
@@ -29,7 +35,7 @@ Mocker can also be used as a decorator. The created object will then be passed a
 
     >>> @requests_mock.Mocker()
     ... def test_function(m):
-    ...     m.register_uri('GET', 'http://test.com', text='resp')
+    ...     m.get('http://test.com', text='resp')
     ...     return requests.get('http://test.com').text
     ...
     >>> test_function()
@@ -41,7 +47,7 @@ If the position of the mock is likely to conflict with other arguments you can p
 
     >>> @requests_mock.Mocker(kw='mock')
     ... def test_kw_function(**kwargs):
-    ...     kwargs['mock'].register_uri('GET', 'http://test.com', text='resp')
+    ...     kwargs['mock'].get('http://test.com', text='resp')
     ...     return requests.get('http://test.com').text
     ...
     >>> test_kw_function()
@@ -81,7 +87,7 @@ This behavior mimics how patchers from `mock` library works.
 Methods
 =======
 
-The mocker object can be used with a similar interface to requests itself. Mocker objects can be called with simply the
+The mocker object can be used with a similar interface to requests itself.
 
 .. doctest::
 
@@ -102,10 +108,13 @@ The functions exist for the common HTTP method:
   - :py:meth:`~requests_mock.MockerCore.post`
   - :py:meth:`~requests_mock.MockerCore.put`
 
-As well as the base:
+As well as the basic:
 
   - :py:meth:`~requests_mock.MockerCore.request`
+  - :py:meth:`~requests_mock.MockerCore.register_uri`
 
+These methods correspond to the HTTP method of your request, so to mock POST requests you would use the :py:meth:`~requests_mock.MockerCore.post` function.
+Futher information about what can be matched from a request can be found at :doc:`matching`
 
 Real HTTP Requests
 ==================

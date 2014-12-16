@@ -14,8 +14,20 @@ The examples in this file are loaded with:
     >>> session = requests.Session()
     >>> session.mount('mock', adapter)
 
-Basic
-=====
+.. note::
+
+    The examples within use this syntax because request matching is a function of the adapter and not the mocker.
+    All the same arguments can be provided to the mocker if that is how you use `requests_mock` within your project, and use the
+
+    .. code:: python
+
+        mock.get(url, ...)
+
+    form in place of the given:
+
+    .. code:: python
+
+        adapter.register_uri('GET', url, ...)
 
 .. doctest::
     :hide:
@@ -25,6 +37,22 @@ Basic
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
     >>> session.mount('mock', adapter)
+
+Simple
+======
+
+The most simple way to match a request is to register the URL and method that will be requested with a textual response.
+When a request is made that goes through the mocker this response will be retrieved.
+
+.. doctest::
+
+    .. >>> adapter.register_uri('GET', 'mock://test.com/path', text='resp')
+    .. >>> session.get('mock://test.com/path').text
+    .. 'resp'
+
+Path Matching
+=============
+
 
 You can specify a protocol-less path:
 
