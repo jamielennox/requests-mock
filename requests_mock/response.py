@@ -118,6 +118,14 @@ class _Context(object):
 class _MatcherResponse(object):
 
     def __init__(self, **kwargs):
+        self._exc = kwargs.pop('exc', None)
+
+        # If the user is asking for an exception to be thrown then prevent them
+        # specifying any sort of body or status response as it won't be used.
+        # This may be protecting the user too much but can be removed later.
+        if self._exc and kwargs:
+            raise TypeError('Cannot provide other arguments with exc.')
+
         _check_body_arguments(**kwargs)
         self._params = kwargs
 
@@ -136,6 +144,10 @@ class _MatcherResponse(object):
             raise TypeError('Text should be a callback or string data')
 
     def get_response(self, request):
+        # if an error was requested then raise that instead of doing response
+        if self._exc:
+            raise self._exc
+
         context = _Context(self._params.get('headers', {}).copy(),
                            self._params.get('status_code', _DEFAULT_STATUS),
                            self._params.get('reason'))
