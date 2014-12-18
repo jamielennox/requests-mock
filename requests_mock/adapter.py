@@ -32,6 +32,7 @@ class _RequestObjectProxy(object):
 
     def __init__(self, request):
         self._request = request
+        self._matcher = None
         self._url_parts_ = None
         self._qs = None
 
@@ -83,6 +84,10 @@ class _RequestObjectProxy(object):
 
     def json(self, **kwargs):
         return json.loads(self.text, **kwargs)
+
+    @property
+    def matcher(self):
+        return self._matcher
 
 
 class _RequestHistoryTracker(object):
@@ -229,8 +234,14 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         self._add_to_history(request)
 
         for matcher in reversed(self._matchers):
-            resp = matcher(request)
+            try:
+                resp = matcher(request)
+            except Exception:
+                request._matcher = matcher
+                raise
+
             if resp is not None:
+                request._matcher = matcher
                 resp.connection = self
                 return resp
 

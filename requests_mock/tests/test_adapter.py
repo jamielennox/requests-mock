@@ -454,3 +454,37 @@ class SessionAdapterTests(base.TestCase):
                           self.url,
                           exc=MyExc,
                           text='fail')
+
+    def test_sets_request_matcher_in_history(self):
+        url1 = '%s://test1.url/' % self.PREFIX
+        url2 = '%s://test2.url/' % self.PREFIX
+
+        text1 = 'text1'
+        text2 = 'text2'
+
+        m1 = self.adapter.register_uri('GET', url1, text=text1)
+        m2 = self.adapter.register_uri('GET', url2, text=text2)
+
+        resp1 = self.session.get(url1)
+        resp2 = self.session.get(url2)
+
+        self.assertEqual(text1, resp1.text)
+        self.assertEqual(text2, resp2.text)
+
+        self.assertEqual(2, self.adapter.call_count)
+
+        self.assertEqual(url1, self.adapter.request_history[0].url)
+        self.assertEqual(url2, self.adapter.request_history[1].url)
+
+        self.assertIs(m1, self.adapter.request_history[0].matcher)
+        self.assertIs(m2, self.adapter.request_history[1].matcher)
+
+    def test_sets_request_matcher_on_exception(self):
+        m = self.adapter.register_uri('GET', self.url, exc=MyExc)
+
+        self.assertRaises(MyExc,
+                          self.session.get,
+                          self.url)
+
+        self.assertEqual(self.url, self.adapter.last_request.url)
+        self.assertIs(m, self.adapter.last_request.matcher)
