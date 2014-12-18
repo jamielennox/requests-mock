@@ -11,6 +11,7 @@
 # under the License.
 
 import json
+import weakref
 
 import requests
 from requests.adapters import BaseAdapter
@@ -87,7 +88,13 @@ class _RequestObjectProxy(object):
 
     @property
     def matcher(self):
-        return self._matcher
+        """The matcher that this request was handled by.
+
+        The matcher object is handled by a weakref. It will return the matcher
+        object if it is still available - so if the mock is still in place. If
+        the matcher is not available it will return None.
+        """
+        return self._matcher()
 
 
 class _RequestHistoryTracker(object):
@@ -237,11 +244,11 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             try:
                 resp = matcher(request)
             except Exception:
-                request._matcher = matcher
+                request._matcher = weakref.ref(matcher)
                 raise
 
             if resp is not None:
-                request._matcher = matcher
+                request._matcher = weakref.ref(matcher)
                 resp.connection = self
                 return resp
 
