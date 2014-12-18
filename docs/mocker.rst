@@ -47,6 +47,37 @@ If the position of the mock is likely to conflict with other arguments you can p
     >>> test_kw_function()
     'resp'
 
+Class Decorator
+===============
+
+Mocker can also be used to decorate a whole class. It works exactly like in case of decorating a normal function.
+When used in this way they wrap every test method on the class. The mocker recognise methods that start with *test* as being test methods.
+This is the same way that the `unittest.TestLoader` finds test methods by default.
+It is possible that you want to use a different prefix for your tests. You can inform the mocker of the different prefix by setting `requests_mock.Mocker.TEST_PREFIX`:
+
+.. doctest::
+
+    >>> requests_mock.Mocker.TEST_PREFIX = 'foo'
+    >>>
+    >>> @requests_mock.Mocker()
+    ... class Thing(object):
+    ...     def foo_one(self, m):
+    ...        m.register_uri('GET', 'http://test.com', text='resp')
+    ...        return requests.get('http://test.com').text
+    ...     def foo_two(self, m):
+    ...         m.register_uri('GET', 'http://test.com', text='resp')
+    ...         return requests.get('http://test.com').text
+    ...
+    >>>
+    >>> Thing().foo_one()
+    'resp'
+    >>> Thing().foo_two()
+    'resp'
+
+
+This behavior mimics how patchers from `mock` library works.
+
+
 Methods
 =======
 
