@@ -1,4 +1,4 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=stackforge/requests-mock.git
+project=openstack/requests-mock.git
