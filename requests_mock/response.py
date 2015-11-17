@@ -13,6 +13,9 @@
 import json as jsonutils
 
 from requests.adapters import HTTPAdapter
+from requests.cookies import MockRequest, MockResponse
+from requests.cookies import RequestsCookieJar
+from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.packages.urllib3.response import HTTPResponse
 import six
 
@@ -20,10 +23,38 @@ from requests_mock import compat
 from requests_mock import exceptions
 
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
-_HTTP_ARGS = frozenset(['status_code', 'reason', 'headers'])
+_HTTP_ARGS = frozenset(['status_code', 'reason', 'headers', 'cookies'])
 
 _DEFAULT_STATUS = 200
 _http_adapter = HTTPAdapter()
+
+
+class CookieJar(RequestsCookieJar):
+
+    def set(self, name, value, **kwargs):
+        """Add a cookie to the Jar.
+
+        :param str name: cookie name/key.
+        :param str value: cookie value.
+        :param int version: Integer or None. Netscape cookies have version 0.
+            RFC 2965 and RFC 2109 cookies have a version cookie-attribute of 1.
+            However, note that cookielib may 'downgrade' RFC 2109 cookies to
+            Netscape cookies, in which case version is 0.
+        :param str port: String representing a port or a set of ports
+            (eg. '80', or '80,8080'),
+        :param str domain: The domain the cookie should apply to.
+        :param str path: Cookie path (a string, eg. '/acme/rocket_launchers').
+        :param bool secure: True if cookie should only be returned over a
+            secure connection.
+        :param int expires: Integer expiry date in seconds since epoch or None.
+        :param bool discard: True if this is a session cookie.
+        :param str comment: String comment from the server explaining the
+            function of this cookie.
+        :param str comment_url: URL linking to a comment from the server
+            explaining the function of this cookie.
+        """
+        # just here to provide the function documentation
+        return super(CookieJar, self).set(name, value, **kwargs)
 
 
 def _check_body_arguments(**kwargs):
@@ -53,6 +84,25 @@ class _FakeConnection(object):
         pass
 
 
+def _extract_cookies(request, response, cookies):
+    """Add cookies to the response.
+
+    Cookies in requests are extracted from the headers in the original_response
+    httplib.HTTPMessage which we don't create so we have to do this step
+    manually.
+    """
+    # This will add cookies set manually via the Set-Cookie or Set-Cookie2
+    # header but this only allows 1 cookie to be set.
+    http_message = compat._FakeHTTPMessage(response.headers)
+    response.cookies.extract_cookies(MockResponse(http_message),
+                                     MockRequest(request))
+
+    # This allows you to pass either a CookieJar or a dictionary to request_uri
+    # or directly to create_response. To allow more than one cookie to be set.
+    if cookies:
+        merge_cookies(response.cookies, cookies)
+
+
 def create_response(request, **kwargs):
     """
     :param int status_code: The status code to return upon a successful
@@ -67,6 +117,8 @@ def create_response(request, **kwargs):
         and returned upon a successful match.
     :param dict headers: A dictionary object containing headers that are
         returned upon a successful match.
+    :param CookieJar cookies: A cookie jar with cookies to set on the
+        response.
     """
     connection = kwargs.pop('connection', _FakeConnection())
 
@@ -103,16 +155,20 @@ def create_response(request, **kwargs):
     response = _http_adapter.build_response(request, raw)
     response.connection = connection
     response.encoding = encoding
+
+    _extract_cookies(request, response, kwargs.get('cookies'))
+
     return response
 
 
 class _Context(object):
     """Stores the data being used to process a current URL match."""
 
-    def __init__(self, headers, status_code, reason):
+    def __init__(self, headers, status_code, reason, cookies):
         self.headers = headers
         self.status_code = status_code
         self.reason = reason
+        self.cookies = cookies
 
 
 class _MatcherResponse(object):
@@ -148,9 +204,16 @@ class _MatcherResponse(object):
         if self._exc:
             raise self._exc
 
+        # If a cookie dict is passed convert it into a CookieJar so that the
+        # cookies object available in a callback context is always a jar.
+        cookies = self._params.get('cookies', CookieJar())
+        if isinstance(cookies, dict):
+            cookies = cookiejar_from_dict(cookies, CookieJar())
+
         context = _Context(self._params.get('headers', {}).copy(),
                            self._params.get('status_code', _DEFAULT_STATUS),
-                           self._params.get('reason'))
+                           self._params.get('reason'),
+                           cookies)
 
         # if a body element is a callback then execute it
         def _call(f, *args, **kwargs):
@@ -164,4 +227,5 @@ class _MatcherResponse(object):
                                raw=self._params.get('raw'),
                                status_code=context.status_code,
                                reason=context.reason,
-                               headers=context.headers)
+                               headers=context.headers,
+                               cookies=context.cookies)

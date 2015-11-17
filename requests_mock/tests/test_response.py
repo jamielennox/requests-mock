@@ -77,3 +77,31 @@ class ResponseTests(base.TestCase):
         resp = self.create_response()
         self.assertRaises(exceptions.InvalidRequest,
                           resp.connection.send, self.request)
+
+    def test_cookies_from_header(self):
+        # domain must be same as request url to pass policy check
+        headers = {'Set-Cookie': 'fig=newton; Path=/test; domain=.test.url'}
+        resp = self.create_response(headers=headers)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual(['/test'], resp.cookies.list_paths())
+        self.assertEqual(['.test.url'], resp.cookies.list_domains())
+
+    def test_cookies_from_dict(self):
+        # This is a syntax we get from requests. I'm not sure i like it.
+        resp = self.create_response(cookies={'fig': 'newton',
+                                             'sugar': 'apple'})
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+
+    def test_cookies_with_jar(self):
+        jar = response.CookieJar()
+        jar.set('fig', 'newton', path='/foo', domain='.test.url')
+        jar.set('sugar', 'apple', path='/bar', domain='.test.url')
+        resp = self.create_response(cookies=jar)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual(['.test.url'], resp.cookies.list_domains())

@@ -14,12 +14,13 @@ from requests_mock.adapter import Adapter, ANY
 from requests_mock.exceptions import MockException, NoMockAddress
 from requests_mock.mocker import mock, Mocker, MockerCore
 from requests_mock.mocker import DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT
-from requests_mock.response import create_response
+from requests_mock.response import create_response, CookieJar
 
 
 __all__ = ['Adapter',
            'ANY',
            'create_response',
+           'CookieJar',
            'mock',
            'Mocker',
            'MockerCore',

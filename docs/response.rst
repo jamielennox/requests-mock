@@ -34,6 +34,7 @@ Responses are registered with the :py:meth:`requests_mock.Adapter.register_uri` 
 :status_code: The HTTP status response to return. Defaults to 200.
 :reason: The reason text that accompanies the Status (e.g. 'OK' in '200 OK')
 :headers: A dictionary of headers to be included in the response.
+:cookies: A CookieJar containing all the cookies to add to the response.
 
 To specify the body of the response there are a number of options that depend on the format that you wish to return.
 
@@ -82,6 +83,7 @@ The available properties on the `context` are:
 :headers: The dictionary of headers that are to be returned in the response.
 :status_code: The status code that is to be returned in the response.
 :reason: The string HTTP status code reason that is to be returned in the response.
+:cookies: A :py:class:`requests_mock.CookieJar` of cookies that will be merged into the response.
 
 These parameters are populated initially from the variables provided to the :py:meth:`~requests_mock.Adapter.register_uri` function and if they are modified on the context object then those changes will be reflected in the response.
 
@@ -130,3 +132,33 @@ Callbacks work within response lists in exactly the same way they do normally;
     >>> resp = session.get('mock://test.com/5')
     >>> resp.status_code, resp.headers, resp.text
     (200, {'Test1': 'value1', 'Test2': 'value2'}, 'response')
+
+Handling Cookies
+================
+
+Whilst cookies are just headers they are treated in a different way, both in HTTP and the requests library.
+To work as closely to the requests library as possible there are two ways to provide cookies to requests_mock responses.
+
+The most simple method is to use a dictionary interface.
+The Key and value of the dictionary are turned directly into the name and value of the cookie.
+This method does not allow you to set any of the more advanced cookie parameters like expiry or domain.
+
+.. doctest::
+
+    >>> adapter.register_uri('GET', 'mock://test.com/6', cookies={'foo': 'bar'}),
+    >>> resp = session.get('mock://test.com/6')
+    >>> resp.cookies['foo']
+    'bar'
+
+The more advanced way is to construct and populate a cookie jar that you can add cookies to and pass that to the mocker.
+
+.. doctest::
+
+    >>> jar = requests_mock.CookieJar()
+    >>> jar.set('foo', 'bar', domain='.test.com', path='/baz')
+    >>> adapter.register_uri('GET', 'mock://test.com/7', cookies=jar),
+    >>> resp = session.get('mock://test.com/7')
+    >>> resp.cookies['foo']
+    'bar'
+    >>> resp.cookies.list_paths()
+    ['/baz']

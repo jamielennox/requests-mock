@@ -488,3 +488,91 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual(self.url, self.adapter.last_request.url)
         self.assertIs(m, self.adapter.last_request.matcher)
+
+    def test_cookies_from_header(self):
+        headers = {'Set-Cookie': 'fig=newton; Path=/test; domain=.example.com'}
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text='text',
+                                  headers=headers)
+
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual(['/test'], resp.cookies.list_paths())
+        self.assertEqual(['.example.com'], resp.cookies.list_domains())
+
+    def test_cookies_from_dict(self):
+        # This is a syntax we get from requests. I'm not sure i like it.
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text='text',
+                                  cookies={'fig': 'newton', 'sugar': 'apple'})
+
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+
+    def test_cookies_with_jar(self):
+        jar = requests_mock.CookieJar()
+        jar.set('fig', 'newton', path='/foo', domain='.example.com')
+        jar.set('sugar', 'apple', path='/bar', domain='.example.com')
+
+        self.adapter.register_uri('GET', self.url, text='text', cookies=jar)
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual(['.example.com'], resp.cookies.list_domains())
+
+    def test_cookies_header_with_cb(self):
+
+        def _cb(request, context):
+            val = 'fig=newton; Path=/test; domain=.example.com'
+            context.headers['Set-Cookie'] = val
+            return 'text'
+
+        self.adapter.register_uri('GET', self.url, text=_cb)
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual(['/test'], resp.cookies.list_paths())
+        self.assertEqual(['.example.com'], resp.cookies.list_domains())
+
+    def test_cookies_from_dict_with_cb(self):
+        def _cb(request, context):
+            # converted into a jar by now
+            context.cookies.set('sugar', 'apple', path='/test')
+            return 'text'
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=_cb,
+                                  cookies={'fig': 'newton'})
+
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+        self.assertEqual(['/', '/test'], resp.cookies.list_paths())
+
+    def test_cookies_with_jar_cb(self):
+        def _cb(request, context):
+            context.cookies.set('sugar',
+                                'apple',
+                                path='/bar',
+                                domain='.example.com')
+            return 'text'
+
+        jar = requests_mock.CookieJar()
+        jar.set('fig', 'newton', path='/foo', domain='.example.com')
+
+        self.adapter.register_uri('GET', self.url, text=_cb, cookies=jar)
+        resp = self.session.get(self.url)
+
+        self.assertEqual('newton', resp.cookies['fig'])
+        self.assertEqual('apple', resp.cookies['sugar'])
+        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual(['.example.com'], resp.cookies.list_domains())
