@@ -576,3 +576,25 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual('apple', resp.cookies['sugar'])
         self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
         self.assertEqual(['.example.com'], resp.cookies.list_domains())
+
+    def test_allow_redirects(self):
+        data = 'testdata'
+        self.adapter.register_uri('GET', self.url, text=data, status_code=300)
+        resp = self.session.get(self.url, allow_redirects=False)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(300, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertFalse(self.adapter.last_request.allow_redirects)
+
+    def test_timeout(self):
+        data = 'testdata'
+        timeout = 300
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, timeout=timeout)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(timeout, self.adapter.last_request.timeout)
