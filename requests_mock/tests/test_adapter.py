@@ -577,6 +577,23 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
         self.assertEqual(['.example.com'], resp.cookies.list_domains())
 
+    def test_base_params(self):
+        data = 'testdata'
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+
+        self.assertIs(None, self.adapter.last_request.allow_redirects)
+        self.assertIs(None, self.adapter.last_request.timeout)
+        self.assertIs(True, self.adapter.last_request.verify)
+        self.assertIs(None, self.adapter.last_request.cert)
+
+        # actually it's an OrderedDict, but equality works fine
+        self.assertEqual({}, self.adapter.last_request.proxies)
+
     def test_allow_redirects(self):
         data = 'testdata'
         self.adapter.register_uri('GET', self.url, text=data, status_code=300)
@@ -598,3 +615,52 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(200, resp.status_code)
         self.assertEqual(data, resp.text)
         self.assertEqual(timeout, self.adapter.last_request.timeout)
+
+    def test_verify_false(self):
+        data = 'testdata'
+        verify = False
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, verify=verify)
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertIs(verify, self.adapter.last_request.verify)
+
+    def test_verify_path(self):
+        data = 'testdata'
+        verify = '/path/to/cacerts.pem'
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, verify=verify)
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(verify, self.adapter.last_request.verify)
+
+    def test_certs(self):
+        data = 'testdata'
+        cert = ('/path/to/cert.pem', 'path/to/key.pem')
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, cert=cert)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(cert, self.adapter.last_request.cert)
+        self.assertTrue(self.adapter.last_request.verify)
+
+    def test_proxies(self):
+        data = 'testdata'
+        proxies = {'http': 'foo.bar:3128',
+                   'http://host.name': 'foo.bar:4012'}
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, proxies=proxies)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(proxies, self.adapter.last_request.proxies)
+        self.assertIsNot(proxies, self.adapter.last_request.proxies)
