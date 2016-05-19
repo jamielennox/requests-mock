@@ -23,7 +23,7 @@ The fixture provides the same interfaces as the adapter.
     ...
     ...     def setUp(self):
     ...         super(MyTestCase, self).setUp()
-    ...         self.requests_mock = self.useFixture(requests_mock.Mock())
+    ...         self.requests_mock = self.useFixture(fixture.Fixture())
     ...         self.requests_mock.register_uri('GET', self.TEST_URL, text='respA')
     ...
     ...     def test_method(self):
