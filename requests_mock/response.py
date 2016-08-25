@@ -103,6 +103,22 @@ def _extract_cookies(request, response, cookies):
         merge_cookies(response.cookies, cookies)
 
 
+class _IOReader(six.BytesIO):
+    """A reader that makes a BytesIO look like a HTTPResponse.
+
+    A HTTPResponse will return an empty string when you read from it after
+    the socket has been closed. A BytesIO will raise a ValueError. For
+    compatibility we want to do the same thing a HTTPResponse does.
+    """
+
+    def read(self, *args, **kwargs):
+        if self.closed:
+            return six.b('')
+
+        # not a new style object in python 2
+        return six.BytesIO.read(self, *args, **kwargs)
+
+
 def create_response(request, **kwargs):
     """
     :param int status_code: The status code to return upon a successful
@@ -142,12 +158,12 @@ def create_response(request, **kwargs):
         encoding = 'utf-8'
         content = text.encode(encoding)
     if content is not None:
-        body = six.BytesIO(content)
+        body = _IOReader(content)
     if not raw:
         raw = HTTPResponse(status=kwargs.get('status_code', _DEFAULT_STATUS),
                            headers=kwargs.get('headers', {}),
                            reason=kwargs.get('reason'),
-                           body=body or six.BytesIO(six.b('')),
+                           body=body or _IOReader(six.b('')),
                            decode_content=False,
                            preload_content=False,
                            original_response=compat._fake_http_response)
