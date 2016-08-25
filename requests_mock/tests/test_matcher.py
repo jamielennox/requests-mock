@@ -27,12 +27,14 @@ class TestMatcher(base.TestCase):
               request_method='GET',
               complete_qs=False,
               headers=None,
-              request_headers={}):
+              request_headers={},
+              real_http=False):
         matcher = adapter._Matcher(matcher_method,
                                    target,
                                    [],
                                    complete_qs,
-                                   request_headers)
+                                   request_headers,
+                                   real_http=real_http)
         request = adapter._RequestObjectProxy._create(request_method,
                                                       url,
                                                       headers)

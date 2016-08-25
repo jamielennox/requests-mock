@@ -151,10 +151,21 @@ class _RequestHistoryTracker(object):
         return len(self.request_history)
 
 
+class _RunRealHTTP(Exception):
+    """A fake exception to jump out of mocking and allow a real request.
+
+    This exception is caught at the mocker level and allows it to execute this
+    request through the real requests mechanism rather than the mocker.
+
+    It should never be exposed to a user.
+    """
+
+
 class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
 
-    def __init__(self, method, url, responses, complete_qs, request_headers):
+    def __init__(self, method, url, responses, complete_qs, request_headers,
+                 real_http):
         """
         :param bool complete_qs: Match the entire query string. By default URLs
             match if all the provided matcher query arguments are matched and
@@ -162,6 +173,7 @@ class _Matcher(_RequestHistoryTracker):
             require that the entire query string needs to match.
         """
         super(_Matcher, self).__init__()
+
         self._method = method
         self._url = url
         try:
@@ -171,6 +183,7 @@ class _Matcher(_RequestHistoryTracker):
         self._responses = responses
         self._complete_qs = complete_qs
         self._request_headers = request_headers
+        self._real_http = real_http
 
     def _match_method(self, request):
         if self._method is ANY:
@@ -248,6 +261,11 @@ class _Matcher(_RequestHistoryTracker):
         if not self._match(request):
             return None
 
+        # doing this before _add_to_history means real requests are not stored
+        # in the request history. I'm not sure what is better here.
+        if self._real_http:
+            raise _RunRealHTTP()
+
         if len(self._responses) > 1:
             response_matcher = self._responses.pop(0)
         else:
@@ -294,19 +312,24 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         """
         complete_qs = kwargs.pop('complete_qs', False)
         request_headers = kwargs.pop('request_headers', {})
+        real_http = kwargs.pop('_real_http', False)
 
         if response_list and kwargs:
             raise RuntimeError('You should specify either a list of '
                                'responses OR response kwargs. Not both.')
+        elif real_http and (response_list or kwargs):
+            raise RuntimeError('You should specify either response data '
+                               'OR real_http. Not both.')
         elif not response_list:
-            response_list = [kwargs]
+            response_list = [] if real_http else [kwargs]
 
         responses = [response._MatcherResponse(**k) for k in response_list]
         matcher = _Matcher(method,
                            url,
                            responses,
                            complete_qs=complete_qs,
-                           request_headers=request_headers)
+                           request_headers=request_headers,
+                           real_http=real_http)
         self.add_matcher(matcher)
         return matcher
 

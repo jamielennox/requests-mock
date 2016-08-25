@@ -15,6 +15,7 @@ import requests
 
 import requests_mock
 from requests_mock import compat
+from requests_mock import exceptions
 from requests_mock.tests import base
 
 original_send = requests.Session.send
@@ -243,3 +244,38 @@ class MockerHttpMethodsTests(base.TestCase):
         mock_obj = m.delete(self.URL, text=self.TEXT)
         self.assertResponse(requests.delete(self.URL))
         self.assertTrue(mock_obj.called)
+
+    @requests_mock.Mocker()
+    def test_mocker_real_http_and_responses(self, m):
+        self.assertRaises(RuntimeError,
+                          m.get,
+                          self.URL,
+                          text='abcd',
+                          real_http=True)
+
+    @requests_mock.Mocker()
+    def test_mocker_real_http(self, m):
+        data = 'testdata'
+
+        uri1 = 'fake://example.com/foo'
+        uri2 = 'fake://example.com/bar'
+        uri3 = 'fake://example.com/baz'
+
+        m.get(uri1, text=data)
+        m.get(uri2, real_http=True)
+
+        self.assertEqual(data, requests.get(uri1).text)
+
+        # This should fail because requests can't get an adapter for mock://
+        # but it shows that it has tried and would have made a request.
+        self.assertRaises(requests.exceptions.InvalidSchema,
+                          requests.get,
+                          uri2)
+
+        # This fails because real_http is not set on the mocker
+        self.assertRaises(exceptions.NoMockAddress,
+                          requests.get,
+                          uri3)
+
+        # do it again to make sure the mock is still in place
+        self.assertEqual(data, requests.get(uri1).text)
