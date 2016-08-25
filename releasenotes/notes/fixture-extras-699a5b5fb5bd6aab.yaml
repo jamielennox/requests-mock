@@ -1,0 +1,7 @@
+---
+prelude: >
+    Installing the requirements for the 'fixture' contrib package can now be
+    done via pip with `pip install requests-mock[fixture]`
+features:
+    Added 'fixture' to pip extras so you can install the fixture requirements
+    with `pip install requests-mock[fixture]`
