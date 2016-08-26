@@ -664,3 +664,15 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(data, resp.text)
         self.assertEqual(proxies, self.adapter.last_request.proxies)
         self.assertIsNot(proxies, self.adapter.last_request.proxies)
+
+    def test_reading_closed_fp(self):
+        self.adapter.register_uri('GET', self.url, text='abc')
+        resp = self.session.get(self.url)
+
+        # raw will have been closed during the request reading
+        self.assertTrue(resp.raw.closed)
+
+        data = resp.raw.read()
+
+        self.assertIsInstance(data, six.binary_type)
+        self.assertEqual(0, len(data))
