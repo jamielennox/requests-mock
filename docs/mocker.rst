@@ -132,3 +132,18 @@ The Mocker object takes the following parameters:
     ...
     'resp'
     200
+
+*New in 1.1*
+
+Similarly when using a mocker you can register an individual URI to bypass the mocking infrastructure and make a real request. Note this only works when using the mocker and not when directly mounting an adapter.
+
+.. doctest::
+
+    >>> with requests_mock.Mocker() as m:
+    ...     m.register_uri('GET', 'http://test.com', text='resp')
+    ...     m.register_uri('GET', 'http://www.google.com', real_http=True)
+    ...     print(requests.get('http://test.com').text)
+    ...     print(requests.get('http://www.google.com').status_code)  # doctest: +SKIP
+    ...
+    'resp'
+    200

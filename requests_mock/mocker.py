@@ -34,7 +34,6 @@ class MockerCore(object):
     """
 
     _PROXY_FUNCS = set(['last_request',
-                        'register_uri',
                         'add_matcher',
                         'request_history',
                         'called',
@@ -70,6 +69,10 @@ class MockerCore(object):
             except exceptions.NoMockAddress:
                 if not self._real_http:
                     raise
+            except adapter._RunRealHTTP:
+                # this mocker wants you to run the request through the real
+                # requests library rather than the mocking. Let it.
+                pass
             finally:
                 requests.Session.get_adapter = real_get_adapter
 
@@ -94,6 +97,12 @@ class MockerCore(object):
                 pass
 
         raise AttributeError(name)
+
+    def register_uri(self, *args, **kwargs):
+        # you can pass real_http here, but it's private to pass direct to the
+        # adapter, because if you pass direct to the adapter you'll see the exc
+        kwargs['_real_http'] = kwargs.pop('real_http', False)
+        return self._adapter.register_uri(*args, **kwargs)
 
     def request(self, *args, **kwargs):
         return self.register_uri(*args, **kwargs)
