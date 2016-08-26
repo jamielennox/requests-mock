@@ -676,3 +676,41 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertIsInstance(data, six.binary_type)
         self.assertEqual(0, len(data))
+
+    def test_case_sensitive_headers(self):
+        data = 'testdata'
+        headers = {'aBcDe': 'FgHiJ'}
+
+        self.adapter.register_uri('GET', self.url, text=data)
+        resp = self.session.get(self.url, headers=headers)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+
+        for k, v in headers.items():
+            self.assertEqual(v, self.adapter.last_request.headers[k])
+
+    def test_case_sensitive_history(self):
+        self.adapter._case_sensitive = True
+
+        data = 'testdata'
+        netloc = 'examPlE.CoM'
+        path = '/TesTER'
+        query = 'aBC=deF'
+
+        mock_url = '%s://%s%s' % (self.PREFIX, netloc.lower(), path)
+        request_url = '%s://%s%s?%s' % (self.PREFIX, netloc, path, query)
+
+        # test that the netloc is ignored when actually making the request
+        self.adapter.register_uri('GET', mock_url, text=data)
+        resp = self.session.get(request_url)
+
+        self.assertEqual('GET', self.adapter.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+
+        # but even still the mixed case parameters come out in history
+        self.assertEqual(netloc, self.adapter.last_request.netloc)
+        self.assertEqual(path, self.adapter.last_request.path)
+        self.assertEqual(query, self.adapter.last_request.query)

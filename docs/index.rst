@@ -11,6 +11,7 @@ Contents:
    mocker
    matching
    response
+   knownissues
    history
    adapter
    contrib

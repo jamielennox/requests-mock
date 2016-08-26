@@ -38,6 +38,18 @@ The examples in this file are loaded with:
     >>> session = requests.Session()
     >>> session.mount('mock', adapter)
 
+.. note::
+
+    By default all matching is case insensitive. This can be adjusted by
+    passing case_sensitive=True when creating a mocker or adapter or globally
+    by doing:
+
+    .. code:: python
+
+        requests_mock.mock.case_sensitive = True
+
+    for more see: :ref:`case_insensitive`
+
 Simple
 ======
 

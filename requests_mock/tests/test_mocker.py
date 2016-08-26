@@ -279,3 +279,34 @@ class MockerHttpMethodsTests(base.TestCase):
 
         # do it again to make sure the mock is still in place
         self.assertEqual(data, requests.get(uri1).text)
+
+    @requests_mock.Mocker(case_sensitive=True)
+    def test_case_sensitive_query(self, m):
+        data = 'testdata'
+        query = {'aBcDe': 'FgHiJ'}
+
+        m.get(self.URL, text=data)
+        resp = requests.get(self.URL, params=query)
+
+        self.assertEqual('GET', m.last_request.method)
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(data, resp.text)
+
+        for k, v in query.items():
+            self.assertEqual([v], m.last_request.qs[k])
+
+    @mock.patch.object(requests_mock.Mocker, 'case_sensitive', True)
+    def test_global_case_sensitive(self):
+        with requests_mock.mock() as m:
+            data = 'testdata'
+            query = {'aBcDe': 'FgHiJ'}
+
+            m.get(self.URL, text=data)
+            resp = requests.get(self.URL, params=query)
+
+            self.assertEqual('GET', m.last_request.method)
+            self.assertEqual(200, resp.status_code)
+            self.assertEqual(data, resp.text)
+
+            for k, v in query.items():
+                self.assertEqual([v], m.last_request.qs[k])

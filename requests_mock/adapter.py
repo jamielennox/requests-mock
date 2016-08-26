@@ -46,13 +46,22 @@ class _RequestObjectProxy(object):
         self._cert = kwargs.pop('cert', None)
         self._proxies = copy.deepcopy(kwargs.pop('proxies', {}))
 
+        # FIXME(jamielennox): This is part of bug #1584008 and should default
+        # to True (or simply removed) in a major version bump.
+        self._case_sensitive = kwargs.pop('case_sensitive', False)
+
     def __getattr__(self, name):
         return getattr(self._request, name)
 
     @property
     def _url_parts(self):
         if self._url_parts_ is None:
-            self._url_parts_ = urlparse.urlparse(self._request.url.lower())
+            url = self._request.url
+
+            if not self._case_sensitive:
+                url = url.lower()
+
+            self._url_parts_ = urlparse.urlparse(url)
 
         return self._url_parts_
 
@@ -165,7 +174,7 @@ class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
 
     def __init__(self, method, url, responses, complete_qs, request_headers,
-                 real_http):
+                 real_http, case_sensitive):
         """
         :param bool complete_qs: Match the entire query string. By default URLs
             match if all the provided matcher query arguments are matched and
@@ -176,14 +185,28 @@ class _Matcher(_RequestHistoryTracker):
 
         self._method = method
         self._url = url
-        try:
-            self._url_parts = urlparse.urlparse(url.lower())
-        except:
-            self._url_parts = None
         self._responses = responses
         self._complete_qs = complete_qs
         self._request_headers = request_headers
         self._real_http = real_http
+
+        # url can be a regex object or ANY so don't always run urlparse
+        if isinstance(url, six.string_types):
+            url_parts = urlparse.urlparse(url)
+            self._scheme = url_parts.scheme.lower()
+            self._netloc = url_parts.netloc.lower()
+            self._path = url_parts.path or '/'
+            self._query = url_parts.query
+
+            if not case_sensitive:
+                self._path = self._path.lower()
+                self._query = self._query.lower()
+
+        else:
+            self._scheme = None
+            self._netloc = None
+            self._path = None
+            self._query = None
 
     def _match_method(self, request):
         if self._method is ANY:
@@ -202,18 +225,20 @@ class _Matcher(_RequestHistoryTracker):
         if hasattr(self._url, 'search'):
             return self._url.search(request.url) is not None
 
-        if self._url_parts.scheme and request.scheme != self._url_parts.scheme:
+        # scheme is always matched case insensitive
+        if self._scheme and request.scheme.lower() != self._scheme:
             return False
 
-        if self._url_parts.netloc and request.netloc != self._url_parts.netloc:
+        # netloc is always matched case insensitive
+        if self._netloc and request.netloc.lower() != self._netloc:
             return False
 
-        if (request.path or '/') != (self._url_parts.path or '/'):
+        if (request.path or '/') != self._path:
             return False
 
         # construct our own qs structure as we remove items from it below
         request_qs = urlparse.parse_qs(request.query)
-        matcher_qs = urlparse.parse_qs(self._url_parts.query)
+        matcher_qs = urlparse.parse_qs(self._query)
 
         for k, vals in six.iteritems(matcher_qs):
             for v in vals:
@@ -279,12 +304,15 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
     """A fake adapter than can return predefined responses.
 
     """
-    def __init__(self):
+    def __init__(self, case_sensitive=False):
         super(Adapter, self).__init__()
+        self._case_sensitive = case_sensitive
         self._matchers = []
 
     def send(self, request, **kwargs):
-        request = _RequestObjectProxy(request, **kwargs)
+        request = _RequestObjectProxy(request,
+                                      case_sensitive=self._case_sensitive,
+                                      **kwargs)
         self._add_to_history(request)
 
         for matcher in reversed(self._matchers):
@@ -323,10 +351,17 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         elif not response_list:
             response_list = [] if real_http else [kwargs]
 
+        # NOTE(jamielennox): case_sensitive is not present as a kwarg because i
+        # think there would be an edge case where the adapter and register_uri
+        # had different values.
+        # Ideally case_sensitive would be a value passed to match() however
+        # this would change the contract of matchers so we pass ito to the
+        # proxy and the matcher seperately.
         responses = [response._MatcherResponse(**k) for k in response_list]
         matcher = _Matcher(method,
                            url,
                            responses,
+                           case_sensitive=self._case_sensitive,
                            complete_qs=complete_qs,
                            request_headers=request_headers,
                            real_http=real_http)
