@@ -334,9 +334,11 @@ class SessionAdapterTests(base.TestCase):
         m = self.adapter.register_uri('GET', self.url, text='resp')
         self.assertEqual(0, m.call_count)
         self.assertFalse(m.called)
+        self.assertFalse(m.called_once)
 
         self.assertEqual(0, self.adapter.call_count)
         self.assertFalse(self.adapter.called)
+        self.assertFalse(m.called_once)
 
     def test_called_and_called_count(self):
         m = self.adapter.register_uri('GET', self.url, text='resp')
@@ -349,9 +351,11 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual(len(resps), m.call_count)
         self.assertTrue(m.called)
+        self.assertFalse(m.called_once)
 
         self.assertEqual(len(resps), self.adapter.call_count)
         self.assertTrue(self.adapter.called)
+        self.assertFalse(m.called_once)
 
     def test_adapter_picks_correct_adatper(self):
         good = '%s://test3.url/' % self.PREFIX
@@ -436,6 +440,7 @@ class SessionAdapterTests(base.TestCase):
         resp = self.session.post(self.url, data=data)
 
         self.assertEqual(1, m.call_count)
+        self.assertTrue(m.called_once)
         self.assertEqual(dict_resp, resp.json())
 
     def test_raises_exception(self):
@@ -445,6 +450,7 @@ class SessionAdapterTests(base.TestCase):
                           self.session.get,
                           self.url)
 
+        self.assertTrue(self.adapter.called_once)
         self.assertEqual(self.url, self.adapter.last_request.url)
 
     def test_raises_exception_with_body_args_fails(self):
@@ -472,6 +478,7 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(text2, resp2.text)
 
         self.assertEqual(2, self.adapter.call_count)
+        self.assertFalse(self.adapter.called_once)
 
         self.assertEqual(url1, self.adapter.request_history[0].url)
         self.assertEqual(url2, self.adapter.request_history[1].url)

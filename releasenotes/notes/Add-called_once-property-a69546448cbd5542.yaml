@@ -1,0 +1,6 @@
+---
+prelude: >
+    Add a called_once property to the mockers.
+features:
+  - A called_once property was added to the adapter and the mocker. This gives
+    us an easy way to emulate mock's assert_called_once.

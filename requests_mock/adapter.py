@@ -147,6 +147,10 @@ class _RequestHistoryTracker(object):
         return self.call_count > 0
 
     @property
+    def called_once(self):
+        return self.call_count == 1
+
+    @property
     def call_count(self):
         return len(self.request_history)
 
