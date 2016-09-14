@@ -1,0 +1,17 @@
+---
+prelude: >
+    It is now possible to make URL matching and request history not lowercase
+    the provided URLs.
+features:
+  - You can pass case_sensitive=True to an adapter or set
+    `requests_mock.mock.case_sensitive = True` globally to enable case
+    sensitive matching.
+upgrade:
+  - It is recommended you add `requests_mock.mock.case_sensitive = True` to
+    your base test file to globally turn on case sensitive matching as this
+    will become the default in a 2.X release.
+fixes:
+  - Reported in bug \#1584008 all request matching is done in a case
+    insensitive way, as a byproduct of this request history is handled in a
+    case insensitive way. This can now be controlled by setting case_sensitive
+    to True when creating an adapter or globally.

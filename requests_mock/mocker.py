@@ -39,8 +39,28 @@ class MockerCore(object):
                         'called',
                         'call_count'])
 
+    case_sensitive = False
+    """case_sensitive handles a backwards incompatible bug. The URL used to
+    match against our matches and that is saved in request_history is always
+    lowercased. This is incorrect as it reports incorrect history to the user
+    and doesn't allow case sensitive path matching.
+
+    Unfortunately fixing this change is backwards incompatible in the 1.X
+    series as people may rely on this behaviour. To work around this you can
+    globally set:
+
+    requests_mock.mock.case_sensitive = True
+
+    which will prevent the lowercase being executed and return case sensitive
+    url and query information.
+
+    This will become the default in a 2.X release. See bug: #1584008.
+    """
+
     def __init__(self, **kwargs):
-        self._adapter = adapter.Adapter()
+        case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
+        self._adapter = adapter.Adapter(case_sensitive=case_sensitive)
+
         self._real_http = kwargs.pop('real_http', False)
         self._real_send = None
 

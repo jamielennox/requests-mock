@@ -28,13 +28,15 @@ class TestMatcher(base.TestCase):
               complete_qs=False,
               headers=None,
               request_headers={},
-              real_http=False):
+              real_http=False,
+              case_sensitive=False):
         matcher = adapter._Matcher(matcher_method,
                                    target,
                                    [],
                                    complete_qs,
                                    request_headers,
-                                   real_http=real_http)
+                                   real_http=real_http,
+                                   case_sensitive=case_sensitive)
         request = adapter._RequestObjectProxy._create(request_method,
                                                       url,
                                                       headers)
@@ -222,3 +224,44 @@ class TestMatcher(base.TestCase):
                            'http://www.test.com/path',
                            headers={'A': 'abc', 'b': 'def'},
                            request_headers={'c': 'ghi'})
+
+        # headers should be key insensitive and value sensitive, we have no
+        # choice here because they go into an insensitive dict.
+        self.assertMatch('/path',
+                         'http://www.test.com/path',
+                         headers={'aBc': 'abc', 'DEF': 'def'},
+                         request_headers={'abC': 'abc'})
+
+        self.assertNoMatch('/path',
+                           'http://www.test.com/path',
+                           headers={'abc': 'aBC', 'DEF': 'def'},
+                           request_headers={'abc': 'Abc'})
+
+    def test_case_sensitive_ignored_for_netloc_and_protocol(self):
+        for case_sensitive in (True, False):
+            self.assertMatch('http://AbC.CoM',
+                             'http://aBc.CoM',
+                             case_sensitive=case_sensitive)
+
+            self.assertMatch('htTP://abc.com',
+                             'hTTp://abc.com',
+                             case_sensitive=case_sensitive)
+
+            self.assertMatch('htTP://aBC.cOm',
+                             'hTTp://AbC.Com',
+                             case_sensitive=case_sensitive)
+
+    def assertSensitiveMatch(self, target, url, **kwargs):
+        self.assertMatch(target, url, case_sensitive=False, **kwargs)
+        self.assertNoMatch(target, url, case_sensitive=True, **kwargs)
+
+    def test_case_sensitive_paths(self):
+        self.assertSensitiveMatch('http://abc.com/pAtH', 'http://abc.com/path')
+        self.assertSensitiveMatch('/pAtH', 'http://abc.com/path')
+
+    def test_case_sensitive_query(self):
+        self.assertSensitiveMatch('http://abc.com/path?abCD=efGH',
+                                  'http://abc.com/path?abCd=eFGH')
+
+        self.assertSensitiveMatch('http://abc.com/path?abcd=efGH',
+                                  'http://abc.com/path?abcd=eFGH')
