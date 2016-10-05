@@ -37,6 +37,7 @@ class MockerCore(object):
                         'add_matcher',
                         'request_history',
                         'called',
+                        'called_once',
                         'call_count'])
 
     case_sensitive = False

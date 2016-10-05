@@ -176,6 +176,7 @@ class MockerTests(base.TestCase):
         self.assertTrue(matcher.called)
         self.assertTrue(matcher.called_once)
         self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
         self.assertEqual(m.request_history, matcher.request_history)
         self.assertIs(m.last_request, matcher.last_request)
@@ -204,6 +205,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(resp)
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_get(self, m):
@@ -211,6 +214,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.get(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_options(self, m):
@@ -218,6 +223,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.options(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_head(self, m):
@@ -225,6 +232,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.head(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_post(self, m):
@@ -232,6 +241,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.post(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_put(self, m):
@@ -239,6 +250,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.put(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_patch(self, m):
@@ -246,6 +259,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.patch(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_delete(self, m):
@@ -253,6 +268,8 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertResponse(requests.delete(self.URL))
         self.assertTrue(mock_obj.called)
         self.assertTrue(mock_obj.called_once)
+        self.assertTrue(m.called)
+        self.assertTrue(m.called_once)
 
     @requests_mock.Mocker()
     def test_mocker_real_http_and_responses(self, m):
