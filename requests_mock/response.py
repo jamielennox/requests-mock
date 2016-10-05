@@ -148,9 +148,9 @@ def create_response(request, **kwargs):
     encoding = None
 
     if content and not isinstance(content, six.binary_type):
-        raise TypeError('Content should be a callback or binary data')
+        raise TypeError('Content should be binary data')
     if text and not isinstance(text, six.string_types):
-        raise TypeError('Text should be a callback or string data')
+        raise TypeError('Text should be string data')
 
     if json is not None:
         text = jsonutils.dumps(json)
