@@ -143,6 +143,10 @@ class _RequestObjectProxy(object):
     def json(self, **kwargs):
         return json.loads(self.text, **kwargs)
 
+    def form(self, **kwargs):
+        kwargs.setdefault('strict_parsing', True)
+        return urlparse.parse_qs(self.text, **kwargs)
+
     @property
     def matcher(self):
         """The matcher that this request was handled by.

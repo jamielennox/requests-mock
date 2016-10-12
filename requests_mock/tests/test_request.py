@@ -117,3 +117,17 @@ class RequestTests(base.TestCase):
         self.assertEqual('host.example.com', req.netloc)
         self.assertEqual('host.example.com', req.hostname)
         self.assertEqual(443, req.port)
+
+    def test_form_data(self):
+        req = self.do_request(method='POST', data={'abc': 'def', 'ghi': 'jkl'})
+        self.assertEqual({'abc': ['def'], 'ghi': ['jkl']}, req.form())
+
+    def test_bad_form_data(self):
+        req = self.do_request(method='POST', data='abcd')
+        self.assertEqual('abcd', req.text)
+        self.assertRaises(ValueError, req.form)
+
+    def test_form_data_spaces(self):
+        data = {'abc': 'def', 'ghi': 'jkl mno-pq'}
+        req = self.do_request(method='POST', data=data)
+        self.assertEqual({'abc': ['def'], 'ghi': ['jkl mno-pq']}, req.form())

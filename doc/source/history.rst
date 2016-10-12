@@ -49,6 +49,7 @@ These additions include:
 :qs: The query string of the request. See :py:func:`urllib.parse.parse_qs` for information on the return format.
 :hostname: The host name that the request was sent to.
 :port: The port the request was sent to.
+:form: A dictionary representation similar to the qs return value for form encoded data.
 
 .. doctest::
 
