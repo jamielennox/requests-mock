@@ -131,3 +131,148 @@ class RequestTests(base.TestCase):
         data = {'abc': 'def', 'ghi': 'jkl mno-pq'}
         req = self.do_request(method='POST', data=data)
         self.assertEqual({'abc': ['def'], 'ghi': ['jkl mno-pq']}, req.form())
+
+    def assertMultipartEqual(self, multi, filename=None, data=None,
+                             content_type=None, headers=None):
+        self.assertEqual(filename, multi.filename)
+        self.assertEqual(data, multi.data)
+
+        self.assertEqual(data, multi)
+        self.assertEqual((filename, data), multi)
+
+        if content_type:
+            self.assertEqual(content_type, multi.content_type)
+            self.assertEqual((filename, data, content_type), multi)
+
+        if headers:
+            for k, v in headers.items():
+                self.assertEqual(v, multi.headers[k])
+
+    def test_multipart_from_single_file(self):
+        filename = 'filename'
+        data = 'some test data'
+        content_type = 'text/plain'
+        file1 = self.create_tempfile(data)
+
+        with open(file1, 'rb') as fd1:
+            files = {'testfile': (filename, fd1, content_type)}
+            req = self.do_request(method='POST', files=files)
+
+        multi = req.multipart_form()
+
+        self.assertEqual(set(['testfile']), set(multi.keys()))
+        self.assertEqual(1, len(multi['testfile']))
+
+        self.assertMultipartEqual(multi['testfile'][0],
+                                  filename=filename,
+                                  data=data.encode('utf-8'),
+                                  content_type=content_type)
+
+    def test_multipart_from_seperate_file_and_text(self):
+        filename1 = 'filename'
+        data1 = 'some test data'
+        content_type1 = 'text/plain'
+
+        filename2 = 'dataname'
+        data2 = 'some different data'
+        content_type2 = 'image/png'
+
+        file1 = self.create_tempfile(data1)
+
+        with open(file1, 'rb') as fd1:
+            files = {'testfile': (filename1, fd1, content_type1),
+                     'testdata': (filename2, data2, content_type2)}
+            req = self.do_request(method='POST', files=files)
+
+        multi = req.multipart_form()
+
+        self.assertEqual(set(['testfile', 'testdata']), set(multi.keys()))
+        self.assertEqual(1, len(multi['testfile']))
+        self.assertEqual(1, len(multi['testdata']))
+
+        self.assertMultipartEqual(multi['testfile'][0],
+                                  filename=filename1,
+                                  data=data1.encode('utf-8'),
+                                  content_type=content_type1)
+
+        self.assertMultipartEqual(multi['testdata'][0],
+                                  filename=filename2,
+                                  data=data2.encode('utf-8'),
+                                  content_type=content_type2)
+
+    def test_multipart_from_multi_file_and_text(self):
+        filename1 = 'filename'
+        data1 = 'some test data'
+        content_type1 = 'text/plain'
+
+        filename2 = 'dataname'
+        data2 = 'some different data'
+        content_type2 = 'image/png'
+
+        file1 = self.create_tempfile(data1)
+
+        with open(file1, 'rb') as fd1:
+            files = [('testfile', (filename1, fd1, content_type1)),
+                     ('testfile', (filename2, data2, content_type2))]
+
+            req = self.do_request(method='POST', files=files)
+
+        multi = req.multipart_form()
+
+        self.assertEqual(set(['testfile']), set(multi.keys()))
+        self.assertEqual(2, len(multi['testfile']))
+
+        self.assertMultipartEqual(multi['testfile'][0],
+                                  filename=filename1,
+                                  data=data1.encode('utf-8'),
+                                  content_type=content_type1)
+
+        self.assertMultipartEqual(multi['testfile'][1],
+                                  filename=filename2,
+                                  data=data2.encode('utf-8'),
+                                  content_type=content_type2)
+
+    def test_multipart_from_multi_file_and_data(self):
+        filename1 = 'filename'
+        data1 = 'some test data'
+        content_type1 = 'text/plain'
+
+        filename2 = 'dataname'
+        data2 = 'some different data'
+        content_type2 = 'image/png'
+
+        file1 = self.create_tempfile(data1)
+
+        with open(file1, 'rb') as fd1:
+            files = [('testfile', (filename1, fd1, content_type1)),
+                     ('testfile', (filename2, data2, content_type2))]
+
+            req = self.do_request(method='POST',
+                                  files=files,
+                                  data={'a': 'b', 'c': 'd'})
+
+        multi = req.multipart_form()
+
+        self.assertEqual(set(['testfile', 'a', 'c']), set(multi.keys()))
+
+        self.assertEqual(2, len(multi['testfile']))
+        self.assertEqual(1, len(multi['a']))
+        self.assertEqual(1, len(multi['c']))
+
+        self.assertMultipartEqual(multi['testfile'][0],
+                                  filename=filename1,
+                                  data=data1.encode('utf-8'),
+                                  content_type=content_type1)
+
+        self.assertMultipartEqual(multi['testfile'][1],
+                                  filename=filename2,
+                                  data=data2.encode('utf-8'),
+                                  content_type=content_type2)
+
+        self.assertMultipartEqual(multi['a'][0],
+                                  filename=None,
+                                  data='b')
+
+        self.assertMultipartEqual(multi['c'][0],
+                                  filename=None,
+                                  data='d')

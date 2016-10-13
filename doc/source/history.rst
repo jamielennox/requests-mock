@@ -50,6 +50,7 @@ These additions include:
 :hostname: The host name that the request was sent to.
 :port: The port the request was sent to.
 :form: A dictionary representation similar to the qs return value for form encoded data.
+:multipart_form: A dictionary representation similar to the qs return value for multipart form encoded data.
 
 .. doctest::
 

@@ -10,8 +10,27 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
+import tempfile
+
+import six
 import testtools
 
 
 class TestCase(testtools.TestCase):
-    pass
+
+    def create_tempfile(self, content, suffix='', prefix='tmp'):
+        fd, filename = tempfile.mkstemp(suffix=suffix,
+                                        prefix=prefix,
+                                        text=False)
+        self.addCleanup(os.unlink, filename)
+
+        if isinstance(content, six.string_types):
+            content = content.encode('utf-8')
+
+        try:
+            os.write(fd, content)
+        finally:
+            os.close(fd)
+
+        return filename
