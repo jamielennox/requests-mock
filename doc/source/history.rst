@@ -47,6 +47,8 @@ These additions include:
 :text: The data of the request converted into a unicode string.
 :json: The data of the request loaded from json into python objects.
 :qs: The query string of the request. See :py:func:`urllib.parse.parse_qs` for information on the return format.
+:hostname: The host name that the request was sent to.
+:port: The port the request was sent to.
 
 .. doctest::
 

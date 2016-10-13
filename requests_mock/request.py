@@ -67,6 +67,32 @@ class _RequestObjectProxy(object):
         return self._url_parts.netloc
 
     @property
+    def hostname(self):
+        try:
+            return self.netloc.split(':')[0]
+        except IndexError:
+            return ''
+
+    @property
+    def port(self):
+        components = self.netloc.split(':')
+
+        try:
+            return int(components[1])
+        except (IndexError, ValueError):
+            pass
+
+        if self.scheme == 'https':
+            return 443
+        if self.scheme == 'http':
+            return 80
+
+        # The default return shouldn't matter too much because if you are
+        # wanting to test this value you really should be explicitly setting it
+        # somewhere. 0 at least is a boolean False and an int.
+        return 0
+
+    @property
     def path(self):
         return self._url_parts.path
 

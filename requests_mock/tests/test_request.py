@@ -89,3 +89,31 @@ class RequestTests(base.TestCase):
 
         self.assertEqual(proxies, req.proxies)
         self.assertIsNot(proxies, req.proxies)
+
+    def test_hostname_port_http(self):
+        req = self.do_request(url='http://host.example.com:81/path')
+
+        self.assertEqual('host.example.com:81', req.netloc)
+        self.assertEqual('host.example.com', req.hostname)
+        self.assertEqual(81, req.port)
+
+    def test_hostname_port_https(self):
+        req = self.do_request(url='https://host.example.com:8080/path')
+
+        self.assertEqual('host.example.com:8080', req.netloc)
+        self.assertEqual('host.example.com', req.hostname)
+        self.assertEqual(8080, req.port)
+
+    def test_hostname_default_port_http(self):
+        req = self.do_request(url='http://host.example.com/path')
+
+        self.assertEqual('host.example.com', req.netloc)
+        self.assertEqual('host.example.com', req.hostname)
+        self.assertEqual(80, req.port)
+
+    def test_hostname_default_port_https(self):
+        req = self.do_request(url='https://host.example.com/path')
+
+        self.assertEqual('host.example.com', req.netloc)
+        self.assertEqual('host.example.com', req.hostname)
+        self.assertEqual(443, req.port)
