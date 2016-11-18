@@ -409,3 +409,33 @@ class MockerHttpMethodsTests(base.TestCase):
 
             self.assertEqual(6, m1.call_count)
             self.assertEqual(2, r1.call_count)
+
+    @mock.patch('requests.adapters.HTTPAdapter.send')
+    def test_inner_real_http(self, real_send):
+        mock_url = 'http://foo.org/path'
+        real_url = 'http://httpbin.org/get'
+
+        test_text = 'real http data'
+        test_bytes = test_text.encode('utf-8')
+
+        # using create_response is a bit bootstrappy here but so long as it's
+        # coming from HTTPAdapter.send it's ok
+        req = requests.Request(method='GET', url=real_url)
+        real_send.return_value = response.create_response(req.prepare(),
+                                                          status_code=200,
+                                                          content=test_bytes)
+
+	def callback(request, context):
+            # this callback is executed in the context of a mocker so calling
+            # requests.get again loops back through.
+	    return requests.get(real_url).text
+
+        with requests_mock.Mocker(real_http=False) as mock:
+            mock.get(mock_url, text=callback)
+            resp = requests.get(mock_url)
+
+        self.assertEqual(1, real_send.call_count)
+        self.assertEqual(real_url, real_send.call_args[0][0].url)
+
+        self.assertEqual(resp.text, test_text)
+

@@ -26,6 +26,37 @@ POST = 'POST'
 PUT = 'PUT'
 
 _original_send = requests.Session.send
+_original_get_adapter = requests.Session.get_adapter
+
+
+class _MockerAdapter(adapter.Adapter):
+
+    def send(self, *args, **kwargs):
+        # When we are actually inside our mocked adapter.send we're going to be
+        # doing a bunch of comparisons to matchers. It's possible here that our
+        # adapter triggers a callback and the user regains control. This
+        # callback can then call requests. What state do we want requests in
+        # here? My best guess is that you want a clean, un-mocked requests so
+        # you can do real calls so we unmock everything.
+
+        # NOTE(jamielennox): I can't decide if this should reset back to a
+        # clean state or if it should hit the same adapter again? Re-hitting
+        # the adapter is harder to implement because you need to handle
+        # real_http here basically moving the whole fake_send logic here. This
+        # might be more correct, but is it worth it to support a case i don't
+        # think anyone would use?
+
+        last_send = requests.Session.send
+        last_get_adapter = requests.Session.get_adapter
+
+        requests.Session.send = _original_send
+        requests.Session.get_adapter = _original_get_adapter
+
+        try:
+            return super(_MockerAdapter, self).send(*args, **kwargs)
+        finally:
+            requests.Session.send = last_send
+            requests.Session.get_adapter = last_get_adapter
 
 
 class MockerCore(object):
@@ -62,7 +93,7 @@ class MockerCore(object):
 
     def __init__(self, **kwargs):
         case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
-        self._adapter = adapter.Adapter(case_sensitive=case_sensitive)
+        self._adapter = _MockerAdapter(case_sensitive=case_sensitive)
 
         self._real_http = kwargs.pop('real_http', False)
         self._last_send = None
