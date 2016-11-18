@@ -339,3 +339,73 @@ class MockerHttpMethodsTests(base.TestCase):
 
             for k, v in query.items():
                 self.assertEqual([v], m.last_request.qs[k])
+
+    def test_nested_mocking(self):
+        url1 = 'http://url1.com/path1'
+        url2 = 'http://url2.com/path2'
+        url3 = 'http://url3.com/path3'
+
+        data1 = 'data1'
+        data2 = 'data2'
+        data3 = 'data3'
+
+        with requests_mock.mock() as m1:
+
+            r1 = m1.get(url1, text=data1)
+
+            resp1a = requests.get(url1)
+            self.assertRaises(exceptions.NoMockAddress, requests.get, url2)
+            self.assertRaises(exceptions.NoMockAddress, requests.get, url3)
+
+            self.assertEqual(data1, resp1a.text)
+
+            # call count = 3 because there are 3 calls above, url 1-3
+            self.assertEqual(3, m1.call_count)
+            self.assertEqual(1, r1.call_count)
+
+            with requests_mock.mock() as m2:
+
+                r2 = m2.get(url2, text=data2)
+
+                self.assertRaises(exceptions.NoMockAddress, requests.get, url1)
+                resp2a = requests.get(url2)
+                self.assertRaises(exceptions.NoMockAddress, requests.get, url3)
+
+                self.assertEqual(data2, resp2a.text)
+
+                with requests_mock.mock() as m3:
+
+                    r3 = m3.get(url3, text=data3)
+
+                    self.assertRaises(exceptions.NoMockAddress,
+                                      requests.get,
+                                      url1)
+                    self.assertRaises(exceptions.NoMockAddress,
+                                      requests.get,
+                                      url2)
+                    resp3 = requests.get(url3)
+
+                    self.assertEqual(data3, resp3.text)
+
+                    self.assertEqual(3, m3.call_count)
+                    self.assertEqual(1, r3.call_count)
+
+                resp2b = requests.get(url2)
+                self.assertRaises(exceptions.NoMockAddress, requests.get, url1)
+                self.assertEqual(data2, resp2b.text)
+                self.assertRaises(exceptions.NoMockAddress, requests.get, url3)
+
+                self.assertEqual(3, m1.call_count)
+                self.assertEqual(1, r1.call_count)
+                self.assertEqual(6, m2.call_count)
+                self.assertEqual(2, r2.call_count)
+                self.assertEqual(3, m3.call_count)
+                self.assertEqual(1, r3.call_count)
+
+            resp1b = requests.get(url1)
+            self.assertEqual(data1, resp1b.text)
+            self.assertRaises(exceptions.NoMockAddress, requests.get, url2)
+            self.assertRaises(exceptions.NoMockAddress, requests.get, url3)
+
+            self.assertEqual(6, m1.call_count)
+            self.assertEqual(2, r1.call_count)
