@@ -265,6 +265,13 @@ class SessionAdapterTests(base.TestCase):
                           self.url,
                           content=six.u('unicode'))
 
+    def test_dont_pass_empty_string_as_content(self):
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          content=six.u(''))
+
     def test_dont_pass_bytes_as_text(self):
         if six.PY2:
             self.skipTest('Cannot enforce byte behaviour in PY2')
@@ -274,6 +281,16 @@ class SessionAdapterTests(base.TestCase):
                           'GET',
                           self.url,
                           text=six.b('bytes'))
+
+    def test_dont_pass_empty_string_as_text(self):
+        if six.PY2:
+            self.skipTest('Cannot enforce byte behaviour in PY2')
+
+        self.assertRaises(TypeError,
+                          self.adapter.register_uri,
+                          'GET',
+                          self.url,
+                          text=six.b(''))
 
     def test_dont_pass_non_str_as_content(self):
         self.assertRaises(TypeError,

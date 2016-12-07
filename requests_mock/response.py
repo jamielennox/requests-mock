@@ -147,9 +147,9 @@ def create_response(request, **kwargs):
     json = kwargs.pop('json', None)
     encoding = None
 
-    if content and not isinstance(content, six.binary_type):
+    if content is not None and not isinstance(content, six.binary_type):
         raise TypeError('Content should be binary data')
-    if text and not isinstance(text, six.string_types):
+    if text is not None and not isinstance(text, six.string_types):
         raise TypeError('Text should be string data')
 
     if json is not None:
@@ -207,12 +207,12 @@ class _MatcherResponse(object):
         content = self._params.get('content')
         text = self._params.get('text')
 
-        if content and not (callable(content) or
-                            isinstance(content, six.binary_type)):
+        if content is not None and not (callable(content) or
+                                        isinstance(content, six.binary_type)):
             raise TypeError('Content should be a callback or binary data')
 
-        if text and not (callable(text) or
-                         isinstance(text, six.string_types)):
+        if text is not None and not (callable(text) or
+                                     isinstance(text, six.string_types)):
             raise TypeError('Text should be a callback or string data')
 
     def get_response(self, request):
