@@ -209,6 +209,38 @@ Only the headers that are provided need match, any additional headers will be ig
     requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/headers
 
 
+Additional Matchers
+===================
+
+As distinct from `Custom Matching` below we can add an additional matcher callback that lets us do more dynamic matching in addition to the standard options.
+This is handled by a callback function that takes the request as a parameter:
+
+.. doctest::
+    :hide:
+
+    >>> import requests
+    >>> import requests_mock
+    >>> adapter = requests_mock.Adapter()
+    >>> session = requests.Session()
+    >>> session.mount('mock', adapter)
+
+.. doctest::
+
+    >>> def match_request_text(request):
+    ...     # request.text may be None, or '' prevents a TypeError.
+    ...     return 'hello' in (request.text or '')
+    ...
+    >>> adapter.register_uri('POST', 'mock://test.com/additional', additional_matcher=match_request_text, text='resp')
+    >>> session.post('mock://test.com/headers', data='hello world').text
+    'resp'
+    >>> resp = session.post('mock://test.com/additional', data='goodbye world')
+    Traceback (most recent call last):
+       ...
+    requests_mock.exceptions.NoMockAddress: No mock address: POST mock://test.com/additional
+
+Using this mechanism lets you do custom handling such as parsing yaml or XML structures and matching on features of that data or anything else that is not directly handled via the provided matchers rather than build in every possible option to `requests_mock`.
+
+
 Custom Matching
 ===============
 

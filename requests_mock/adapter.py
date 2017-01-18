@@ -66,7 +66,7 @@ class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
 
     def __init__(self, method, url, responses, complete_qs, request_headers,
-                 real_http, case_sensitive):
+                 additional_matcher, real_http, case_sensitive):
         """
         :param bool complete_qs: Match the entire query string. By default URLs
             match if all the provided matcher query arguments are matched and
@@ -81,6 +81,7 @@ class _Matcher(_RequestHistoryTracker):
         self._complete_qs = complete_qs
         self._request_headers = request_headers
         self._real_http = real_http
+        self._additional_matcher = additional_matcher
 
         # url can be a regex object or ANY so don't always run urlparse
         if isinstance(url, six.string_types):
@@ -169,10 +170,20 @@ class _Matcher(_RequestHistoryTracker):
 
         return True
 
+    def _match_additional(self, request):
+        if callable(self._additional_matcher):
+            return self._additional_matcher(request)
+
+        if self._additional_matcher is not None:
+            raise TypeError("Unexpected format of additional matcher.")
+
+        return True
+
     def _match(self, request):
         return (self._match_method(request) and
                 self._match_url(request) and
-                self._match_headers(request))
+                self._match_headers(request) and
+                self._match_additional(request))
 
     def __call__(self, request):
         if not self._match(request):
@@ -231,6 +242,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         :param str url: The URL to match.
         """
         complete_qs = kwargs.pop('complete_qs', False)
+        additional_matcher = kwargs.pop('additional_matcher', None)
         request_headers = kwargs.pop('request_headers', {})
         real_http = kwargs.pop('_real_http', False)
 
@@ -255,6 +267,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
                            responses,
                            case_sensitive=self._case_sensitive,
                            complete_qs=complete_qs,
+                           additional_matcher=additional_matcher,
                            request_headers=request_headers,
                            real_http=real_http)
         self.add_matcher(matcher)
