@@ -15,7 +15,7 @@ The Basics
 ==========
 
 Everything in `requests`_ eventually goes through an adapter to do the transport work.
-`requests-mock` creates a custom `adatper` that allows you to predefine responses when certain URIs are called.
+`requests-mock` creates a custom `adapter` that allows you to predefine responses when certain URIs are called.
 
 There are then a number of methods provided to get the adapter used.
 
