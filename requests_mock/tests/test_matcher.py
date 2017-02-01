@@ -27,24 +27,28 @@ class TestMatcher(base.TestCase):
               request_method='GET',
               complete_qs=False,
               headers=None,
+              request_data=None,
               request_headers={},
+              additional_matcher=None,
               real_http=False,
               case_sensitive=False):
         matcher = adapter._Matcher(matcher_method,
                                    target,
                                    [],
-                                   complete_qs,
-                                   request_headers,
+                                   complete_qs=complete_qs,
+                                   additional_matcher=additional_matcher,
+                                   request_headers=request_headers,
                                    real_http=real_http,
                                    case_sensitive=case_sensitive)
         request = adapter._RequestObjectProxy._create(request_method,
                                                       url,
-                                                      headers)
+                                                      headers,
+                                                      data=request_data)
         return matcher._match(request)
 
     def assertMatch(self,
-                    target,
-                    url,
+                    target=ANY,
+                    url='http://example.com/requests-mock',
                     matcher_method='GET',
                     request_method='GET',
                     **kwargs):
@@ -58,8 +62,8 @@ class TestMatcher(base.TestCase):
                          (matcher_method, target, request_method, url))
 
     def assertMatchBoth(self,
-                        target,
-                        url,
+                        target=ANY,
+                        url='http://example.com/requests-mock',
                         matcher_method='GET',
                         request_method='GET',
                         **kwargs):
@@ -75,8 +79,8 @@ class TestMatcher(base.TestCase):
                          **kwargs)
 
     def assertNoMatch(self,
-                      target,
-                      url,
+                      target=ANY,
+                      url='http://example.com/requests-mock',
                       matcher_method='GET',
                       request_method='GET',
                       **kwargs):
@@ -90,8 +94,8 @@ class TestMatcher(base.TestCase):
                          (matcher_method, target, request_method, url))
 
     def assertNoMatchBoth(self,
-                          target,
-                          url,
+                          target=ANY,
+                          url='http://example.com/requests-mock',
                           matcher_method='GET',
                           request_method='GET',
                           **kwargs):
@@ -265,3 +269,18 @@ class TestMatcher(base.TestCase):
 
         self.assertSensitiveMatch('http://abc.com/path?abcd=efGH',
                                   'http://abc.com/path?abcd=eFGH')
+
+    def test_additional_matcher(self):
+
+        def test_match_body(request):
+            return 'hello' in request.text
+
+        self.assertMatch(request_method='POST',
+                         matcher_method='POST',
+                         request_data='hello world',
+                         additional_matcher=test_match_body)
+
+        self.assertNoMatch(request_method='POST',
+                           matcher_method='POST',
+                           request_data='goodbye world',
+                           additional_matcher=test_match_body)

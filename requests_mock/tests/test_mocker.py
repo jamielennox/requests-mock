@@ -409,3 +409,20 @@ class MockerHttpMethodsTests(base.TestCase):
 
             self.assertEqual(6, m1.call_count)
             self.assertEqual(2, r1.call_count)
+
+    @requests_mock.mock()
+    def test_mocker_additional(self, m):
+        url = 'http://www.example.com'
+        good_text = 'success'
+
+        def additional_cb(req):
+            return 'hello' in req.text
+
+        m.post(url, additional_matcher=additional_cb, text=good_text)
+
+        self.assertEqual(good_text,
+                         requests.post(url, data='hello world').text)
+        self.assertRaises(exceptions.NoMockAddress,
+                          requests.post,
+                          url,
+                          data='goodbye world')
