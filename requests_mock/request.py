@@ -152,3 +152,6 @@ class _RequestObjectProxy(object):
         the matcher is not available it will return None.
         """
         return self._matcher()
+
+    def __str__(self):
+        return "{0.method} {0.url}".format(self._request)

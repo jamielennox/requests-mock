@@ -117,3 +117,7 @@ class RequestTests(base.TestCase):
         self.assertEqual('host.example.com', req.netloc)
         self.assertEqual('host.example.com', req.hostname)
         self.assertEqual(443, req.port)
+
+    def test_to_string(self):
+        req = self.do_request(url='https://host.example.com/path')
+        self.assertEqual('GET https://host.example.com/path', str(req))
