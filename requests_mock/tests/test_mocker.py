@@ -92,6 +92,21 @@ class MockerTests(base.TestCase):
         inner()
         self.assertMockStopped()
 
+    def test_with_decorator_called_multiple_times(self):
+
+        @requests_mock.Mocker()
+        def inner(arg1, m):
+            self._do_test(m)
+            self.assertEquals(
+                len(m.request_history), 1,
+                "Failed to provide clean mock on subsequent calls"
+            )
+
+        inner('a')
+        # if we call the same decorated method again should get
+        # a new request mock
+        inner('b')
+
     def test_with_class_decorator(self):
         outer = self
 

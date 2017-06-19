@@ -61,8 +61,8 @@ class MockerCore(object):
     """
 
     def __init__(self, **kwargs):
-        case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
-        self._adapter = adapter.Adapter(case_sensitive=case_sensitive)
+        self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
+        self._adapter = adapter.Adapter(case_sensitive=self.case_sensitive)
 
         self._real_http = kwargs.pop('real_http', False)
         self._last_send = None
@@ -198,7 +198,8 @@ class Mocker(MockerCore):
         """
         m = Mocker(
             kw=self._kw,
-            real_http=self._real_http
+            real_http=self._real_http,
+            case_sensitive=self.case_sensitive
         )
         return m
 
@@ -209,7 +210,7 @@ class Mocker(MockerCore):
         """
         @functools.wraps(func)
         def inner(*args, **kwargs):
-            with self as m:
+            with self.copy() as m:
                 if self._kw:
                     kwargs[self._kw] = m
                 else:
