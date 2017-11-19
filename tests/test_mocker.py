@@ -16,7 +16,7 @@ import requests
 import requests_mock
 from requests_mock import exceptions
 from requests_mock import response
-from requests_mock.tests import base
+from tests import base
 
 original_send = requests.Session.send
 

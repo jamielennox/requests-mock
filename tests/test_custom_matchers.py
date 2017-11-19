@@ -14,7 +14,7 @@ import requests
 import six
 
 import requests_mock
-from requests_mock.tests import base
+from tests import base
 
 
 class FailMatcher(object):

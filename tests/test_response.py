@@ -15,7 +15,7 @@ import six
 from requests_mock import adapter
 from requests_mock import exceptions
 from requests_mock import response
-from requests_mock.tests import base
+from tests import base
 
 
 class ResponseTests(base.TestCase):
