@@ -1,0 +1,29 @@
+- project:
+    check:
+      jobs:
+        - requests-mock-keystoneclient-tip
+        - requests-mock-novaclient-tip
+    gate:
+      jobs:
+        - requests-mock-keystoneclient-tip
+        - requests-mock-novaclient-tip
+
+- job:
+    name: requests-mock-keystoneclient-tip
+    parent: tox
+    description: |
+      Run test for requests-mock project.
+
+      Uses tox with the ``keystoneclient-tip`` environment.
+    vars:
+      tox_envlist: keystoneclient-tip
+
+- job:
+    name: requests-mock-novaclient-tip
+    parent: tox
+    description: |
+      Run test for requests-mock project.
+
+      Uses tox with the ``novaclient-tip`` environment.
+    vars:
+      tox_envlist: novaclient-tip
