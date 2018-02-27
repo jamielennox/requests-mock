@@ -52,9 +52,9 @@ These additions include:
 
 .. doctest::
 
-    >>> m.last_request.qs.scheme
+    >>> m.last_request.scheme
     'http'
-    >>> m.last_request.qs.netloc
+    >>> m.last_request.netloc
     'test.com'
 
 The following parameters of the :py:func:`requests.request` call are also exposed via the request object:
