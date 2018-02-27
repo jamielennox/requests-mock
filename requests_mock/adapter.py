@@ -260,7 +260,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         # had different values.
         # Ideally case_sensitive would be a value passed to match() however
         # this would change the contract of matchers so we pass ito to the
-        # proxy and the matcher seperately.
+        # proxy and the matcher separately.
         responses = [_MatcherResponse(**k) for k in response_list]
         matcher = _Matcher(method,
                            url,

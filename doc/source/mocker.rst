@@ -114,7 +114,7 @@ As well as the basic:
   - :py:meth:`~requests_mock.MockerCore.register_uri`
 
 These methods correspond to the HTTP method of your request, so to mock POST requests you would use the :py:meth:`~requests_mock.MockerCore.post` function.
-Futher information about what can be matched from a request can be found at :doc:`matching`
+Further information about what can be matched from a request can be found at :doc:`matching`
 
 Real HTTP Requests
 ==================
