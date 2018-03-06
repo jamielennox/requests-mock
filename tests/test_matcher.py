@@ -13,7 +13,7 @@
 import re
 
 from requests_mock import adapter
-from requests_mock.tests import base
+from . import base
 
 ANY = adapter.ANY
 

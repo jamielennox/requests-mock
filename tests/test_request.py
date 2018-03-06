@@ -14,7 +14,7 @@ import uuid
 
 import requests
 import requests_mock
-from requests_mock.tests import base
+from . import base
 
 
 class RequestTests(base.TestCase):
