@@ -18,7 +18,7 @@ import six
 from six.moves.urllib import parse as urlparse
 
 import requests_mock
-from requests_mock.tests import base
+from . import base
 
 
 class MyExc(Exception):

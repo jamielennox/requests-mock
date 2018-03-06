@@ -1,7 +1,7 @@
 [run]
 branch = True
 source = requests_mock
-omit = requests_mock/tests/*
+omit = tests/*
 
 [report]
 ignore_errors = True
