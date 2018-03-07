@@ -548,7 +548,7 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual('newton', resp.cookies['fig'])
         self.assertEqual('apple', resp.cookies['sugar'])
-        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual({'/foo', '/bar'}, set(resp.cookies.list_paths()))
         self.assertEqual(['.example.com'], resp.cookies.list_domains())
 
     def test_cookies_header_with_cb(self):
@@ -598,7 +598,7 @@ class SessionAdapterTests(base.TestCase):
 
         self.assertEqual('newton', resp.cookies['fig'])
         self.assertEqual('apple', resp.cookies['sugar'])
-        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual({'/foo', '/bar'}, set(resp.cookies.list_paths()))
         self.assertEqual(['.example.com'], resp.cookies.list_domains())
 
     def test_reading_closed_fp(self):

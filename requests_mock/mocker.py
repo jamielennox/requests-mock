@@ -35,12 +35,14 @@ class MockerCore(object):
     same general options available and prevent repeating code.
     """
 
-    _PROXY_FUNCS = set(['last_request',
-                        'add_matcher',
-                        'request_history',
-                        'called',
-                        'called_once',
-                        'call_count'])
+    _PROXY_FUNCS = {
+        'last_request',
+        'add_matcher',
+        'request_history',
+        'called',
+        'called_once',
+        'call_count',
+    }
 
     case_sensitive = False
     """case_sensitive handles a backwards incompatible bug. The URL used to

@@ -108,5 +108,5 @@ class ResponseTests(base.TestCase):
 
         self.assertEqual('newton', resp.cookies['fig'])
         self.assertEqual('apple', resp.cookies['sugar'])
-        self.assertEqual(set(['/foo', '/bar']), set(resp.cookies.list_paths()))
+        self.assertEqual({'/foo', '/bar'}, set(resp.cookies.list_paths()))
         self.assertEqual(['.test.url'], resp.cookies.list_domains())
