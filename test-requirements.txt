@@ -1,5 +1,5 @@
 fixtures
 mock
-sphinx>=1.1.2,!=1.2.0,<1.3
+sphinx
 testrepository>=0.0.18
 testtools
