@@ -11,7 +11,7 @@
 # under the License.
 
 
-class MockException(Exception):
+class MockException(BaseException):
     """Base Exception for library"""
 
 
