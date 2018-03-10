@@ -5,6 +5,9 @@ requests-mock
 .. image:: https://badge.fury.io/py/requests-mock.png
     :target: https://pypi.python.org/pypi/requests-mock
 
+.. image:: https://circleci.com/gh/jamielennox/requests-mock.svg?style=svg
+    :target: https://circleci.com/gh/jamielennox/requests-mock
+
 Intro
 =====
 
