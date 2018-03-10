@@ -64,7 +64,7 @@ For more information checkout the `docs`_.
 Reporting Bugs
 ==============
 
-Please report all bugs on `LaunchPad`_.
+Development and bug tracking is performed on `GitHub`_.
 
 License
 =======
@@ -83,4 +83,4 @@ under the License.
 
 .. _requests: http://python-requests.org
 .. _docs: https://requests-mock.readthedocs.io/
-.. _LaunchPad: https://bugs.launchpad.net/requests-mock
+.. _GitHub: https://github.com/jamielennox/requests-mock
