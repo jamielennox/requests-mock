@@ -62,9 +62,34 @@ jobs:
             source venv/bin/activate
             tox -e py27
 
+  pypi:
+    docker:
+      - image: circleci/python:3.6
+
+    steps:
+      - checkout
+
+      - run:
+          name: Upload to PyPI
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+            pip install twine wheel
+            python setup.py sdist bdist_wheel
+            twine upload dist/*
+
 workflows:
   version: 2
   unittest:
     jobs:
       - py27
       - py36
+      - pypi:
+          requires:
+            - py27
+            - py36
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^\d+\.\d+\.\d+$/
