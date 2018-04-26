@@ -38,5 +38,5 @@ The fixture provides the same interfaces as the adapter.
     ...
 
 
-.. _Fixtures: https://pypi.python.org/pypi/fixtures
-.. _mock: https://pypi.python.org/pypi/mock
+.. _Fixtures: https://pypi.org/project/fixtures/
+.. _mock: https://pypi.org/project/mock/
