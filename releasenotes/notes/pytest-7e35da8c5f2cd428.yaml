@@ -1,0 +1,3 @@
+---
+features:
+  - Added pytest fixture for native integration into pytest projects.

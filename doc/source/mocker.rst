@@ -53,6 +53,15 @@ If the position of the mock is likely to conflict with other arguments you can p
     >>> test_kw_function()
     'resp'
 
+Contrib
+-------
+
+The contrib module also provides ways of loading the mocker based on other frameworks.
+These will require additional dependencies but may provide a better experience depending on your tests setup.
+
+See :doc:`contrib` for these additions.
+
+
 Class Decorator
 ===============
 

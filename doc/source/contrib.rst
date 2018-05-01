@@ -9,3 +9,4 @@ These modules may require dependencies outside of what is provided by `requests_
 .. toctree::
 
     fixture
+    pytest
