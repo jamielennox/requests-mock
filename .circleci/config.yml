@@ -84,6 +84,20 @@ workflows:
     jobs:
       - py27
       - py36
+  publish:
+    jobs:
+      - py27:
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^\d+\.\d+\.\d+$/
+      - py36:
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - pypi:
           requires:
             - py27
