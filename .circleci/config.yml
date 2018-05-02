@@ -89,13 +89,13 @@ workflows:
       - py27:
           filters:
             branches:
-              only: master
+              ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
       - py36:
           filters:
             branches:
-              only: master
+              ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
       - pypi:
@@ -104,6 +104,6 @@ workflows:
             - py36
           filters:
             branches:
-              only: master
+              ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
