@@ -1,0 +1,11 @@
+---
+prelude: >
+  The primary repository is now at https://github.com/jamielennox/requests-mock
+other:
+  - |
+    In this release the main repository was moved off of OpenStack provided
+    infrastructure and onto github at
+    https://github.com/jamielennox/requests-mock. OpenStack has been a great
+    home for the project however requests-mock is a general python project with
+    no specific relationship to OpenStack and the unfamiliar infrastructure was
+    limiting contributes from the wider community.
