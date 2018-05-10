@@ -17,6 +17,7 @@ develop-eggs
 .installed.cfg
 lib
 lib64
+.eggs/
 
 # Installer logs
 pip-log.txt
@@ -53,3 +54,7 @@ ChangeLog
 # release notes published
 RELEASENOTES.rst
 releasenotes/notes/reno.cache
+
+# others
+.vscode/
+venv/
