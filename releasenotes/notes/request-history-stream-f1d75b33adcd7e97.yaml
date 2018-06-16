@@ -1,0 +1,4 @@
+---
+features:
+  - The stream parameter is recorded when the request is sent and available in
+    request history in the same was as parameters like verify or timeout.
