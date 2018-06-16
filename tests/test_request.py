@@ -52,6 +52,7 @@ class RequestTests(base.TestCase):
         self.assertIs(None, req.timeout)
         self.assertIs(True, req.verify)
         self.assertIs(None, req.cert)
+        self.assertIs(False, req.stream)
 
         # actually it's an OrderedDict, but equality works fine
         self.assertEqual({}, req.proxies)
@@ -74,6 +75,14 @@ class RequestTests(base.TestCase):
         verify = '/path/to/cacerts.pem'
         req = self.do_request(verify=verify)
         self.assertEqual(verify, req.verify)
+
+    def test_stream(self):
+        req = self.do_request()
+        self.assertIs(False, req.stream)
+        req = self.do_request(stream=False)
+        self.assertIs(False, req.stream)
+        req = self.do_request(stream=True)
+        self.assertIs(True, req.stream)
 
     def test_certs(self):
         cert = ('/path/to/cert.pem', 'path/to/key.pem')

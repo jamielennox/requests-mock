@@ -36,6 +36,7 @@ class _RequestObjectProxy(object):
         self._timeout = kwargs.pop('timeout', None)
         self._allow_redirects = kwargs.pop('allow_redirects', None)
         self._verify = kwargs.pop('verify', None)
+        self._stream = kwargs.pop('stream', None)
         self._cert = kwargs.pop('cert', None)
         self._proxies = copy.deepcopy(kwargs.pop('proxies', {}))
 
@@ -118,6 +119,10 @@ class _RequestObjectProxy(object):
     @property
     def verify(self):
         return self._verify
+
+    @property
+    def stream(self):
+        return self._stream
 
     @property
     def cert(self):
