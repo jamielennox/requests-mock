@@ -11,6 +11,7 @@
 # under the License.
 
 import mock
+import pytest
 import requests
 
 import requests_mock
@@ -51,6 +52,15 @@ class MockerTests(base.TestCase):
         with requests_mock.Mocker() as m:
             self._do_test(m)
         self.assertMockStopped()
+
+    def test_uncalled_mocks_error(self):
+        def uncalled_testcase():
+            with requests_mock.mock() as m:
+                mocked_call = m.get("http://www.zombo.com")
+                assert 0 == mocked_call.call_count
+
+        self.assertRaises(exceptions.UncalledMockedAddressException,
+                          uncalled_testcase)
 
     @mock.patch('requests.adapters.HTTPAdapter.send')
     @requests_mock.mock(real_http=True)

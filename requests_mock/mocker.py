@@ -17,6 +17,8 @@ import requests
 from requests_mock import adapter
 from requests_mock import exceptions
 
+from requests_mock.adapter import _Matcher
+
 DELETE = 'DELETE'
 GET = 'GET'
 HEAD = 'HEAD'
@@ -126,6 +128,16 @@ class MockerCore(object):
         if self._last_send:
             requests.Session.send = self._last_send
             self._last_send = None
+
+        # if this has callable expected matchers, make sure they
+        # are all called
+        specific_matchers = filter(lambda m: isinstance(m, _Matcher),
+                                   self._adapter._matchers)
+
+        if specific_matchers:
+            for matcher in specific_matchers:
+                if not matcher.called and not matcher._real_http:
+                    raise exceptions.UncalledMockedAddressException(matcher)
 
     def __getattr__(self, name):
         if name in self._PROXY_FUNCS:

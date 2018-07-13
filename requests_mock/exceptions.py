@@ -26,5 +26,16 @@ class NoMockAddress(MockException):
                                            self.request.url)
 
 
+class UncalledMockedAddressException(MockException):
+    """The requested url was mocked but never called!"""
+
+    def __init__(self, matcher):
+        self.matcher = matcher
+
+    def __str__(self):
+        return "Mocked address %s %s but never called" % (self.matcher._method,
+                                                          self.matcher._url)
+
+
 class InvalidRequest(MockException):
     """This call cannot be made under a mocked environment"""
