@@ -67,6 +67,12 @@ def pytest_addoption(parser):
 
 @_fixture_type(scope='function')  # executed on every test
 def requests_mock(request):
+    """Mock out the requests component of your code with defined responses.
+
+    Mocks out any requests made through the python requests library with useful
+    responses for unit testing. See:
+    https://requests-mock.readthedocs.io/en/latest/
+    """
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
     kw = {'case_sensitive': _bool_value(case_sensitive)}
 
