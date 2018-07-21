@@ -13,8 +13,8 @@ import requests_mock as rm_module
 try:
     from distutils import version
     _pytest_version = version.StrictVersion(pytest.__version__)
-    _pytest29 = pytest_version >= version.StrictVersion('2.9.0')
-    _pytest30 = pytest_version >= version.StrictVersion('3.0.0')
+    _pytest29 = _pytest_version >= version.StrictVersion('2.9.0')
+    _pytest30 = _pytest_version >= version.StrictVersion('3.0.0')
 except Exception:
     _pytest29 = False
     _pytest30 = False
@@ -22,6 +22,7 @@ except Exception:
 
 if not _pytest29:
     _case_type = None
+    _case_default = 'false'
 
     # Copied from pytest 2.9.0 where bool was introduced. It's what happens
     # internally if we specify a bool type argument.
@@ -47,6 +48,7 @@ if not _pytest29:
 
 else:
     _case_type = 'bool'
+    _case_default = False
 
     def _bool_value(value):
         return value
@@ -62,7 +64,7 @@ def pytest_addoption(parser):
     parser.addini('requests_mock_case_sensitive',
                   'Use case sensitive matching in requests_mock',
                   type=_case_type,
-                  default=False)
+                  default=_case_default)
 
 
 @_fixture_type(scope='function')  # executed on every test

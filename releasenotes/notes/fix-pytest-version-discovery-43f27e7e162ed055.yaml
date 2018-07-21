@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fixed a bug relating to how the pytest version was being discovered that
+    meant new versions of pytest were being treated as old versions and would
+    receive bad configuration.
