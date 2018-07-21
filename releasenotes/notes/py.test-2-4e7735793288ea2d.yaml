@@ -1,0 +1,7 @@
+---
+prelude: >
+  Fix py.test plugin with py.test < 3.0
+fixes:
+  - The py.test plugin was broken when using py.test < 3.0. The version of
+    py.test that ships in EPEL is only 2.7 so we need to make sure we support
+    at least that version.
