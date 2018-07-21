@@ -80,24 +80,18 @@ jobs:
 
 workflows:
   version: 2
-  unittest:
-    jobs:
-      - py27
-      - py36
-  publish:
+  build_and_release:
     jobs:
       - py27:
           filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
+
       - py36:
           filters:
-            branches:
-              ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
+
       - pypi:
           requires:
             - py27
