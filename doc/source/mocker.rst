@@ -3,7 +3,7 @@ Using the Mocker
 ================
 
 The mocker is a loading mechanism to ensure the adapter is correctly in place to intercept calls from requests.
-It's goal is to provide an interface that is as close to the real requests library interface as possible.
+Its goal is to provide an interface that is as close to the real requests library interface as possible.
 
 Activation
 ==========
