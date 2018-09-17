@@ -59,7 +59,7 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(qs, self.adapter.last_request.qs)
 
     def test_content(self):
-        data = six.b('testdata')
+        data = b'testdata'
 
         self.adapter.register_uri('GET',
                                   self.url,
@@ -72,7 +72,7 @@ class SessionAdapterTests(base.TestCase):
 
     def test_content_callback(self):
         status_code = 401
-        data = six.b('testdata')
+        data = b'testdata'
 
         def _content_cb(request, context):
             context.status_code = status_code
@@ -89,33 +89,33 @@ class SessionAdapterTests(base.TestCase):
         self.assertLastRequest()
 
     def test_text(self):
-        data = 'testdata'
+        data = u'testdata'
 
         self.adapter.register_uri('GET',
                                   self.url,
                                   text=data,
                                   headers=self.headers)
         resp = self.session.get(self.url)
-        self.assertEqual(six.b(data), resp.content)
-        self.assertEqual(six.u(data), resp.text)
+        self.assertEqual(data.encode('utf-8'), resp.content)
+        self.assertEqual(data, resp.text)
         self.assertEqual('utf-8', resp.encoding)
         self.assertHeaders(resp)
         self.assertLastRequest()
 
     def test_text_callback(self):
         status_code = 401
-        data = 'testdata'
+        data = u'testdata'
 
         def _text_cb(request, context):
             context.status_code = status_code
             context.headers.update(self.headers)
-            return six.u(data)
+            return data
 
         self.adapter.register_uri('GET', self.url, text=_text_cb)
         resp = self.session.get(self.url)
         self.assertEqual(status_code, resp.status_code)
-        self.assertEqual(six.u(data), resp.text)
-        self.assertEqual(six.b(data), resp.content)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(data.encode('utf-8'), resp.content)
         self.assertEqual('utf-8', resp.encoding)
         self.assertHeaders(resp)
         self.assertLastRequest()
@@ -127,8 +127,8 @@ class SessionAdapterTests(base.TestCase):
                                   json=json_data,
                                   headers=self.headers)
         resp = self.session.get(self.url)
-        self.assertEqual(six.b('{"hello": "world"}'), resp.content)
-        self.assertEqual(six.u('{"hello": "world"}'), resp.text)
+        self.assertEqual(b'{"hello": "world"}', resp.content)
+        self.assertEqual(u'{"hello": "world"}', resp.text)
         self.assertEqual(json_data, resp.json())
         self.assertEqual('utf-8', resp.encoding)
         self.assertHeaders(resp)
@@ -137,7 +137,7 @@ class SessionAdapterTests(base.TestCase):
     def test_json_callback(self):
         status_code = 401
         json_data = {'hello': 'world'}
-        data = '{"hello": "world"}'
+        data = u'{"hello": "world"}'
 
         def _json_cb(request, context):
             context.status_code = status_code
@@ -148,8 +148,8 @@ class SessionAdapterTests(base.TestCase):
         resp = self.session.get(self.url)
         self.assertEqual(status_code, resp.status_code)
         self.assertEqual(json_data, resp.json())
-        self.assertEqual(six.u(data), resp.text)
-        self.assertEqual(six.b(data), resp.content)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(data.encode('utf-8'), resp.content)
         self.assertEqual('utf-8', resp.encoding)
         self.assertHeaders(resp)
         self.assertLastRequest()
@@ -157,7 +157,7 @@ class SessionAdapterTests(base.TestCase):
     def test_no_body(self):
         self.adapter.register_uri('GET', self.url)
         resp = self.session.get(self.url)
-        self.assertEqual(six.b(''), resp.content)
+        self.assertEqual(b'', resp.content)
         self.assertEqual(200, resp.status_code)
 
     def test_multiple_body_elements(self):
@@ -165,8 +165,8 @@ class SessionAdapterTests(base.TestCase):
                           self.adapter.register_uri,
                           self.url,
                           'GET',
-                          content=six.b('b'),
-                          text=six.u('u'))
+                          content=b'b',
+                          text=u'u')
 
     def test_multiple_responses(self):
         inp = [{'status_code': 400, 'text': 'abcd'},
@@ -264,14 +264,14 @@ class SessionAdapterTests(base.TestCase):
                           self.adapter.register_uri,
                           'GET',
                           self.url,
-                          content=six.u('unicode'))
+                          content=u'unicode')
 
     def test_dont_pass_empty_string_as_content(self):
         self.assertRaises(TypeError,
                           self.adapter.register_uri,
                           'GET',
                           self.url,
-                          content=six.u(''))
+                          content=u'')
 
     def test_dont_pass_bytes_as_text(self):
         if six.PY2:
@@ -281,7 +281,7 @@ class SessionAdapterTests(base.TestCase):
                           self.adapter.register_uri,
                           'GET',
                           self.url,
-                          text=six.b('bytes'))
+                          text=b'bytes')
 
     def test_dont_pass_empty_string_as_text(self):
         if six.PY2:
@@ -291,7 +291,7 @@ class SessionAdapterTests(base.TestCase):
                           self.adapter.register_uri,
                           'GET',
                           self.url,
-                          text=six.b(''))
+                          text=b'')
 
     def test_dont_pass_non_str_as_content(self):
         self.assertRaises(TypeError,
@@ -641,7 +641,7 @@ class SessionAdapterTests(base.TestCase):
 
         data = resp.raw.read()
 
-        self.assertIsInstance(data, six.binary_type)
+        self.assertIsInstance(data, bytes)
         self.assertEqual(0, len(data))
 
     def test_case_sensitive_headers(self):

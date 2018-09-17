@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import io
 import json as jsonutils
 
 from requests.adapters import HTTPAdapter
@@ -110,7 +111,7 @@ def _extract_cookies(request, response, cookies):
         merge_cookies(response.cookies, cookies)
 
 
-class _IOReader(six.BytesIO):
+class _IOReader(io.BytesIO):
     """A reader that makes a BytesIO look like a HTTPResponse.
 
     A HTTPResponse will return an empty string when you read from it after
@@ -120,20 +121,19 @@ class _IOReader(six.BytesIO):
 
     def read(self, *args, **kwargs):
         if self.closed:
-            return six.b('')
+            return b''
 
         # if the file is open, but you asked for zero bytes read you should get
         # back zero without closing the stream.
         if len(args) > 0 and args[0] == 0:
             return six.b('')
 
-        # not a new style object in python 2
-        result = six.BytesIO.read(self, *args, **kwargs)
+        result = io.BytesIO.read(self, *args, **kwargs)
 
         # when using resp.iter_content(None) it'll go through a different
         # request path in urllib3. This path checks whether the object is
         # marked closed instead of the return value. see gh124.
-        if result == six.b(''):
+        if result == b'':
             self.close()
 
         return result
@@ -172,7 +172,7 @@ def create_response(request, **kwargs):
     headers = kwargs.pop('headers', {})
     encoding = None
 
-    if content is not None and not isinstance(content, six.binary_type):
+    if content is not None and not isinstance(content, bytes):
         raise TypeError('Content should be binary data')
     if text is not None and not isinstance(text, six.string_types):
         raise TypeError('Text should be string data')
@@ -193,7 +193,7 @@ def create_response(request, **kwargs):
         raw = HTTPResponse(status=status,
                            reason=reason,
                            headers=headers,
-                           body=body or _IOReader(six.b('')),
+                           body=body or _IOReader(b''),
                            decode_content=False,
                            enforce_content_length=False,
                            preload_content=False,
@@ -241,7 +241,7 @@ class _MatcherResponse(object):
         text = self._params.get('text')
 
         if content is not None and not (callable(content) or
-                                        isinstance(content, six.binary_type)):
+                                        isinstance(content, bytes)):
             raise TypeError('Content should be a callback or binary data')
 
         if text is not None and not (callable(text) or
