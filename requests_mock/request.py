@@ -14,7 +14,6 @@ import copy
 import json
 
 import requests
-import six
 from six.moves.urllib import parse as urlparse
 
 
@@ -146,7 +145,7 @@ class _RequestObjectProxy(object):
     def text(self):
         body = self.body
 
-        if isinstance(body, six.binary_type):
+        if isinstance(body, bytes):
             body = body.decode('utf-8')
 
         return body
