@@ -73,6 +73,38 @@ class ResponseTests(base.TestCase):
         self.assertIsInstance(resp.text, six.string_types)
         self.assertIsInstance(resp.content, six.binary_type)
 
+    def test_content_with_charset_header(self):
+        data = 'data'
+        content = six.b(data)
+        headers = {'Content-Type': 'text/html;charset=utf-8'}
+        resp = self.create_response(content=content, headers=headers)
+
+        self.assertEqual(data, resp.text)
+        self.assertIsInstance(resp.text, six.string_types)
+        self.assertIsInstance(resp.content, six.binary_type)
+        self.assertEqual(resp.encoding, 'utf-8')
+
+    def test_content_with_charset_header_lowercase(self):
+        data = 'data'
+        content = six.b(data)
+        headers = {'content-type': 'text/html;charset=utf-8'}
+        resp = self.create_response(content=content, headers=headers)
+
+        self.assertEqual(data, resp.text)
+        self.assertIsInstance(resp.text, six.string_types)
+        self.assertIsInstance(resp.content, six.binary_type)
+        self.assertEqual(resp.encoding, 'utf-8')
+
+    def test_content_without_charset_header(self):
+        data = 'data'
+        content = six.b(data)
+        resp = self.create_response(content=content)
+
+        self.assertEqual(data, resp.text)
+        self.assertIsInstance(resp.text, six.string_types)
+        self.assertIsInstance(resp.content, six.binary_type)
+        self.assertEqual(resp.encoding, None)
+
     def test_setting_connection(self):
         conn = object()
         resp = self.create_response(connection=conn)

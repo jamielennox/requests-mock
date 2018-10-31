@@ -17,6 +17,7 @@ from requests.cookies import MockRequest, MockResponse
 from requests.cookies import RequestsCookieJar
 from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.packages.urllib3.response import HTTPResponse
+from requests.utils import get_encoding_from_headers
 import six
 
 from requests_mock import compat
@@ -170,6 +171,10 @@ def create_response(request, **kwargs):
 
     response = _http_adapter.build_response(request, raw)
     response.connection = connection
+
+    header_encoding = get_encoding_from_headers(response.headers)
+    if header_encoding:
+        encoding = header_encoding
     response.encoding = encoding
 
     _extract_cookies(request, response, kwargs.get('cookies'))
