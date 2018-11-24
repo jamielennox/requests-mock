@@ -19,3 +19,12 @@ The fixture then provides the same interface as the :py:class:`requests_mock.Moc
     ...
 
 .. _pytest: https://pytest.org
+
+Configuration
+=============
+
+Some options are available to be read from pytest's configuration mechanism.
+
+These options are:
+
+   `requests_mock_case_sensitive`: (bool) Turn on case sensitivity in path matching.

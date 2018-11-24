@@ -56,6 +56,11 @@ class MockerCore(object):
 
     requests_mock.mock.case_sensitive = True
 
+    or for pytest set in your configuration:
+
+    [pytest]
+    requests_mock_case_sensitive = True
+
     which will prevent the lowercase being executed and return case sensitive
     url and query information.
 
