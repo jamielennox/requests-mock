@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import pickle
 import six
 
 from requests_mock import adapter
@@ -110,3 +111,16 @@ class ResponseTests(base.TestCase):
         self.assertEqual('apple', resp.cookies['sugar'])
         self.assertEqual({'/foo', '/bar'}, set(resp.cookies.list_paths()))
         self.assertEqual(['.test.url'], resp.cookies.list_domains())
+
+    def test_response_pickle(self):
+        text = 'hello world'
+        jar = response.CookieJar()
+        jar.set('fig', 'newton', path='/foo', domain='.test.url')
+        orig_resp = self.create_response(cookies=jar, text=text)
+
+        d = pickle.dumps(orig_resp)
+        new_resp = pickle.loads(d)
+
+        self.assertEqual(text, new_resp.text)
+        self.assertEqual('newton', new_resp.cookies['fig'])
+        self.assertIsNone(new_resp.request.matcher)

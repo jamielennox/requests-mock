@@ -1,0 +1,4 @@
+---
+fixes:
+  - Remove weakref objects from the request/response that will allow the
+    objects to be pickled with the regular python mechanisms. #78

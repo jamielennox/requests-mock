@@ -10,10 +10,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import pickle
+
 import mock
 import requests
 
 import requests_mock
+from requests_mock import adapter
 from requests_mock import exceptions
 from requests_mock import response
 from . import base
@@ -441,3 +444,19 @@ class MockerHttpMethodsTests(base.TestCase):
                           requests.post,
                           url,
                           data='goodbye world')
+
+    @requests_mock.mock()
+    def test_mocker_pickle(self, m):
+        url = 'http://www.example.com'
+        text = 'hello world'
+        m.get(url, text=text)
+
+        orig_resp = requests.get(url)
+        self.assertEqual(text, orig_resp.text)
+
+        d = pickle.dumps(orig_resp)
+        new_resp = pickle.loads(d)
+
+        self.assertEqual(text, new_resp.text)
+        self.assertIsInstance(orig_resp.request.matcher, adapter._Matcher)
+        self.assertIsNone(new_resp.request.matcher)
