@@ -45,6 +45,12 @@ class _RequestObjectProxy(object):
         self._case_sensitive = kwargs.pop('case_sensitive', False)
 
     def __getattr__(self, name):
+        # there should be a better way to exclude this, but I don't want to
+        # implement __setstate__ just not forward it to the request. You can't
+        # actually define the method and raise AttributeError there either.
+        if name in ('__setstate__',):
+            raise AttributeError(name)
+
         return getattr(self._request, name)
 
     @property
@@ -148,6 +154,12 @@ class _RequestObjectProxy(object):
     def json(self, **kwargs):
         return json.loads(self.text, **kwargs)
 
+    def __getstate__(self):
+        # Can't pickle a weakref, but it's a weakref so ok to drop it.
+        d = self.__dict__.copy()
+        d['_matcher'] = None
+        return d
+
     @property
     def matcher(self):
         """The matcher that this request was handled by.
@@ -156,6 +168,10 @@ class _RequestObjectProxy(object):
         object if it is still available - so if the mock is still in place. If
         the matcher is not available it will return None.
         """
+        # if unpickled or not from a response this will be None
+        if self._matcher is None:
+            return None
+
         return self._matcher()
 
     def __str__(self):
