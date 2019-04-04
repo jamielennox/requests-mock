@@ -20,6 +20,13 @@ from requests_mock import exceptions
 from requests_mock.request import _RequestObjectProxy
 from requests_mock.response import _MatcherResponse
 
+try:
+    import purl
+    purl_types = (purl.URL,)
+except ImportError:
+    purl = None
+    purl_types = ()
+
 ANY = object()
 
 
@@ -90,6 +97,16 @@ class _Matcher(_RequestHistoryTracker):
             self._netloc = url_parts.netloc.lower()
             self._path = url_parts.path or '/'
             self._query = url_parts.query
+
+            if not case_sensitive:
+                self._path = self._path.lower()
+                self._query = self._query.lower()
+
+        elif isinstance(url, purl_types):
+            self._scheme = url.scheme()
+            self._netloc = url.netloc()
+            self._path = url.path()
+            self._query = url.query()
 
             if not case_sensitive:
                 self._path = self._path.lower()

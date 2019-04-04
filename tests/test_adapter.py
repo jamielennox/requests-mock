@@ -13,6 +13,7 @@
 import json
 import re
 
+import purl
 import requests
 import six
 from six.moves.urllib import parse as urlparse
@@ -326,6 +327,12 @@ class SessionAdapterTests(base.TestCase):
         for u in ('mock://www.tester.com/a', 'mock://abc.tester.com'):
             resp = self.session.get(u)
             self.assertEqual('resp', resp.text)
+
+    def test_with_purl(self):
+        self.adapter.register_uri('GET', purl.URL('mock://www.tester.com/a'), text='resp')
+
+        resp = self.session.get('mock://www.tester.com/a')
+        self.assertEqual('resp', resp.text)
 
     def test_requests_in_history_on_no_match(self):
         self.assertRaises(requests_mock.NoMockAddress,
