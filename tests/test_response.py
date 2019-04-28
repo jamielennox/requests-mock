@@ -124,3 +124,9 @@ class ResponseTests(base.TestCase):
         self.assertEqual(text, new_resp.text)
         self.assertEqual('newton', new_resp.cookies['fig'])
         self.assertIsNone(new_resp.request.matcher)
+
+    def test_response_encoding(self):
+        headers = {"content-type": "text/html; charset=ISO-8859-1"}
+        resp = self.create_response(headers=headers,
+                                    text="<html><body></body></html")
+        self.assertEqual('ISO-8859-1', resp.encoding)
