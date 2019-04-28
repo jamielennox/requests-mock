@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    If you specified a charset in the Content-Type of a response it would be
+    ignored and overriden with either 'utf-8' or None depending on the type of
+    response content passed in. If you pass this value we should honour it and
+    perform the encoding correctly.

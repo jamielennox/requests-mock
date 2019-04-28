@@ -17,6 +17,7 @@ from requests.cookies import MockRequest, MockResponse
 from requests.cookies import RequestsCookieJar
 from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.packages.urllib3.response import HTTPResponse
+from requests.utils import get_encoding_from_headers
 import six
 
 from requests_mock import compat
@@ -145,6 +146,7 @@ def create_response(request, **kwargs):
     content = kwargs.pop('content', None)
     text = kwargs.pop('text', None)
     json = kwargs.pop('json', None)
+    headers = kwargs.pop('headers', {})
     encoding = None
 
     if content is not None and not isinstance(content, six.binary_type):
@@ -155,13 +157,13 @@ def create_response(request, **kwargs):
     if json is not None:
         text = jsonutils.dumps(json)
     if text is not None:
-        encoding = 'utf-8'
+        encoding = get_encoding_from_headers(headers) or 'utf-8'
         content = text.encode(encoding)
     if content is not None:
         body = _IOReader(content)
     if not raw:
         raw = HTTPResponse(status=kwargs.get('status_code', _DEFAULT_STATUS),
-                           headers=kwargs.get('headers', {}),
+                           headers=headers,
                            reason=kwargs.get('reason'),
                            body=body or _IOReader(six.b('')),
                            decode_content=False,
@@ -170,7 +172,9 @@ def create_response(request, **kwargs):
 
     response = _http_adapter.build_response(request, raw)
     response.connection = connection
-    response.encoding = encoding
+
+    if encoding and not response.encoding:
+        response.encoding = encoding
 
     _extract_cookies(request, response, kwargs.get('cookies'))
 
