@@ -1,0 +1,10 @@
+---
+prelude: >
+  Increase the minimum required requests version to 2.3
+critical:
+  - |
+    The minimum version of requests has been increase to 2.3. This simply
+    ensures that all documented features of requests-mock are actually
+    available. This version of requests is still quite old and if this is an
+    issue you should either pin requests-mock to <1.6 or preferably update
+    requests.
