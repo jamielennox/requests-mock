@@ -329,7 +329,9 @@ class SessionAdapterTests(base.TestCase):
             self.assertEqual('resp', resp.text)
 
     def test_with_purl(self):
-        self.adapter.register_uri('GET', purl.URL('mock://www.tester.com/a'), text='resp')
+        self.adapter.register_uri('GET',
+                                  purl.URL('mock://www.tester.com/a'),
+                                  text='resp')
 
         resp = self.session.get('mock://www.tester.com/a')
         self.assertEqual('resp', resp.text)
