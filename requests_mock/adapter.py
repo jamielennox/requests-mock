@@ -20,6 +20,10 @@ from requests_mock import exceptions
 from requests_mock.request import _RequestObjectProxy
 from requests_mock.response import _MatcherResponse
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 try:
     import purl
     purl_types = (purl.URL,)
@@ -245,6 +249,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             if resp is not None:
                 request._matcher = weakref.ref(matcher)
                 resp.connection = self
+                logger.debug('{} \"{} \" {}'.format(request._request.url,request._request.method, resp.status_code))
                 return resp
 
         raise exceptions.NoMockAddress(request)
