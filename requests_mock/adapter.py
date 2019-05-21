@@ -249,7 +249,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             if resp is not None:
                 request._matcher = weakref.ref(matcher)
                 resp.connection = self
-                logger.debug('{} \"{} \" {}'.format(request._request.url,request._request.method, resp.status_code))
+                logger.debug('{} {} {}'.format(request._request.method,request._request.url, resp.status_code))
                 return resp
 
         raise exceptions.NoMockAddress(request)
