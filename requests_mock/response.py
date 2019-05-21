@@ -219,10 +219,25 @@ class _MatcherResponse(object):
                                      isinstance(text, six.string_types)):
             raise TypeError('Text should be a callback or string data')
 
+    def _raise_exception(self, request):
+        # If the response is an exception raise it. If the exception passed is
+        # NoMockAddress we should raise it in the correct way so a user can
+        # request that NoMockAddress is actually raised on purpose.
+
+        if self._exc:
+            try:
+                subclass = issubclass(self._exc, exceptions.NoMockAddress)
+            except TypeError:
+                subclass = False
+
+            if subclass:
+                raise self._exc(request)
+            else:
+                raise self._exc
+
     def get_response(self, request):
         # if an error was requested then raise that instead of doing response
-        if self._exc:
-            raise self._exc
+        self._raise_exception(request)
 
         # If a cookie dict is passed convert it into a CookieJar so that the
         # cookies object available in a callback context is always a jar.

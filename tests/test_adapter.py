@@ -487,6 +487,24 @@ class SessionAdapterTests(base.TestCase):
                           exc=MyExc,
                           text='fail')
 
+    def test_raises_no_address(self):
+        m = self.adapter.register_uri(
+            'GET',
+            self.url,
+            [{'text': 'success'}, {'exc': requests_mock.NoMockAddress}]
+        )
+
+        resp = self.session.get(self.url)
+        self.assertEqual('success', resp.text)
+
+        e = self.assertRaises(requests_mock.NoMockAddress,
+                              self.session.get,
+                              self.url)
+
+        self.assertIsInstance(e, requests_mock.NoMockAddress)
+        self.assertEqual(self.url, e.request.url)
+        self.assertEqual(2, m.call_count)
+
     def test_sets_request_matcher_in_history(self):
         url1 = '%s://test1.url/' % self.PREFIX
         url2 = '%s://test2.url/' % self.PREFIX
