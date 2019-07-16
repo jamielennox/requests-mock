@@ -1,2 +1,2 @@
-requests>=2.3
+requests>=2.3,<3
 six
