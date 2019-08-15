@@ -176,6 +176,16 @@ class TestMatcher(base.TestCase):
         self.assertNoMatch('/path?a=1&b=2',
                            'http://www.test.com/path?a=1')
 
+    def test_query_empty_string(self):
+        self.assertMatch('/path?a',
+                         'http://www.test.com/path?a')
+        self.assertMatch('/path?bob&paul',
+                         'http://www.test.com/path?paul&bob')
+        self.assertNoMatch('/path?bob',
+                           'http://www.test.com/path?paul')
+        self.assertNoMatch('/path?pual&bob',
+                           'http://www.test.com/path?bob')
+
     def test_method_match(self):
         self.assertNoMatchMethodBoth('GET', 'POST')
         self.assertMatchMethodBoth('GET', 'get')
