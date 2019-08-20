@@ -104,6 +104,14 @@ Query strings provided to a register will match so long as at least those provid
     >>> session.get('mock://test.com/7?a=1&b=2').text
     'resp'
 
+We can also match an empty query string.
+
+.. doctest::
+
+    >>> adapter.register_uri('GET', '/7?a', text='resp')
+    >>> session.get('mock://test.com/7?a').text
+    'resp'
+
 If any part of the query string is wrong then it will not match.
 
 .. doctest::
