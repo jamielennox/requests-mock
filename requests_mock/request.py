@@ -110,7 +110,7 @@ class _RequestObjectProxy(object):
     @property
     def qs(self):
         if self._qs is None:
-            self._qs = urlparse.parse_qs(self.query)
+            self._qs = urlparse.parse_qs(self.query, keep_blank_values=True)
 
         return self._qs
 
