@@ -1,0 +1,3 @@
+---
+features:
+  - You can now match on the empty query string value like `/path?a`.

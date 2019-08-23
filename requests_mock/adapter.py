@@ -151,8 +151,8 @@ class _Matcher(_RequestHistoryTracker):
             return False
 
         # construct our own qs structure as we remove items from it below
-        request_qs = urlparse.parse_qs(request.query)
-        matcher_qs = urlparse.parse_qs(self._query)
+        request_qs = urlparse.parse_qs(request.query, keep_blank_values=True)
+        matcher_qs = urlparse.parse_qs(self._query, keep_blank_values=True)
 
         for k, vals in six.iteritems(matcher_qs):
             for v in vals:
