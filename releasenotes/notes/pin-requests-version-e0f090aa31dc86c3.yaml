@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Pins version of requests to <3 to prepare for new release of requests in future.
