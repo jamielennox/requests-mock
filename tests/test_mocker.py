@@ -73,7 +73,7 @@ class MockerTests(base.TestCase):
         self.assertEqual('resp_a', resp_a.text)
         self.assertEqual('resp_b', resp_b.text)
 
-        self.assertIs(requests.Session.send, original_send)
+        self.assertEqual(requests.Session.send, original_send)
         self.assertNotEqual(session_a.send, session_a_original_send)
         self.assertNotEqual(session_b.send, session_b_original_send)
         self.assertNotEqual(session_a.send, session_b.send)
