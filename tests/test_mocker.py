@@ -49,6 +49,41 @@ class MockerTests(base.TestCase):
         self.assertMockStopped()
         mocker.stop()
 
+    def test_with_session(self):
+        session_a = requests.Session()
+        session_b = requests.Session()
+
+        session_a_original_send = session_a.send
+        session_b_original_send = session_b.send
+        self.assertNotEqual(session_a_original_send, session_b_original_send)
+
+        mocker_a = requests_mock.Mocker(session=session_a)
+        mocker_b = requests_mock.Mocker(session=session_b)
+
+        mocker_a.start()
+        mocker_b.start()
+
+        url = 'http://test.url/path'
+        mocker_a.register_uri('GET', url, text='resp_a')
+        mocker_b.register_uri('GET', url, text='resp_b')
+
+        resp_b = session_b.get(url)
+        resp_a = session_a.get(url)
+
+        self.assertEqual('resp_a', resp_a.text)
+        self.assertEqual('resp_b', resp_b.text)
+
+        self.assertIs(requests.Session.send, original_send)
+        self.assertNotEqual(session_a.send, session_a_original_send)
+        self.assertNotEqual(session_b.send, session_b_original_send)
+        self.assertNotEqual(session_a.send, session_b.send)
+
+        mocker_a.stop()
+        mocker_b.stop()
+
+        self.assertEqual(session_a.send, session_a_original_send)
+        self.assertEqual(session_b.send, session_b_original_send)
+
     def test_with_context_manager(self):
         self.assertMockStopped()
         with requests_mock.Mocker() as m:

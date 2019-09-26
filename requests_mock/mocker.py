@@ -68,6 +68,7 @@ class MockerCore(object):
     """
 
     def __init__(self, **kwargs):
+        self._session = kwargs.pop('session', None)
         self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
         self._adapter = (
             kwargs.pop('adapter', None) or
@@ -88,14 +89,27 @@ class MockerCore(object):
         if self._last_send:
             raise RuntimeError('Mocker has already been started')
 
-        self._last_send = requests.Session.send
+        mock_target = self._session or requests.Session
+
+        def _wrap(fn):
+            if not self._session:
+                return fn
+
+            def _wrapped(*args, **kwargs):
+                return fn(self._session, *args, **kwargs)
+
+            return _wrapped
+
+        self._last_send = mock_target.send
 
         def _fake_get_adapter(session, url):
             return self._adapter
 
+        _fake_get_adapter = _wrap(_fake_get_adapter)
+
         def _fake_send(session, request, **kwargs):
-            real_get_adapter = requests.Session.get_adapter
-            requests.Session.get_adapter = _fake_get_adapter
+            real_get_adapter = mock_target.get_adapter
+            mock_target.get_adapter = _fake_get_adapter
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
             # seems like here we would use _last_send there is the possibility
@@ -117,11 +131,11 @@ class MockerCore(object):
                 # requests library rather than the mocking. Let it.
                 pass
             finally:
-                requests.Session.get_adapter = real_get_adapter
+                mock_target.get_adapter = real_get_adapter
 
             return _original_send(session, request, **kwargs)
 
-        requests.Session.send = _fake_send
+        mock_target.send = _wrap(_fake_send)
 
     def stop(self):
         """Stop mocking requests.
@@ -129,7 +143,7 @@ class MockerCore(object):
         This should have no impact if mocking has not been started.
         """
         if self._last_send:
-            requests.Session.send = self._last_send
+            (self._session or requests.Session).send = self._last_send
             self._last_send = None
 
     def __getattr__(self, name):
