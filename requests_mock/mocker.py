@@ -74,7 +74,7 @@ class MockerCore(object):
             adapter.Adapter(case_sensitive=self.case_sensitive)
         )
 
-        self._real_http = kwargs.pop('real_http', False)
+        self.real_http = kwargs.pop('real_http', False)
         self._last_send = None
 
         if kwargs:
@@ -110,7 +110,7 @@ class MockerCore(object):
             try:
                 return _original_send(session, request, **kwargs)
             except exceptions.NoMockAddress:
-                if not self._real_http:
+                if not self.real_http:
                     raise
             except adapter._RunRealHTTP:
                 # this mocker wants you to run the request through the real
@@ -208,7 +208,7 @@ class Mocker(MockerCore):
         """
         m = Mocker(
             kw=self._kw,
-            real_http=self._real_http,
+            real_http=self.real_http,
             case_sensitive=self.case_sensitive
         )
         return m
