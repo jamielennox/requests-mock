@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Make real_http variable on Mocker object public. This means you can change
+    the value of the parameter after the object has been created. This will
+    allow setting it in situations like pytest where you may not be able to set
+    __init__ time options.
