@@ -66,6 +66,11 @@ def pytest_addoption(parser):
                   type=_case_type,
                   default=_case_default)
 
+    parser.addini('requests_mock_real_http',
+                  'Fallback to real http requests in requests_mock',
+                  type=_case_type,
+                  default=_case_default)
+
 
 @_fixture_type(scope='function')  # executed on every test
 def requests_mock(request):
@@ -76,7 +81,12 @@ def requests_mock(request):
     https://requests-mock.readthedocs.io/en/latest/
     """
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
-    kw = {'case_sensitive': _bool_value(case_sensitive)}
+    real_http = request.config.getini('requests_mock_real_http')
+
+    kw = {
+        'case_sensitive': _bool_value(case_sensitive),
+        'real_http': _bool_value(real_http),
+    }
 
     with rm_module.Mocker(**kw) as m:
         yield m

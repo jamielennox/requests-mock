@@ -1,0 +1,6 @@
+---
+fixes:
+  - |
+    Allow real_http to be specified globally when using a pytest fixture.
+    Typically you would want this set once on the mocker but it can on occasion
+    be useful to set it globally.
