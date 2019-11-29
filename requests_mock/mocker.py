@@ -26,6 +26,7 @@ POST = 'POST'
 PUT = 'PUT'
 
 _original_send = requests.Session.send
+_original_get_adapter = requests.Session.get_adapter
 
 
 class MockerCore(object):
@@ -94,7 +95,7 @@ class MockerCore(object):
             return self._adapter
 
         def _fake_send(session, request, **kwargs):
-            real_get_adapter = requests.Session.get_adapter
+            _last_get_adapter = requests.Session.get_adapter
             requests.Session.get_adapter = _fake_get_adapter
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
@@ -117,9 +118,15 @@ class MockerCore(object):
                 # requests library rather than the mocking. Let it.
                 pass
             finally:
-                requests.Session.get_adapter = real_get_adapter
+                requests.Session.get_adapter = _last_get_adapter
 
-            return _original_send(session, request, **kwargs)
+            # if we are here it means we must run the real http request
+            try:
+                requests.Session.get_adapter = _original_get_adapter
+                return _original_send(session, request, **kwargs)
+            finally:
+                requests.Session.get_adapter = _last_get_adapter
+
 
         requests.Session.send = _fake_send
 
