@@ -1,8 +1,8 @@
 try:
     from http import HTTPStatus
-    HTTPStatus_FOUND = HTTPStatus.FOUND
+    HTTP_STATUS_FOUND = HTTPStatus.FOUND
 except ImportError:
-    from httplib import FOUND as HTTPStatus_FOUND
+    from httplib import FOUND as HTTP_STATUS_FOUND
 
 import pytest
 import requests
@@ -27,10 +27,10 @@ def test_redirect_and_nesting():
             middle_mock.get(url_middle, text='middle' + url_middle)
 
             with requests_mock.Mocker() as inner_mock:
-                inner_mock.post(url_inner, status_code=HTTPStatus_FOUND, headers={'location': url})
+                inner_mock.post(url_inner, status_code=HTTP_STATUS_FOUND, headers={'location': url})
                 inner_mock.get(url, real_http=True)
 
-                assert 'outer' + url == requests.post(url_inner).text
+                assert 'outer' + url == requests.post(url_inner).text  # nosec
                 with pytest.raises(requests_mock.NoMockAddress):
                     requests.get(url_middle)
                 with pytest.raises(requests_mock.NoMockAddress):
@@ -39,15 +39,15 @@ def test_redirect_and_nesting():
             # back to middle mock
             with pytest.raises(requests_mock.NoMockAddress):
                 requests.post(url_inner)
-            assert 'middle' + url_middle == requests.get(url_middle).text
-            assert 'outer' + url_outer == requests.get(url_outer).text
+            assert 'middle' + url_middle == requests.get(url_middle).text  # nosec
+            assert 'outer' + url_outer == requests.get(url_outer).text  # nosec
 
         # back to outter mock
         with pytest.raises(requests_mock.NoMockAddress):
             requests.post(url_inner)
         with pytest.raises(requests_mock.NoMockAddress):
             requests.get(url_middle)
-        assert 'outer' + url_outer == requests.get(url_outer).text
+        assert 'outer' + url_outer == requests.get(url_outer).text  # nosec
 
 
 class TestClass(object):

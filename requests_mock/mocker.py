@@ -26,7 +26,6 @@ POST = 'POST'
 PUT = 'PUT'
 
 _original_send = requests.Session.send
-_original_get_adapter = requests.Session.get_adapter
 
 
 class MockerCore(object):
