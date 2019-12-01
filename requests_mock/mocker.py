@@ -90,12 +90,13 @@ class MockerCore(object):
             raise RuntimeError('Mocker has already been started')
 
         self._last_send = requests.Session.send
+        self._last_get_adapter = requests.Session.get_adapter
 
         def _fake_get_adapter(session, url):
             return self._adapter
 
         def _fake_send(session, request, **kwargs):
-            _last_get_adapter = requests.Session.get_adapter
+            # mock get_adapter
             requests.Session.get_adapter = _fake_get_adapter
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
@@ -118,15 +119,13 @@ class MockerCore(object):
                 # requests library rather than the mocking. Let it.
                 pass
             finally:
-                requests.Session.get_adapter = _last_get_adapter
+                # restore get_adapter
+                requests.Session.get_adapter = self._last_get_adapter
 
             # if we are here it means we must run the real http request
-            try:
-                requests.Session.get_adapter = _original_get_adapter
-                return _original_send(session, request, **kwargs)
-            finally:
-                requests.Session.get_adapter = _last_get_adapter
-
+            # Or, with nested mocks, to the parent mock, that is why we use
+            # _last_send here instead of _original_send
+            return self._last_send(session, request, **kwargs)
 
         requests.Session.send = _fake_send
 
