@@ -44,7 +44,7 @@ As a context manager:
 
 .. code:: python
 
-    >>> with requests_mock.mock() as m:
+    >>> with requests_mock.Mocker() as m:
     ...     m.get('http://test.com', text='data')
     ...     requests.get('http://test.com').text
     ...
@@ -54,7 +54,7 @@ Or as a decorator:
 
 .. code:: python
 
-    >>> @requests_mock.mock()
+    >>> @requests_mock.Mocker()
     ... def test_func(m):
     ...     m.get('http://test.com', text='data')
     ...     return requests.get('http://test.com').text
