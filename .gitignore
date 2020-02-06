@@ -43,6 +43,7 @@ output/*/index.html
 
 # Sphinx
 doc/build
+doc/source/_build
 
 .testrepository
 .pytest_cache
