@@ -62,6 +62,14 @@ Or as a decorator:
     >>> test_func()
     'data'
 
+Or as a pytest fixture:
+
+.. code:: python
+
+    >>> def test_simple(requests_mock):
+    ...    requests_mock.get('http://test.com', text='data')
+    ...    assert 'data' == requests.get('http://test.com').text
+
 For more information checkout the `docs`_.
 
 Reporting Bugs
