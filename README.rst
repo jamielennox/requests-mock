@@ -77,6 +77,11 @@ Reporting Bugs
 
 Development and bug tracking is performed on `GitHub`_.
 
+Questions
+=========
+
+There is a tag dedicated to `requests-mock` on `StackOverflow`_ where you can ask usage questions.
+
 License
 =======
 
@@ -95,3 +100,4 @@ under the License.
 .. _requests: http://python-requests.org
 .. _docs: https://requests-mock.readthedocs.io/
 .. _GitHub: https://github.com/jamielennox/requests-mock
+.. _StackOverflow: https://stackoverflow.com/questions/tagged/requests-mock
