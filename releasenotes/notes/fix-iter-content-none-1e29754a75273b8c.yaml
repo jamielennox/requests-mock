@@ -1,0 +1,5 @@
+---
+fixes:
+  - 124 when using `response.iter_content(None)` the iterator would keep
+    returning b'' and never finish. In most code paths the b'' would indicate
+    that the stream is finished, but using None we have to close it ourselves.
