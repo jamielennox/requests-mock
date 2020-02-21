@@ -117,7 +117,15 @@ class _IOReader(six.BytesIO):
             return six.b('')
 
         # not a new style object in python 2
-        return six.BytesIO.read(self, *args, **kwargs)
+        result = six.BytesIO.read(self, *args, **kwargs)
+
+        # when using resp.iter_content(None) it'll go through a different
+        # request path in urllib3. This path checks whether the object is
+        # marked closed instead of the return value. see gh124.
+        if result == six.b(''):
+            self.close()
+
+        return result
 
 
 def create_response(request, **kwargs):
