@@ -162,9 +162,13 @@ def create_response(request, **kwargs):
     if content is not None:
         body = _IOReader(content)
     if not raw:
-        raw = HTTPResponse(status=kwargs.get('status_code', _DEFAULT_STATUS),
+        status = kwargs.get('status_code', _DEFAULT_STATUS)
+        reason = kwargs.get('reason',
+                            six.moves.http_client.responses.get(status))
+
+        raw = HTTPResponse(status=status,
+                           reason=reason,
                            headers=headers,
-                           reason=kwargs.get('reason'),
                            body=body or _IOReader(six.b('')),
                            decode_content=False,
                            preload_content=False,

@@ -130,3 +130,25 @@ class ResponseTests(base.TestCase):
         resp = self.create_response(headers=headers,
                                     text="<html><body></body></html")
         self.assertEqual('ISO-8859-1', resp.encoding)
+
+    def test_default_reason(self):
+        resp = self.create_response()
+        self.assertEqual('OK', resp.reason)
+
+    def test_custom_reason(self):
+        reason = 'Live long and prosper'
+        resp = self.create_response(status_code=201, reason=reason)
+
+        self.assertEqual(201, resp.status_code)
+        self.assertEqual(reason, resp.reason)
+
+    def test_some_other_response_reasons(self):
+        reasons = {
+            301: 'Moved Permanently',
+            410: 'Gone',
+            503: 'Service Unavailable',
+        }
+
+        for code, reason in six.iteritems(reasons):
+            self.assertEqual(reason,
+                             self.create_response(status_code=code).reason)

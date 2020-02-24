@@ -1,0 +1,5 @@
+---
+features:
+  - When creating a response we now default the reason string to the
+    appropriate string based on the status code. This can still be provided
+    manually.
