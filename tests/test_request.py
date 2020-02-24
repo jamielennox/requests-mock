@@ -55,7 +55,10 @@ class RequestTests(base.TestCase):
         self.assertIs(False, req.stream)
 
         # actually it's an OrderedDict, but equality works fine
-        self.assertEqual({}, req.proxies)
+        # Skipping this check - it's problematic based on people's environments
+        # and in CI systems where there are proxies set up at the environment
+        # level. gh #127
+        # self.assertEqual({}, req.proxies)
 
     def test_allow_redirects(self):
         req = self.do_request(allow_redirects=False, status_code=300)
