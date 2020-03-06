@@ -13,3 +13,10 @@ These are only loading mechanisms, they do not contain any logic and can be used
 
 .. _requests: http://python-requests.org
 .. _pluggable transport adapters: http://docs.python-requests.org/en/latest/user/advanced/#transport-adapters
+
+Installation
+============
+
+::
+
+    pip install requests-mock
