@@ -1,0 +1,14 @@
+---
+prelude: >
+  Makes explicit the behaviour of nested mocking.
+features:
+  - |
+    Nested mocks now has a defined behaviour which is essentially a classic
+    nesting behaviour. A mock works as normal, but in the same way that
+    real_http=True will escalate to the outer send (typically the real send) if
+    there is a mocker defined outside that will handle the calls.
+fixes:
+  - |
+    This fixes all known nesting bugs. They may not be perfect, however this is
+    now the explicit defined behaviour and so all related bugs are closed in
+    favour of this.
