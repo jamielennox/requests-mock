@@ -659,3 +659,27 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(netloc, self.adapter.last_request.netloc)
         self.assertEqual(path, self.adapter.last_request.path)
         self.assertEqual(query, self.adapter.last_request.query)
+
+    def test_stream_none(self):
+        text = 'hello world'
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=text,
+                                  headers=self.headers)
+
+        resp = self.session.get(self.url, stream=True)
+        resps = [c for c in resp.iter_content(None, decode_unicode=True)]
+        self.assertEqual([text], resps)
+
+    def test_stream_size(self):
+        text = 'hello world'
+
+        self.adapter.register_uri('GET',
+                                  self.url,
+                                  text=text,
+                                  headers=self.headers)
+
+        resp = self.session.get(self.url, stream=True)
+        resps = [c for c in resp.iter_content(3, decode_unicode=True)]
+        self.assertEqual(['hel', 'lo ', 'wor', 'ld'], resps)

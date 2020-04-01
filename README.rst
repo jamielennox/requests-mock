@@ -44,7 +44,7 @@ As a context manager:
 
 .. code:: python
 
-    >>> with requests_mock.mock() as m:
+    >>> with requests_mock.Mocker() as m:
     ...     m.get('http://test.com', text='data')
     ...     requests.get('http://test.com').text
     ...
@@ -54,7 +54,7 @@ Or as a decorator:
 
 .. code:: python
 
-    >>> @requests_mock.mock()
+    >>> @requests_mock.Mocker()
     ... def test_func(m):
     ...     m.get('http://test.com', text='data')
     ...     return requests.get('http://test.com').text
@@ -62,12 +62,25 @@ Or as a decorator:
     >>> test_func()
     'data'
 
+Or as a pytest fixture:
+
+.. code:: python
+
+    >>> def test_simple(requests_mock):
+    ...    requests_mock.get('http://test.com', text='data')
+    ...    assert 'data' == requests.get('http://test.com').text
+
 For more information checkout the `docs`_.
 
 Reporting Bugs
 ==============
 
 Development and bug tracking is performed on `GitHub`_.
+
+Questions
+=========
+
+There is a tag dedicated to `requests-mock` on `StackOverflow`_ where you can ask usage questions.
 
 License
 =======
@@ -87,3 +100,4 @@ under the License.
 .. _requests: http://python-requests.org
 .. _docs: https://requests-mock.readthedocs.io/
 .. _GitHub: https://github.com/jamielennox/requests-mock
+.. _StackOverflow: https://stackoverflow.com/questions/tagged/requests-mock

@@ -75,7 +75,7 @@ class MockerCore(object):
             adapter.Adapter(case_sensitive=self.case_sensitive)
         )
 
-        self._real_http = kwargs.pop('real_http', False)
+        self.real_http = kwargs.pop('real_http', False)
         self._last_send = None
 
         if kwargs:
@@ -101,6 +101,7 @@ class MockerCore(object):
             return _wrapped
 
         self._last_send = mock_target.send
+        self._last_get_adapter = mock_target.get_adapter
 
         def _fake_get_adapter(session, url):
             return self._adapter
@@ -108,7 +109,7 @@ class MockerCore(object):
         _fake_get_adapter = _wrap(_fake_get_adapter)
 
         def _fake_send(session, request, **kwargs):
-            real_get_adapter = mock_target.get_adapter
+            # mock get_adapter
             mock_target.get_adapter = _fake_get_adapter
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
@@ -124,16 +125,20 @@ class MockerCore(object):
             try:
                 return _original_send(session, request, **kwargs)
             except exceptions.NoMockAddress:
-                if not self._real_http:
+                if not self.real_http:
                     raise
             except adapter._RunRealHTTP:
                 # this mocker wants you to run the request through the real
                 # requests library rather than the mocking. Let it.
                 pass
             finally:
-                mock_target.get_adapter = real_get_adapter
+                # restore get_adapter
+                mock_target.get_adapter = self._last_get_adapter
 
-            return _original_send(session, request, **kwargs)
+            # if we are here it means we must run the real http request
+            # Or, with nested mocks, to the parent mock, that is why we use
+            # _last_send here instead of _original_send
+            return self._last_send(session, request, **kwargs)
 
         mock_target.send = _wrap(_fake_send)
 
@@ -222,7 +227,7 @@ class Mocker(MockerCore):
         """
         m = Mocker(
             kw=self._kw,
-            real_http=self._real_http,
+            real_http=self.real_http,
             case_sensitive=self.case_sensitive
         )
         return m

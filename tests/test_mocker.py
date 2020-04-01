@@ -111,6 +111,40 @@ class MockerTests(base.TestCase):
         self.assertEqual(test_text, resp.text)
         self.assertEqual(test_bytes, resp.content)
 
+    @mock.patch('requests.adapters.HTTPAdapter.send')
+    def test_real_http_changes(self, real_send):
+        url = 'http://www.google.com/'
+        test_text = 'real http data'
+        test_bytes = test_text.encode('utf-8')
+
+        req = requests.Request(method='GET', url=url)
+        real_send.return_value = response.create_response(req.prepare(),
+                                                          status_code=200,
+                                                          content=test_bytes)
+
+        with requests_mock.Mocker() as m:
+            # real_http defaults to false so should raise NoMockAddress
+
+            self.assertRaises(exceptions.NoMockAddress,
+                              requests.get,
+                              url)
+
+            self.assertEqual(1, m.call_count)
+            self.assertEqual(0, real_send.call_count)
+
+            # change the value of real_http mid test
+            m.real_http = True
+
+            # fetch the url again and it should go through to the real url that
+            # we've mocked out at a lower level.
+            resp = requests.get(url)
+
+        self.assertEqual(1, real_send.call_count)
+        self.assertEqual(url, real_send.call_args[0][0].url)
+
+        self.assertEqual(test_text, resp.text)
+        self.assertEqual(test_bytes, resp.content)
+
     @requests_mock.mock()
     def test_with_test_decorator(self, m):
         self._do_test(m)
@@ -242,7 +276,7 @@ class MockerTests(base.TestCase):
         copy_of_mocker = mocker.copy()
         self.assertIsNot(copy_of_mocker, mocker)
         self.assertEqual(copy_of_mocker._kw, mocker._kw)
-        self.assertEqual(copy_of_mocker._real_http, mocker._real_http)
+        self.assertEqual(copy_of_mocker.real_http, mocker.real_http)
 
 
 class MockerHttpMethodsTests(base.TestCase):
