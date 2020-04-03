@@ -28,6 +28,20 @@ PUT = 'PUT'
 _original_send = requests.Session.send
 
 
+def _set_method(target, name, method):
+    # target is either a class or an instance
+    # name is the name of the method
+    # method is a class style method (taking self as a first argument)
+    if isinstance(target, type):
+        # target is a class
+        setattr(target, name, method)
+    else:
+        # target is an instance
+        def wrapped_method(*args, **kwargs):
+            return method(target, *args, **kwargs)
+        setattr(target, name, wrapped_method)
+
+
 class MockerCore(object):
     """A wrapper around common mocking functions.
 
@@ -68,7 +82,7 @@ class MockerCore(object):
     """
 
     def __init__(self, **kwargs):
-        self._session = kwargs.pop('session', None)
+        self._mock_target = kwargs.pop('session', requests.Session)
         self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
         self._adapter = (
             kwargs.pop('adapter', None) or
@@ -89,28 +103,27 @@ class MockerCore(object):
         if self._last_send:
             raise RuntimeError('Mocker has already been started')
 
-        mock_target = self._session or requests.Session
+        # backup last `send` for restoration on `self.stop`
+        self._last_send = self._mock_target.send
 
-        def _wrap(fn):
-            if not self._session:
-                return fn
+        # backup last `send` for call in `_fake_send`
+        # (with `session` as first arg)
+        if isinstance(self._mock_target, type):
+            self._last_send_with_session = self._last_send
+        else:
+            self._last_send_with_session = (
+                lambda session, *args, **kwargs:
+                self._last_send(*args, **kwargs)
+            )
 
-            def _wrapped(*args, **kwargs):
-                return fn(self._session, *args, **kwargs)
-
-            return _wrapped
-
-        self._last_send = mock_target.send
-        self._last_get_adapter = mock_target.get_adapter
+        self._last_get_adapter = self._mock_target.get_adapter
 
         def _fake_get_adapter(session, url):
             return self._adapter
 
-        _fake_get_adapter = _wrap(_fake_get_adapter)
-
         def _fake_send(session, request, **kwargs):
             # mock get_adapter
-            mock_target.get_adapter = _fake_get_adapter
+            _set_method(session, "get_adapter", _fake_get_adapter)
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
             # seems like here we would use _last_send there is the possibility
@@ -133,14 +146,16 @@ class MockerCore(object):
                 pass
             finally:
                 # restore get_adapter
-                mock_target.get_adapter = self._last_get_adapter
+                _set_method(session, "get_adapter", self._last_get_adapter)
 
             # if we are here it means we must run the real http request
             # Or, with nested mocks, to the parent mock, that is why we use
             # _last_send here instead of _original_send
-            return self._last_send(session, request, **kwargs)
+            # _last_send might not take session as an argument,
+            # we use the unwrapped version
+            return self._last_send_with_session(session, request, **kwargs)
 
-        mock_target.send = _wrap(_fake_send)
+        _set_method(self._mock_target, "send", _fake_send)
 
     def stop(self):
         """Stop mocking requests.
@@ -148,7 +163,7 @@ class MockerCore(object):
         This should have no impact if mocking has not been started.
         """
         if self._last_send:
-            (self._session or requests.Session).send = self._last_send
+            self._mock_target.send = self._last_send
             self._last_send = None
 
     def __getattr__(self, name):
