@@ -132,6 +132,7 @@ class MockerCore(object):
         """Stop mocking requests.
 
         This should have no impact if mocking has not been started.
+        When nesting mockers, make sure to stop the innermost first.
         """
         if self._last_send:
             requests.Session.send = self._last_send

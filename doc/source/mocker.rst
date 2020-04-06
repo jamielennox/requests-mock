@@ -156,3 +156,35 @@ Similarly when using a mocker you can register an individual URI to bypass the m
     ...
     'resp'
     200
+
+Nested Mockers
+==============
+
+*New in 1.8*
+
+When nesting mockers the innermost Mocker replaces all others.
+If :py:data:`real_http` is set to :py:const:`True`, at creation or for a given resource,
+the request is passed to the containing Mocker.
+The containing Mocker can in turn:
+
+- serve the request;
+- raise :py:exc:`NoMockAddress`;
+- or pass the request to yet another Mocker (or to the unmocked :py:class:`requests.Session`) if :py:data:`real_http` is set to :py:const:`True`.
+
+.. doctest::
+
+    >>> url = "https://www.example.com/"
+    >>> with requests_mock.Mocker() as outer_mock:
+    ...     outer_mock.get(url, text='outer')
+    ...     with requests_mock.Mocker(real_http=True) as middle_mock:
+    ...         with requests_mock.Mocker() as inner_mock:
+    ...             inner_mock.get(url, real_http=True)
+    ...             print(requests.get(url).text)  # doctest: +SKIP
+    ...
+    'outer'
+
+Most of the time nesting can be avoided by making the mocker object available to subclasses/subfunctions.
+
+.. warning::
+   When starting/stopping mockers manually, make sure to stop innermost mockers first.
+   A call from an active inner mocker with a stopped outer mocker leads to undefined behavior.
