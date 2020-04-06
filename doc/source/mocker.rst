@@ -5,6 +5,11 @@ Using the Mocker
 The mocker is a loading mechanism to ensure the adapter is correctly in place to intercept calls from requests.
 Its goal is to provide an interface that is as close to the real requests library interface as possible.
 
+:py:class:`requests_mock.Mocker` takes two optional parameters:
+
+:real_http (bool): If True then any requests that are not handled by the mocking adapter will be forwarded to the real server (see :ref:`RealHTTP`), or the containing Mocker if applicable (see :ref:`NestingMockers`). Defaults to False.
+:session (requests.Session): If set, only the given session instance is mocked (see :ref:`SessionMocking`).
+
 Activation
 ==========
 
@@ -125,12 +130,14 @@ As well as the basic:
 These methods correspond to the HTTP method of your request, so to mock POST requests you would use the :py:meth:`~requests_mock.MockerCore.post` function.
 Further information about what can be matched from a request can be found at :doc:`matching`
 
+.. _RealHTTP:
+
 Real HTTP Requests
 ==================
 
-The Mocker object takes the following parameters:
-
-:real_http (bool): If True then any requests that are not handled by the mocking adapter will be forwarded to the real server. Defaults to False.
+If :py:data:`real_http` is set to :py:const:`True`
+then any requests that are not handled by the mocking adapter will be forwarded to the real server,
+or the containing Mocker if applicable (see :ref:`NestingMockers`).
 
 .. doctest::
 
@@ -156,6 +163,8 @@ Similarly when using a mocker you can register an individual URI to bypass the m
     ...
     'resp'
     200
+
+.. _NestingMockers:
 
 Nested Mockers
 ==============
@@ -188,3 +197,39 @@ Most of the time nesting can be avoided by making the mocker object available to
 .. warning::
    When starting/stopping mockers manually, make sure to stop innermost mockers first.
    A call from an active inner mocker with a stopped outer mocker leads to undefined behavior.
+
+.. _SessionMocking:
+
+Mocking specific sessions
+=========================
+
+*New in 1.8*
+
+:py:class:`requests_mock.Mocker` can be used to mock specific sessions through the :py:data:`session` parameter.
+
+.. doctest::
+
+    >>> url = "https://www.example.com/"
+    >>> with requests_mock.Mocker() as global_mock:
+    ...     global_mock.get(url, text='global')
+    ...     session = requests.Session()
+    ...     print("requests.get before session mock:", requests.get(url).text)
+    ...     print("session.get before session mock:", session.get(url).text)
+    ...     with requests_mock.Mocker(session=session) as session_mock:
+    ...         session_mock.get(url, text='session')
+    ...         print("Within session mock:", requests.get(url).text)
+    ...         print("Within session mock:", session.get(url).text)
+    ...     print("After session mock:", requests.get(url).text)
+    ...     print("After session mock:", session.get(url).text)
+    ...
+    'requests.get before session mock: global'
+    'session.get before session mock: global'
+    'requests.get within session mock: global'
+    'session.get within session mock: session'
+    'requests.get after session mock: global'
+    'session.get after session mock: global'
+
+
+
+.. note::
+  As an alternative, :py:class:`requests_mock.Adapter` instances can be mounted on specific sessions (see :ref:`Adapter`).
