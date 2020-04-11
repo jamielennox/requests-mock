@@ -1,2 +1,3 @@
+packaging
 requests>=2.3,<3
 six

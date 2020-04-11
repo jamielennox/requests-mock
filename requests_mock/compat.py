@@ -11,10 +11,12 @@
 # under the License.
 
 import requests
+from packaging.version import parse
 
 
 def _versiontuple(v):
-    return tuple(map(int, (v.split("."))))
+    version = parse(v)
+    return version.release
 
 
 _requests_version = _versiontuple(requests.__version__)
