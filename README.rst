@@ -31,7 +31,7 @@ A simple example:
 
     >>> session = requests.Session()
     >>> adapter = requests_mock.Adapter()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
     >>> adapter.register_uri('GET', 'mock://test.com', text='data')
     >>> resp = session.get('mock://test.com')
