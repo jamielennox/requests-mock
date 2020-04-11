@@ -29,6 +29,9 @@ The examples in this file are loaded with:
 
         adapter.register_uri('GET', url, ...)
 
+    If you are not familiar with `requests <https://requests.readthedocs.io/>`_' adapters (see :ref:`Adapter`),
+    prefer the mocker approach (see :ref:`Mocker`).
+
 .. doctest::
     :hide:
 
