@@ -16,6 +16,7 @@ import requests
 
 from requests_mock import adapter
 from requests_mock import exceptions
+from copy import deepcopy
 
 DELETE = 'DELETE'
 GET = 'GET'
@@ -211,12 +212,7 @@ class Mocker(MockerCore):
     def copy(self):
         """Returns an exact copy of current mock
         """
-        m = Mocker(
-            kw=self._kw,
-            real_http=self.real_http,
-            case_sensitive=self.case_sensitive
-        )
-        return m
+        return deepcopy(self)
 
     def decorate_callable(self, func):
         """Decorates a callable
