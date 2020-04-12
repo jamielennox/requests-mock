@@ -244,9 +244,11 @@ class MockerTests(base.TestCase):
         self.assertEqual(copy_of_mocker._kw, mocker._kw)
         self.assertEqual(copy_of_mocker.real_http, mocker.real_http)
 
-        self.assertEqual(len(mocker._adapter._matchers), len(copy_of_mocker._adapter._matchers), 'Matchers not copied.')
+        self.assertEqual(len(mocker._adapter._matchers), len(copy_of_mocker._adapter._matchers),
+                         'Matchers not copied.')
         for i in range(len(mocker._adapter._matchers)):
-            self.assertEqual(mocker._adapter._matchers[i]._url, copy_of_mocker._adapter._matchers[i]._url)
+            self.assertEqual(mocker._adapter._matchers[i]._url,
+                             copy_of_mocker._adapter._matchers[i]._url)
 
 
 class MockerHttpMethodsTests(base.TestCase):
