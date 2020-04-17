@@ -309,7 +309,8 @@ class TestMatcher(base.TestCase):
         request = adapter._RequestObjectProxy._create('GET', url)
 
         call_count = 3
-        [matcher(request) for _ in range(call_count)]
+        for _ in range(call_count):
+            matcher(request)
 
         self.assertEqual(matcher.call_count, call_count)
         matcher.reset_mock()

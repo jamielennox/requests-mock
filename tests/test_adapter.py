@@ -392,7 +392,8 @@ class SessionAdapterTests(base.TestCase):
         m = self.adapter.register_uri('GET', self.url, text='resp')
         call_count = 3
 
-        [self.session.get(self.url) for _ in range(0, call_count)]
+        for _ in range(0, call_count):
+            self.session.get(self.url)
 
         # Verify count is expected value for adapter and matcher
         self.assertEqual(self.adapter.call_count, call_count)
