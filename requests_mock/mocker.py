@@ -42,6 +42,7 @@ class MockerCore(object):
         'called',
         'called_once',
         'call_count',
+        'reset_mock',
     }
 
     case_sensitive = False

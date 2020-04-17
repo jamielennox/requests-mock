@@ -14,6 +14,7 @@ import re
 
 from requests_mock import adapter
 from . import base
+from unittest.mock import MagicMock
 
 ANY = adapter.ANY
 
@@ -294,3 +295,22 @@ class TestMatcher(base.TestCase):
                            matcher_method='POST',
                            request_data='goodbye world',
                            additional_matcher=test_match_body)
+
+    def test_reset_mock_resets_count(self):
+        url = 'mock://test/site/'
+        matcher = adapter._Matcher('GET',
+                                   url,
+                                   [MagicMock()],
+                                   complete_qs=False,
+                                   additional_matcher=None,
+                                   request_headers={},
+                                   real_http=False,
+                                   case_sensitive=False)
+        request = adapter._RequestObjectProxy._create('GET', url)
+
+        call_count = 3
+        [matcher(request) for _ in range(call_count)]
+
+        self.assertEqual(matcher.call_count, call_count)
+        matcher.reset_mock()
+        self.assertEqual(matcher.call_count, 0)

@@ -20,6 +20,7 @@ from six.moves.urllib import parse as urlparse
 
 import requests_mock
 from . import base
+from unittest.mock import patch
 
 
 class MyExc(Exception):
@@ -382,6 +383,23 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(len(resps), self.adapter.call_count)
         self.assertTrue(self.adapter.called)
         self.assertFalse(m.called_once)
+
+    def test_called_and_reset(self):
+        m = self.adapter.register_uri('GET', self.url, text='resp')
+        call_count = 3
+
+        [self.session.get(self.url) for _ in range(0, call_count)]
+
+        # Verify count is expected value for adapter and matcher
+        self.assertEqual(self.adapter.call_count, call_count)
+        self.assertEqual(m.call_count, call_count)
+
+        with patch.object(m, 'reset_mock') as m_matcher_reset:
+            self.adapter.reset_mock()
+            # Assert adapter reset calls reset on matcher
+            m_matcher_reset.assert_called_once()
+
+        self.assertEqual(self.adapter.call_count, 0)
 
     def test_adapter_picks_correct_adapter(self):
         good = '%s://test3.url/' % self.PREFIX
