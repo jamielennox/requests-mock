@@ -249,14 +249,14 @@ class MockerTests(base.TestCase):
         self.assertEqual(copy_of_mocker.real_http, mocker.real_http)
 
     def test_reset_mock_calls_adapter_reset_mock(self):
-        mocker = requests_mock.mock()
-        mocker.get('mock://test/url/', text='test_reponse')
+        with requests_mock.Mocker() as mocker:
+            self.assertMockStarted()
 
-        # Verify mocker.reset_mock calls reset_mock on adapter
-        with patch.object(mocker._adapter, 'reset_mock') as m_adapter_reset:
-            mocker.reset_mock()
-            # Assert adapter reset calls reset on matcher
-            m_adapter_reset.assert_called_once()
+            # Verify mocker.reset_mock calls reset_mock on adapter
+            with patch.object(mocker._adapter, 'reset_mock') as m_adapter_reset:
+                mocker.reset_mock()
+                # Assert adapter reset calls reset on matcher
+                m_adapter_reset.assert_called_once()
 
 
 class MockerHttpMethodsTests(base.TestCase):
