@@ -20,7 +20,11 @@ from six.moves.urllib import parse as urlparse
 
 import requests_mock
 from . import base
-from unittest.mock import patch
+
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 
 class MyExc(Exception):

@@ -14,7 +14,7 @@ import re
 
 from requests_mock import adapter
 from . import base
-from unittest.mock import MagicMock
+from requests_mock.response import _MatcherResponse
 
 ANY = adapter.ANY
 
@@ -300,7 +300,7 @@ class TestMatcher(base.TestCase):
         url = 'mock://test/site/'
         matcher = adapter._Matcher('GET',
                                    url,
-                                   [MagicMock()],
+                                   [_MatcherResponse()],
                                    complete_qs=False,
                                    additional_matcher=None,
                                    request_headers={},

@@ -309,7 +309,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         self._matchers.append(matcher)
 
     def reset_mock(self):
-        super().reset_mock()
+        super(Adapter, self).reset_mock()
         for matcher in self._matchers:
             matcher.reset_mock()
 

@@ -20,7 +20,11 @@ from requests_mock import adapter
 from requests_mock import exceptions
 from requests_mock import response
 from . import base
-from unittest.mock import patch
+
+try:
+    from unittest.mock import patch
+except ImportError:
+    from mock import patch
 
 original_send = requests.Session.send
 
