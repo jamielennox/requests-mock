@@ -244,16 +244,16 @@ class MockerTests(base.TestCase):
         self.assertEqual(copy_of_mocker.real_http, mocker.real_http)
 
     @requests_mock.mock()
-    def test_reset_mock_reverts_call_count(self, m):
+    def test_reset_mock_reverts_call_count(self, request_mock):
         url = 'http://test.url/path'
-        m.get(url, text='resp')
-        resp = requests.get(url)
+        request_mock.get(url, text='resp')
+        requests.get(url)
 
-        self.assertEqual(m.call_count, 1)
+        self.assertEqual(request_mock.call_count, 1)
 
         # reset count and verify it is 0
-        m.reset_mock()
-        self.assertEqual(m.call_count, 0)
+        request_mock.reset_mock()
+        self.assertEqual(request_mock.call_count, 0)
 
 
 class MockerHttpMethodsTests(base.TestCase):
