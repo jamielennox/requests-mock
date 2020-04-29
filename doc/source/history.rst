@@ -84,7 +84,7 @@ For mocks, use "reset_mock" method.
     >>> m.call_count
     0
 
-For adapters and matchers, there is a "reset" method.
+For adapters and matchers, there is a "reset" method. Resetting the adapter also resets the associated matchers.
 
 .. doctest::
 
@@ -101,6 +101,8 @@ For adapters and matchers, there is a "reset" method.
     >>> matcher.called  # Reset adapter also resets associated matchers
     False
 
+However, resetting the matcher does not reset the adapter.
+
 .. doctest::
 
     >>> session.get('mock://test.com')
@@ -109,5 +111,5 @@ For adapters and matchers, there is a "reset" method.
     >>> matcher.reset()
     >>> matcher.called
     False
-    >>> adapter.called()  # Reset matcher does not reset adapter
+    >>> adapter.called  # Reset matcher does not reset adapter
     True
