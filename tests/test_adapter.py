@@ -390,7 +390,7 @@ class SessionAdapterTests(base.TestCase):
         for i in range(matcher_count):
             url = self.url + str(i)
             m = self.adapter.register_uri('GET', url, text='resp')
-            for j in range(call_count):
+            for _ in range(call_count):
                 self.session.get(url)
 
         # Verify call counts on adapter and matchers
