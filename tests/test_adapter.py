@@ -21,11 +21,6 @@ from six.moves.urllib import parse as urlparse
 import requests_mock
 from . import base
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
-
 
 class MyExc(Exception):
     pass
@@ -388,23 +383,27 @@ class SessionAdapterTests(base.TestCase):
         self.assertTrue(self.adapter.called)
         self.assertFalse(m.called_once)
 
-    def test_called_and_reset(self):
-        m = self.adapter.register_uri('GET', self.url, text='resp')
+    def test_reset_reverts_call_count(self):
+        # Create matchers and add calls to history
         call_count = 3
+        matcher_count = 3
+        for i in range(matcher_count):
+            url = self.url + str(i)
+            m = self.adapter.register_uri('GET', url, text='resp')
+            for j in range(call_count):
+                self.session.get(url)
 
-        for _ in range(0, call_count):
-            self.session.get(self.url)
+        # Verify call counts on adapter and matchers
+        self.assertEqual(self.adapter.call_count, matcher_count * call_count)
+        for m in self.adapter._matchers:
+            self.assertEqual(m.call_count, call_count)
 
-        # Verify count is expected value for adapter and matcher
-        self.assertEqual(self.adapter.call_count, call_count)
-        self.assertEqual(m.call_count, call_count)
+        self.adapter.reset()
 
-        with patch.object(m, 'reset_mock') as m_matcher_reset:
-            self.adapter.reset_mock()
-            # Assert adapter reset calls reset on matcher
-            m_matcher_reset.assert_called_once()
-
+        # Verify call counts are 0 after reset
         self.assertEqual(self.adapter.call_count, 0)
+        for m in self.adapter._matchers:
+            self.assertEqual(m.call_count, 0)
 
     def test_adapter_picks_correct_adapter(self):
         good = '%s://test3.url/' % self.PREFIX

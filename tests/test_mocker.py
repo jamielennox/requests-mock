@@ -21,11 +21,6 @@ from requests_mock import exceptions
 from requests_mock import response
 from . import base
 
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
-
 original_send = requests.Session.send
 
 
@@ -248,15 +243,17 @@ class MockerTests(base.TestCase):
         self.assertEqual(copy_of_mocker._kw, mocker._kw)
         self.assertEqual(copy_of_mocker.real_http, mocker.real_http)
 
-    def test_reset_mock_calls_adapter_reset_mock(self):
-        with requests_mock.Mocker() as mocker:
-            self.assertMockStarted()
+    @requests_mock.mock()
+    def test_reset_mock_reverts_call_count(self, m):
+        url = 'http://test.url/path'
+        m.get(url, text='resp')
+        resp = requests.get(url)
 
-            # Verify mocker.reset_mock calls reset_mock on adapter
-            with patch.object(mocker._adapter, 'reset_mock') as m_adapter_reset:
-                mocker.reset_mock()
-                # Assert adapter reset calls reset on matcher
-                m_adapter_reset.assert_called_once()
+        self.assertEqual(m.call_count, 1)
+
+        # reset count and verify it is 0
+        m.reset_mock()
+        self.assertEqual(m.call_count, 0)
 
 
 class MockerHttpMethodsTests(base.TestCase):

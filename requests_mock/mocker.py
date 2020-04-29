@@ -42,7 +42,6 @@ class MockerCore(object):
         'called',
         'called_once',
         'call_count',
-        'reset_mock',
     }
 
     case_sensitive = False
@@ -137,6 +136,9 @@ class MockerCore(object):
         if self._last_send:
             requests.Session.send = self._last_send
             self._last_send = None
+
+    def reset_mock(self):
+        self._adapter.reset()
 
     def __getattr__(self, name):
         if name in self._PROXY_FUNCS:
