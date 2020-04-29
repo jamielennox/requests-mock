@@ -402,8 +402,8 @@ class SessionAdapterTests(base.TestCase):
 
         # Verify call counts are 0 after reset
         self.assertEqual(self.adapter.call_count, 0)
-        for m in self.adapter._matchers:
-            self.assertEqual(m.call_count, 0)
+        for matcher in self.adapter._matchers:
+            self.assertEqual(matcher.call_count, 0)
 
     def test_adapter_picks_correct_adapter(self):
         good = '%s://test3.url/' % self.PREFIX
