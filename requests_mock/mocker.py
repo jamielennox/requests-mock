@@ -42,6 +42,7 @@ class MockerCore(object):
         'called',
         'called_once',
         'call_count',
+        'reset',
     }
 
     case_sensitive = False
@@ -138,8 +139,9 @@ class MockerCore(object):
             requests.Session.send = self._last_send
             self._last_send = None
 
+    # for familiarity with MagicMock
     def reset_mock(self):
-        self._adapter.reset()
+        self.reset()
 
     def __getattr__(self, name):
         if name in self._PROXY_FUNCS:
