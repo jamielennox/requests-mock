@@ -62,6 +62,9 @@ class _RequestHistoryTracker(object):
     def call_count(self):
         return len(self.request_history)
 
+    def reset(self):
+        self.request_history = []
+
 
 class _RunRealHTTP(Exception):
     """A fake exception to jump out of mocking and allow a real request.
@@ -304,6 +307,11 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         :param callable matcher: The matcher to execute.
         """
         self._matchers.append(matcher)
+
+    def reset(self):
+        super(Adapter, self).reset()
+        for matcher in self._matchers:
+            matcher.reset()
 
 
 __all__ = ['Adapter']

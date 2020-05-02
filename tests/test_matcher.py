@@ -14,6 +14,7 @@ import re
 
 from requests_mock import adapter
 from . import base
+from requests_mock.response import _MatcherResponse
 
 ANY = adapter.ANY
 
@@ -294,3 +295,23 @@ class TestMatcher(base.TestCase):
                            matcher_method='POST',
                            request_data='goodbye world',
                            additional_matcher=test_match_body)
+
+    def test_reset_reverts_count(self):
+        url = 'mock://test/site/'
+        matcher = adapter._Matcher('GET',
+                                   url,
+                                   [_MatcherResponse()],
+                                   complete_qs=False,
+                                   additional_matcher=None,
+                                   request_headers={},
+                                   real_http=False,
+                                   case_sensitive=False)
+        request = adapter._RequestObjectProxy._create('GET', url)
+
+        call_count = 3
+        for _ in range(call_count):
+            matcher(request)
+
+        self.assertEqual(matcher.call_count, call_count)
+        matcher.reset()
+        self.assertEqual(matcher.call_count, 0)

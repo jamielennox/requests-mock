@@ -138,6 +138,9 @@ class MockerCore(object):
             requests.Session.send = self._last_send
             self._last_send = None
 
+    def reset_mock(self):
+        self._adapter.reset()
+
     def __getattr__(self, name):
         if name in self._PROXY_FUNCS:
             try:

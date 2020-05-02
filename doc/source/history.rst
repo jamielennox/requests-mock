@@ -66,3 +66,50 @@ The following parameters of the :py:func:`requests.request` call are also expose
 :cert: The client certificate or cert/key tuple for this request.
 
 Note: That the default value of these attributes are the values that are passed to the adapter and not what is passed to the request method. This means that the default for allow_redirects is None (even though that is interpretted as True) if unset, whereas the defautl for verify is True, and the default for proxies the empty dict.
+
+Reset History
+===============
+
+For mocks, adapters, and matchers, the history can be reset. This can be useful when testing complex code with multiple requests. 
+
+For mocks, use "reset_mock" method.
+
+.. doctest::
+
+    >>> m.called
+    True
+    >>> m.reset_mock()
+    >>> m.called
+    False
+    >>> m.call_count
+    0
+
+For adapters and matchers, there is a "reset" method. Resetting the adapter also resets the associated matchers.
+
+.. doctest::
+
+    >>> adapter = requests_mock.adapter.Adapter()
+    >>> matcher = adapter.register_uri('GET', 'mock://test.com', text='resp')
+    >>> session = requests.Session()
+    >>> session.mount('mock://', adapter)
+    >>> session.get('mock://test.com')
+    >>> adapter.called
+    True
+    >>> adapter.reset()
+    >>> adapter.called
+    False
+    >>> matcher.called  # Reset adapter also resets associated matchers
+    False
+
+However, resetting the matcher does not reset the adapter.
+
+.. doctest::
+
+    >>> session.get('mock://test.com')
+    >>> matcher.called
+    True
+    >>> matcher.reset()
+    >>> matcher.called
+    False
+    >>> adapter.called  # Reset matcher does not reset adapter
+    True
