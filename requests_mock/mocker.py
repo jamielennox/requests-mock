@@ -30,8 +30,11 @@ _original_send = requests.Session.send
 
 
 def _set_method(target, name, method):
-    # target can be either an instancemethod of classmethod of requests.Session
-    # support both options
+    """ Set a mocked method onto the target.
+
+    Target may be either an instance of a Session object of the
+    requests.Session class. First we Bind the method if it's an instance.
+    """
     if not isinstance(target, type):
         method = six.create_bound_method(method, target)
 
@@ -77,8 +80,11 @@ class MockerCore(object):
     This will become the default in a 2.X release. See bug: #1584008.
     """
 
-    def __init__(self, **kwargs):
-        self._mock_target = kwargs.pop('session', requests.Session)
+    def __init__(self, session=None, **kwargs):
+        if session and not isinstance(session, requests.Session):
+            raise TypeError("Only a requests.Session object can be mocked")
+
+        self._mock_target = session or requests.Session
         self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
         self._adapter = (
             kwargs.pop('adapter', None) or
