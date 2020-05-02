@@ -50,6 +50,19 @@ def test_redirect_and_nesting():
         assert 'outer' + url_outer == requests.get(url_outer).text  # nosec
 
 
+def test_mixed_mocks():
+    url = 'mock://example.test/'
+    with requests_mock.Mocker() as global_mock:
+        global_mock.get(url, text='global')
+        session = requests.Session()
+        text = session.get(url).text
+        assert text == 'global'  # nosec
+        with requests_mock.Mocker(session=session) as session_mock:
+            session_mock.get(url, real_http=True)
+            text = session.get(url).text
+            assert text == 'global'  # nosec
+
+
 class TestClass(object):
 
     def configure(self, requests_mock):

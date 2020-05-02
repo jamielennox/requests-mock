@@ -383,6 +383,28 @@ class SessionAdapterTests(base.TestCase):
         self.assertTrue(self.adapter.called)
         self.assertFalse(m.called_once)
 
+    def test_reset_reverts_call_count(self):
+        # Create matchers and add calls to history
+        call_count = 3
+        matcher_count = 3
+        for i in range(matcher_count):
+            url = self.url + str(i)
+            self.adapter.register_uri('GET', url, text='resp')
+            for _ in range(call_count):
+                self.session.get(url)
+
+        # Verify call counts on adapter and matchers
+        self.assertEqual(self.adapter.call_count, matcher_count * call_count)
+        for matcher in self.adapter._matchers:
+            self.assertEqual(matcher.call_count, call_count)
+
+        self.adapter.reset()
+
+        # Verify call counts are 0 after reset
+        self.assertEqual(self.adapter.call_count, 0)
+        for matcher in self.adapter._matchers:
+            self.assertEqual(matcher.call_count, 0)
+
     def test_adapter_picks_correct_adapter(self):
         good = '%s://test3.url/' % self.PREFIX
         self.adapter.register_uri('GET',

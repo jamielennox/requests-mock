@@ -31,14 +31,15 @@ A simple example:
 
     >>> session = requests.Session()
     >>> adapter = requests_mock.Adapter()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
     >>> adapter.register_uri('GET', 'mock://test.com', text='data')
     >>> resp = session.get('mock://test.com')
     >>> resp.status_code, resp.text
     (200, 'data')
 
-Obviously having all URLs be `mock://` prefixed isn't going to useful, so you can use `requests_mock.mock` to get the adapter into place.
+Obviously having all URLs be `mock://` prefixed isn't going to be useful,
+so you can use `requests_mock.Mocker` to get the adapter into place.
 
 As a context manager:
 

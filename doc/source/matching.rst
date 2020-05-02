@@ -12,7 +12,7 @@ The examples in this file are loaded with:
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. note::
 
@@ -29,6 +29,9 @@ The examples in this file are loaded with:
 
         adapter.register_uri('GET', url, ...)
 
+    If you are not familiar with `requests <https://requests.readthedocs.io/>`_' adapters (see :ref:`Adapter`),
+    prefer the mocker approach (see :ref:`Mocker`).
+
 .. doctest::
     :hide:
 
@@ -36,7 +39,7 @@ The examples in this file are loaded with:
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. note::
 
@@ -94,7 +97,7 @@ Query Strings
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 Query strings provided to a register will match so long as at least those provided form part of the request.
 
@@ -145,7 +148,7 @@ It can be used as a replace for the method and/or the URL.
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. doctest::
 
@@ -178,7 +181,7 @@ The URL is then matched using :py:meth:`re.regex.search` which means that it wil
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. doctest::
 
@@ -204,7 +207,7 @@ Only the headers that are provided need match, any additional headers will be ig
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. doctest::
 
@@ -230,7 +233,7 @@ This is handled by a callback function that takes the request as a parameter:
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. doctest::
 
@@ -265,7 +268,7 @@ If you need more flexibility than provided by :py:meth:`~requests_mock.Adapter.r
     >>> import requests_mock
     >>> adapter = requests_mock.Adapter()
     >>> session = requests.Session()
-    >>> session.mount('mock', adapter)
+    >>> session.mount('mock://', adapter)
 
 .. doctest::
 

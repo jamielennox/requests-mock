@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    Add a reset/reset_mock function to the mocker and components so that users
+    can clear the calls and history from the Mocker without clearing all the
+    matching that has been used.

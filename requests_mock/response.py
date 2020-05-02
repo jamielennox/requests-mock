@@ -180,7 +180,7 @@ def create_response(request, **kwargs):
                            body=body or _IOReader(six.b('')),
                            decode_content=False,
                            preload_content=False,
-                           original_response=compat._fake_http_response)
+                           original_response=None)
 
     response = _http_adapter.build_response(request, raw)
     response.connection = connection

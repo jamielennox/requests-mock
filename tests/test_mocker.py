@@ -49,6 +49,65 @@ class MockerTests(base.TestCase):
         self.assertMockStopped()
         mocker.stop()
 
+    def test_with_session(self):
+        url = 'http://test.url/path'
+        url_inner = 'http://test.url/inner'
+        url_outer = 'http://test.url/outer'
+        with requests_mock.Mocker() as global_mock:
+            global_mock.get(url_outer, text='global')
+
+            session_a = requests.Session()
+            session_b = requests.Session()
+
+            session_a_original_send = session_a.send
+            session_b_original_send = session_b.send
+            self.assertNotEqual(session_a_original_send, session_b_original_send)
+
+            mocker_a = requests_mock.Mocker(session=session_a)
+            mocker_b = requests_mock.Mocker(session=session_b)
+
+            mocker_a.start()
+            mocker_b.start()
+
+            mocker_a.register_uri('GET', url, text='resp_a')
+            mocker_a.register_uri('GET', url_outer, real_http=True)
+            mocker_b.register_uri('GET', url, text='resp_b')
+
+            with requests_mock.Mocker(session=session_b) as mocker_b_inner:
+                mocker_b_inner.register_uri('GET', url, real_http=True)
+                mocker_b_inner.register_uri('GET', url_inner, text='resp_b_inner')
+
+                self.assertEqual('resp_a', session_a.get(url).text)
+                self.assertEqual('resp_b', session_b.get(url).text)
+                self.assertRaises(exceptions.NoMockAddress,
+                                session_a.get,
+                                url_inner)
+                self.assertEqual('resp_b_inner', session_b.get(url_inner).text)
+
+            self.assertEqual('resp_a', session_a.get(url).text)
+            self.assertEqual('resp_b', session_b.get(url).text)
+            self.assertRaises(exceptions.NoMockAddress,
+                                session_a.get,
+                                url_inner)
+            self.assertRaises(exceptions.NoMockAddress,
+                                session_b.get,
+                                url_inner)
+            self.assertEqual('global', session_a.get(url_outer).text)
+            self.assertRaises(exceptions.NoMockAddress,
+                                session_b.get,
+                                url_outer)
+
+            self.assertNotEqual(session_a.send, session_a_original_send)
+            self.assertNotEqual(session_b.send, session_b_original_send)
+            self.assertNotEqual(session_a.send, session_b.send)
+
+            mocker_a.stop()
+            mocker_b.stop()
+
+            self.assertEqual(session_a.send, session_a_original_send)
+            self.assertEqual(session_b.send, session_b_original_send)
+        self.assertEqual(requests.Session.send, original_send)
+
     def test_with_context_manager(self):
         self.assertMockStopped()
         with requests_mock.Mocker() as m:
