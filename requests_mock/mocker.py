@@ -13,6 +13,7 @@
 import functools
 
 import requests
+import six
 
 from requests_mock import adapter
 from requests_mock import exceptions
@@ -29,17 +30,12 @@ _original_send = requests.Session.send
 
 
 def _set_method(target, name, method):
-    # target is either a class or an instance
-    # name is the name of the method
-    # method is a class style method (taking self as a first argument)
-    if isinstance(target, type):
-        # target is a class
-        setattr(target, name, method)
-    else:
-        # target is an instance
-        def wrapped_method(*args, **kwargs):
-            return method(target, *args, **kwargs)
-        setattr(target, name, wrapped_method)
+    # target can be either an instancemethod of classmethod of requests.Session
+    # support both options
+    if not isinstance(target, type):
+        method = six.create_bound_method(method, target)
+
+    setattr(target, name, method)
 
 
 class MockerCore(object):
@@ -105,17 +101,6 @@ class MockerCore(object):
 
         # backup last `send` for restoration on `self.stop`
         self._last_send = self._mock_target.send
-
-        # backup last `send` for call in `_fake_send`
-        # (with `session` as first arg)
-        if isinstance(self._mock_target, type):
-            self._last_send_with_session = self._last_send
-        else:
-            self._last_send_with_session = (
-                lambda session, *args, **kwargs:
-                self._last_send(*args, **kwargs)
-            )
-
         self._last_get_adapter = self._mock_target.get_adapter
 
         def _fake_get_adapter(session, url):
@@ -151,9 +136,10 @@ class MockerCore(object):
             # if we are here it means we must run the real http request
             # Or, with nested mocks, to the parent mock, that is why we use
             # _last_send here instead of _original_send
-            # _last_send might not take session as an argument,
-            # we use the unwrapped version
-            return self._last_send_with_session(session, request, **kwargs)
+            if isinstance(self._mock_target, type):
+                return self._last_send(session, request, **kwargs)
+            else:
+                return self._last_send(request, **kwargs)
 
         _set_method(self._mock_target, "send", _fake_send)
 
