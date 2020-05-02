@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    Allow mocking of only a single Session object. While there has always been
+    the option of adding just the Adapter to an existing Session, this is more
+    difficult to work with than the Mocker workflow that is typically used. You
+    can now pass a Session object to a Mocker and it will provide the standard
+    workflow but limited to just that object.
