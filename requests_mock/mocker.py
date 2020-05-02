@@ -13,6 +13,7 @@
 import functools
 
 import requests
+import six
 
 from requests_mock import adapter
 from requests_mock import exceptions
@@ -26,6 +27,18 @@ POST = 'POST'
 PUT = 'PUT'
 
 _original_send = requests.Session.send
+
+
+def _set_method(target, name, method):
+    """ Set a mocked method onto the target.
+
+    Target may be either an instance of a Session object of the
+    requests.Session class. First we Bind the method if it's an instance.
+    """
+    if not isinstance(target, type):
+        method = six.create_bound_method(method, target)
+
+    setattr(target, name, method)
 
 
 class MockerCore(object):
@@ -68,7 +81,11 @@ class MockerCore(object):
     This will become the default in a 2.X release. See bug: #1584008.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, session=None, **kwargs):
+        if session and not isinstance(session, requests.Session):
+            raise TypeError("Only a requests.Session object can be mocked")
+
+        self._mock_target = session or requests.Session
         self.case_sensitive = kwargs.pop('case_sensitive', self.case_sensitive)
         self._adapter = (
             kwargs.pop('adapter', None) or
@@ -89,15 +106,16 @@ class MockerCore(object):
         if self._last_send:
             raise RuntimeError('Mocker has already been started')
 
-        self._last_send = requests.Session.send
-        self._last_get_adapter = requests.Session.get_adapter
+        # backup last `send` for restoration on `self.stop`
+        self._last_send = self._mock_target.send
+        self._last_get_adapter = self._mock_target.get_adapter
 
         def _fake_get_adapter(session, url):
             return self._adapter
 
         def _fake_send(session, request, **kwargs):
             # mock get_adapter
-            requests.Session.get_adapter = _fake_get_adapter
+            _set_method(session, "get_adapter", _fake_get_adapter)
 
             # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
             # seems like here we would use _last_send there is the possibility
@@ -120,14 +138,17 @@ class MockerCore(object):
                 pass
             finally:
                 # restore get_adapter
-                requests.Session.get_adapter = self._last_get_adapter
+                _set_method(session, "get_adapter", self._last_get_adapter)
 
             # if we are here it means we must run the real http request
             # Or, with nested mocks, to the parent mock, that is why we use
             # _last_send here instead of _original_send
-            return self._last_send(session, request, **kwargs)
+            if isinstance(self._mock_target, type):
+                return self._last_send(session, request, **kwargs)
+            else:
+                return self._last_send(request, **kwargs)
 
-        requests.Session.send = _fake_send
+        _set_method(self._mock_target, "send", _fake_send)
 
     def stop(self):
         """Stop mocking requests.
@@ -136,7 +157,7 @@ class MockerCore(object):
         When nesting mockers, make sure to stop the innermost first.
         """
         if self._last_send:
-            requests.Session.send = self._last_send
+            self._mock_target.send = self._last_send
             self._last_send = None
 
     # for familiarity with MagicMock
