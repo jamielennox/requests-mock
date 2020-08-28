@@ -11,7 +11,6 @@
 # under the License.
 
 import json as jsonutils
-import urllib
 
 from requests.adapters import HTTPAdapter
 from requests.cookies import MockRequest, MockResponse
@@ -136,7 +135,7 @@ def create_set_cookie_header(response, jar):
     """
     set_cookie_items = []
     for cookie_name, cookie_value in response.cookies.items():
-        set_cookie_items.append(cookie_name + '=' + urllib.parse.quote(cookie_value))
+        set_cookie_items.append(cookie_name + '=' + six.moves.urllib.parse.quote(cookie_value))
     
     set_cookie_header = "; ".join(set_cookie_items)
 
