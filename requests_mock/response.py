@@ -11,6 +11,7 @@
 # under the License.
 
 import json as jsonutils
+import urllib
 
 from requests.adapters import HTTPAdapter
 from requests.cookies import MockRequest, MockResponse
@@ -128,6 +129,21 @@ class _IOReader(six.BytesIO):
         return result
 
 
+def create_set_cookie_header(response, jar):
+    """
+    :param requests.packages.urllib3.response response: the Response that will be updated with the Set-Cookie header
+    :param requests.cookies.RequestsCookieJar jar: a CookieJar containing all cookies to be converted in a Set-Cookie header
+    """
+    set_cookie_items = []
+    for cookie_name, cookie_value in response.cookies.items():
+        set_cookie_items.append(cookie_name + '=' + urllib.parse.quote(cookie_value))
+    
+    set_cookie_header = "; ".join(set_cookie_items)
+
+    if set_cookie_header:
+        response.headers["Set-Cookie"] = set_cookie_header
+
+
 def create_response(request, **kwargs):
     """
     :param int status_code: The status code to return upon a successful
@@ -189,6 +205,9 @@ def create_response(request, **kwargs):
         response.encoding = encoding
 
     _extract_cookies(request, response, kwargs.get('cookies'))
+
+    create_set_cookie_header(response, response.cookies)
+    response.raw._original_response = compat._FakeHTTPResponse(response.headers)
 
     return response
 
