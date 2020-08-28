@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import requests
-
 
 class _FakeHTTPMessage(object):
 
@@ -33,10 +31,10 @@ class _FakeHTTPMessage(object):
 
 
 class _FakeHTTPResponse(object):
-    
+
     def __init__(self, headers):
         self._headers = headers
         self.msg = _FakeHTTPMessage(headers)
-    
+
     def isclosed(self):
         return True
