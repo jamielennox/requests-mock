@@ -181,9 +181,9 @@ class MockerTests(base.TestCase):
                                                           status_code=200,
                                                           content=test_bytes)
 
-        s = requests.Session()
-        with requests_mock.Mocker(session=s, real_http=True) as m:
-            resp = s.get(url)
+        session = requests.Session()
+        with requests_mock.Mocker(session=session, real_http=True):
+            resp = session.get(url)
 
         self.assertEqual(test_text, resp.text)
         self.assertEqual(test_bytes, resp.content)
