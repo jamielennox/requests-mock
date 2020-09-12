@@ -11,6 +11,7 @@
 # under the License.
 
 import functools
+import types
 
 import requests
 import six
@@ -34,8 +35,10 @@ def _set_method(target, name, method):
 
     Target may be either an instance of a Session object of the
     requests.Session class. First we Bind the method if it's an instance.
+
+    If method is a bound_method, can direct setattr
     """
-    if not isinstance(target, type):
+    if not isinstance(target, type) and not isinstance(method, types.MethodType):
         method = six.create_bound_method(method, target)
 
     setattr(target, name, method)
