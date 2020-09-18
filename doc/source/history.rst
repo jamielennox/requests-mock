@@ -15,7 +15,7 @@ The easiest way to test if a request hit the adapter is to simply check the call
     >>> import requests_mock
 
     >>> with requests_mock.mock() as m:
-    ...     m.get('http://test.com, text='resp')
+    ...     m.get('http://test.com', text='resp')
     ...     resp = requests.get('http://test.com')
     ...
     >>> m.called
