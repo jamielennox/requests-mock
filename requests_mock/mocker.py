@@ -30,7 +30,7 @@ PUT = 'PUT'
 _original_send = requests.Session.send
 
 
-def is_bound_method(method):
+def _is_bound_method(method):
     """
     bound_method 's self is a obj
     unbound_method 's self is None
@@ -48,7 +48,7 @@ def _set_method(target, name, method):
 
     If method is a bound_method, can direct setattr
     """
-    if not isinstance(target, type) and not is_bound_method(method):
+    if not isinstance(target, type) and not _is_bound_method(method):
         method = six.create_bound_method(method, target)
 
     setattr(target, name, method)
