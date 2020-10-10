@@ -37,4 +37,32 @@ jobs:
         run: python setup.py testr
 
       - name: Test PyTest
-        run: pytest --junitxml=junit/unittest-results-${{ matrix.python-version }}.xml tests/pytest
+        run: pytest tests/pytest
+
+  oldest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('oldest-requirements.txt') }}-${{ hashFiles('test-requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r oldest-requirements.txt -r test-requirements.txt pbr
+          pip install -e .
+
+      - name: Test Testtools
+        run: python setup.py testr
+
+      - name: Test PyTest
+        run: pytest tests/pytest
