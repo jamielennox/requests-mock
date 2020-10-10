@@ -53,7 +53,7 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('oldest-requirements.txt') }}-${{ hashFiles('test-requirements.txt') }}
+          key: ${{ runner.os }}-oldest-${{ hashFiles('oldest-requirements.txt') }}-${{ hashFiles('test-requirements.txt') }}
 
       - name: Install dependencies
         run: |
