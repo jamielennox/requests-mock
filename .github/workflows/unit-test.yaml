@@ -38,10 +38,3 @@ jobs:
 
       - name: Test PyTest
         run: pytest --junitxml=junit/unittest-results-${{ matrix.python-version }}.xml tests/pytest
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: pytest-results-${{ matrix.python-version }}
-          path: junit/unittest-results-${{ matrix.python-version }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
-        if: ${{ always() }}
