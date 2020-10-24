@@ -21,10 +21,6 @@ workflows:
   build_and_release:
     jobs:
       - pypi:
-          requires:
-            - py27
-            - py36
-            - oldest
           filters:
             branches:
               ignore: /.*/
