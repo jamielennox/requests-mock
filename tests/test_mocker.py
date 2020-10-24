@@ -173,6 +173,24 @@ class MockerTests(base.TestCase):
         self.assertEqual(test_text, resp.text)
         self.assertEqual(test_bytes, resp.content)
 
+    @mock.patch('requests.adapters.HTTPAdapter.send')
+    def test_real_http_and_session(self, real_send):
+        url = 'http://www.google.com/'
+        test_text = 'real http data'
+        test_bytes = test_text.encode('utf-8')
+
+        req = requests.Request(method='GET', url=url)
+        real_send.return_value = response.create_response(req.prepare(),
+                                                          status_code=200,
+                                                          content=test_bytes)
+
+        session = requests.Session()
+        with requests_mock.Mocker(session=session, real_http=True):
+            resp = session.get(url)
+
+        self.assertEqual(test_text, resp.text)
+        self.assertEqual(test_bytes, resp.content)
+
     @requests_mock.mock()
     def test_with_test_decorator(self, m):
         self._do_test(m)

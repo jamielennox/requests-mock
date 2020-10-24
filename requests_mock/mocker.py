@@ -11,6 +11,7 @@
 # under the License.
 
 import functools
+import types
 
 import requests
 import six
@@ -29,13 +30,25 @@ PUT = 'PUT'
 _original_send = requests.Session.send
 
 
+def _is_bound_method(method):
+    """
+    bound_method 's self is a obj
+    unbound_method 's self is None
+    """
+    if isinstance(method, types.MethodType) and six.get_method_self(method):
+        return True
+    return False
+
+
 def _set_method(target, name, method):
     """ Set a mocked method onto the target.
 
     Target may be either an instance of a Session object of the
     requests.Session class. First we Bind the method if it's an instance.
+
+    If method is a bound_method, can direct setattr
     """
-    if not isinstance(target, type):
+    if not isinstance(target, type) and not _is_bound_method(method):
         method = six.create_bound_method(method, target)
 
     setattr(target, name, method)
