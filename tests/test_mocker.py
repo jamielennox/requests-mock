@@ -569,3 +569,16 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertEqual(text, new_resp.text)
         self.assertIsInstance(orig_resp.request.matcher, adapter._Matcher)
         self.assertIsNone(new_resp.request.matcher)
+
+    @requests_mock.mock()
+    def test_stream_zero_bytes(self, m):
+        content = b'blah'
+
+        m.get("http://test", content=content)
+        res = requests.get("http://test", stream=True)
+        zero_val = res.raw.read(0)
+        self.assertEqual(b'', zero_val)
+        self.assertFalse(res.raw.closed)
+
+        full_val = res.raw.read()
+        self.assertEqual(content, full_val)

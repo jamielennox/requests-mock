@@ -116,6 +116,11 @@ class _IOReader(six.BytesIO):
         if self.closed:
             return six.b('')
 
+        # if the file is open, but you asked for zero bytes read you should get
+        # back zero without closing the stream.
+        if len(args) > 0 and args[0] == 0:
+            return six.b('')
+
         # not a new style object in python 2
         result = six.BytesIO.read(self, *args, **kwargs)
 
