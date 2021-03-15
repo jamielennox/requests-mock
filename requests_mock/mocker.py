@@ -251,7 +251,7 @@ class Mocker(MockerCore):
     def copy(self):
         """Returns an exact copy of current mock
         """
-        m = Mocker(
+        m = type(self)(
             kw=self._kw,
             real_http=self.real_http,
             case_sensitive=self.case_sensitive
