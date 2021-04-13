@@ -1,0 +1,5 @@
+---
+fixes:
+  - Fix [#148](https://github.com/jamielennox/requests-mock/issues/158). When
+    you have a non url-safe character in your URL it is quoted by requests
+    however requests-mock just treated it as a normal string.

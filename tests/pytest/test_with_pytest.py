@@ -15,9 +15,9 @@ def test_simple(requests_mock):
 
 
 def test_redirect_and_nesting():
-    url_inner = "inner_mock://example.test/"
-    url_middle = "middle_mock://example.test/"
-    url_outer = "outer_mock://example.test/"
+    url_inner = "inner-mock://example.test/"
+    url_middle = "middle-mock://example.test/"
+    url_outer = "outer-mock://example.test/"
     url_base = "https://www.example.com/"
 
     text_middle = 'middle' + url_middle
