@@ -1,6 +1,12 @@
 name: Upload Python Package
 
 on:
+  push:
+    branches:
+      - publish-action
+    tags:
+      - "test-v*"
+
   release:
     types: [created]
 
