@@ -2,16 +2,12 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - publish-action
-
     tags:
-      - 'test-v*'
-      # - 'v*'
+      - 'v*'
 
 jobs:
   build:
-    name: Create Release
+    name: Build Release Objects
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -55,9 +51,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ github.ref }}
-          prerelease: true
-          draft: true
+          # name: ${{ github.ref }}
+          # prerelease: true
+          # draft: true
           files: |
             dist/*
 
@@ -76,7 +72,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          # password: ${{ secrets.PYPI_TOKEN }}
-          password: ${{ secrets.TEST_PYPI_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
           packages_dir: dist/
+          password: ${{ secrets.PYPI_TOKEN }}
+          # password: ${{ secrets.TEST_PYPI_TOKEN }}
+          # repository_url: https://test.pypi.org/legacy/
