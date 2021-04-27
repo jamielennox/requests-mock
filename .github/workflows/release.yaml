@@ -47,6 +47,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: dist
+          path: dist
 
       - name: Create Release
         id: create_release
@@ -69,6 +70,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: dist
+          path: dist
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
@@ -77,3 +79,4 @@ jobs:
           # password: ${{ secrets.PYPI_TOKEN }}
           password: ${{ secrets.TEST_PYPI_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
+          packages_dir: dist/
