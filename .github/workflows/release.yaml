@@ -2,6 +2,9 @@ name: Create Release
 
 on:
   push:
+    branches:
+      - publish-action
+
     tags:
       - 'test-v*'
       # - 'v*'
