@@ -1,0 +1,3 @@
+---
+fixes:
+  - A py.typed file is required to enable type annotations for the package. Add to pack for re-release.
