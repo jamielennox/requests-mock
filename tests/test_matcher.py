@@ -141,8 +141,6 @@ class TestMatcher(base.TestCase):
                              'http://www.test.com/abc')
         self.assertMatchBoth('http://www.test.com:5000/abc',
                              'http://www.test.com:5000/abc')
-        self.assertMatchBoth('http://www.test.com/a string%url',
-                             'http://www.test.com/a string%url')
 
         self.assertNoMatchBoth('https://www.test.com',
                                'http://www.test.com')
