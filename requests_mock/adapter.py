@@ -13,6 +13,7 @@
 import weakref
 
 from requests.adapters import BaseAdapter
+from requests.utils import requote_uri
 import six
 from six.moves.urllib import parse as urlparse
 
@@ -102,7 +103,7 @@ class _Matcher(_RequestHistoryTracker):
             url_parts = urlparse.urlparse(url)
             self._scheme = url_parts.scheme.lower()
             self._netloc = url_parts.netloc.lower()
-            self._path = urlparse.quote(url_parts.path or '/')
+            self._path = requote_uri(url_parts.path or '/')
             self._query = url_parts.query
 
             if not case_sensitive:
