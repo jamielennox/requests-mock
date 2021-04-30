@@ -1,0 +1,3 @@
+---
+fixes:
+  - As part of 1.9.0 we started quoting unsafe URL characters. This was done incorrectly that meant we requoted existing quoted strings. Fixes #170.
