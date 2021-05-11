@@ -30,7 +30,8 @@ class MockerCore:
     def call_count(self) -> int: ...
     def register_uri(
       self,
-      method: str,
+      method: Union[str, Any],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -38,7 +39,8 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def request(
       self,
-      method: str,
+      method: Union[str, Any],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -46,7 +48,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def get(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -54,7 +56,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def head(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -62,7 +64,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def options(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -70,7 +72,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def post(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -78,7 +80,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def put(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -86,7 +88,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def patch(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -94,7 +96,7 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def delete(
       self,
-      path: Union[str, Pattern[str]],
+      url: Union[str, Pattern[str], Any],
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
