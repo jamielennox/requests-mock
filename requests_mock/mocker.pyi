@@ -1,5 +1,6 @@
 # Stubs for requests_mock.mocker
 
+from requests_mock.adapter import AnyMatcher
 from requests import Response
 from requests_mock.request import _RequestObjectProxy
 from typing import Any, Callable, Dict, List, Optional, Pattern, Type, TypeVar, Union
@@ -30,8 +31,11 @@ class MockerCore:
     def call_count(self) -> int: ...
     def register_uri(
       self,
-      method: Union[str, Any],
-      url: Union[str, Pattern[str], Any],
+      method: Union[str, AnyMatcher],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -39,8 +43,11 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def request(
       self,
-      method: Union[str, Any],
-      url: Union[str, Pattern[str], Any],
+      method: Union[str, AnyMatcher],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -48,7 +55,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def get(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -56,7 +66,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def head(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -64,7 +77,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def options(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -72,7 +88,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def post(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -80,7 +99,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def put(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -88,7 +110,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def patch(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
@@ -96,7 +121,10 @@ class MockerCore:
       **kwargs: Any) -> Response: ...
     def delete(
       self,
-      url: Union[str, Pattern[str], Any],
+      url: Union[str, Pattern[str], AnyMatcher],
+      response_list: Optional[List[Dict[str, Any]]] = ...,
+      request_headers: Dict[str, str] = ...,
+      complete_qs: bool = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
