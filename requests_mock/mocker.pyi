@@ -31,6 +31,7 @@ class MockerCore:
     def register_uri(
       self,
       method: str,
+      url: str = ...,
       status_code: int = ...,
       text: str = ...,
       headers: Optional[Dict[str, str]] = ...,
