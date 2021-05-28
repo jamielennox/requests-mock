@@ -2,9 +2,11 @@
 
 from requests.adapters import BaseAdapter
 from requests_mock import _RequestObjectProxy
-from typing import Any, List, Optional
+from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Union
 
-ANY: object = ...
+AnyMatcher = NewType("AnyMatcher", object)
+
+ANY: AnyMatcher = ...
 
 class _RequestHistoryTracker:
     request_history: List[_RequestObjectProxy] = ...
@@ -26,5 +28,17 @@ class _Matcher(_RequestHistoryTracker):
 
 class Adapter(BaseAdapter, _RequestHistoryTracker):
     def __init__(self, case_sensitive: bool = ...) -> None: ...
-    def register_uri(self, method: Any, url: Any, response_list: Optional[Any] = ..., **kwargs: Any) -> Any: ...
+    def register_uri(
+        self,
+        method: Union[str, AnyMatcher],
+        url: Union[str, Pattern[str], AnyMatcher],
+        response_list: Optional[List[Dict[str, Any]]] = ...,
+        request_headers: Dict[str, str] = ...,
+        complete_qs: bool = ...,
+        status_code: int = ...,
+        text: str = ...,
+        headers: Optional[Dict[str, str]] = ...,
+        additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
+        **kwargs: Any
+    ) -> Any: ...
     def add_matcher(self, matcher: Any) -> None: ...
