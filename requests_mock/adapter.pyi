@@ -33,6 +33,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         method: Union[str, AnyMatcher],
         url: Union[str, Pattern[str], AnyMatcher],
         response_list: Optional[List[Dict[str, Any]]] = ...,
+        *,
         request_headers: Dict[str, str] = ...,
         complete_qs: bool = ...,
         status_code: int = ...,
