@@ -1,9 +1,15 @@
 # Stubs for requests_mock.mocker
 
-from requests_mock.adapter import AnyMatcher
-from requests import Response
-from requests_mock.request import _RequestObjectProxy
+from http.cookiejar import CookieJar
+from io import IOBase
 from typing import Any, Callable, Dict, List, Optional, Pattern, Type, TypeVar, Union
+
+from requests import Response
+from requests.packages.urllib3.response import HTTPResponse
+
+from requests_mock.adapter import AnyMatcher
+from requests_mock.request import _RequestObjectProxy
+from requests_mock.response import _Context
 
 DELETE: str
 GET: str
@@ -38,8 +44,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def request(
@@ -51,8 +64,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def get(
@@ -63,8 +83,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def head(
@@ -75,8 +102,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def options(
@@ -87,8 +121,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def post(
@@ -99,8 +140,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def put(
@@ -111,8 +159,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def patch(
@@ -123,8 +178,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
     def delete(
@@ -135,8 +197,15 @@ class MockerCore:
       request_headers: Dict[str, str] = ...,
       complete_qs: bool = ...,
       status_code: int = ...,
-      text: str = ...,
-      headers: Optional[Dict[str, str]] = ...,
+      reason: str = ...,
+      headers: Dict[str, str] = ...,
+      cookies: Union[CookieJar, Dict[str, str]] = ...,
+      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      raw: HTTPResponse = ...,
+      exc: Exception = ...,
       additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
       **kwargs: Any) -> Response: ...
 
