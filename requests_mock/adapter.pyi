@@ -1,8 +1,14 @@
 # Stubs for requests_mock.adapter
 
-from requests.adapters import BaseAdapter
-from requests_mock import _RequestObjectProxy
+from http.cookiejar import CookieJar
+from io import IOBase
 from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Union
+
+from requests.adapters import BaseAdapter
+from requests.packages.urllib3.response import HTTPResponse
+
+from requests_mock.response import _Context
+from requests_mock import _RequestObjectProxy
 
 AnyMatcher = NewType("AnyMatcher", object)
 
@@ -33,11 +39,19 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         method: Union[str, AnyMatcher],
         url: Union[str, Pattern[str], AnyMatcher],
         response_list: Optional[List[Dict[str, Any]]] = ...,
+        *,
         request_headers: Dict[str, str] = ...,
         complete_qs: bool = ...,
         status_code: int = ...,
-        text: str = ...,
-        headers: Optional[Dict[str, str]] = ...,
+        reason: str = ...,
+        headers: Dict[str, str] = ...,
+        cookies: Union[CookieJar, Dict[str, str]] = ...,
+        json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
+        text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
+        content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
+        body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+        raw: HTTPResponse = ...,
+        exc: Exception = ...,
         additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
         **kwargs: Any
     ) -> Any: ...
