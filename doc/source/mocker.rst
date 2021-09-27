@@ -9,7 +9,7 @@ Its goal is to provide an interface that is as close to the real requests librar
 
 :py:class:`requests_mock.Mocker` takes two optional parameters:
 
-:real_http (bool): If True then any requests that are not handled by the mocking adapter will be forwarded to the real server (see :ref:`RealHTTP`), or the containing Mocker if applicable (see :ref:`NestingMockers`). Defaults to False.
+:real_http (bool): If :py:const:`True` then any requests that are not handled by the mocking adapter will be forwarded to the real server (see :ref:`RealHTTP`), or the containing Mocker if applicable (see :ref:`NestingMockers`). Defaults to :py:const:`False`.
 :session (requests.Session): If set, only the given session instance is mocked (see :ref:`SessionMocking`).
 
 Activation
@@ -114,7 +114,7 @@ The mocker object can be used with a similar interface to requests itself.
     'resp'
 
 
-The functions exist for the common HTTP method:
+The following functions exist for the common HTTP methods:
 
   - :py:meth:`~requests_mock.MockerCore.delete`
   - :py:meth:`~requests_mock.MockerCore.get`
