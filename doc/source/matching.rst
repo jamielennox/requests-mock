@@ -44,14 +44,14 @@ The examples in this file are loaded with:
 .. note::
 
     By default all matching is case insensitive. This can be adjusted by
-    passing case_sensitive=True when creating a mocker or adapter or globally
+    passing case_sensitive=True when creating a mocker or adapter, or globally
     by doing:
 
     .. code:: python
 
         requests_mock.mock.case_sensitive = True
 
-    for more see: :ref:`case_insensitive`
+    for more, see: :ref:`case_insensitive`
 
 Simple
 ======
@@ -191,7 +191,7 @@ The URL is then matched using :py:meth:`re.regex.search` which means that it wil
     .. >>> session.get('mock://www.tester.com/a/b').text
     .. 'resp'
 
-If you use regular expression matching then *requests-mock* can't do it's normal query string or path only matching, that will need to be part of the expression.
+If you use regular expression matching then *requests-mock* can't do its normal query string or path-only matching. That will need to be part of the expression.
 
 
 Request Headers
@@ -223,7 +223,7 @@ Only the headers that are provided need match, any additional headers will be ig
 Additional Matchers
 ===================
 
-As distinct from `Custom Matching` below we can add an additional matcher callback that lets us do more dynamic matching in addition to the standard options.
+As distinct from `Custom Matching` below, we can add an additional matcher callback that lets us do more dynamic matching in addition to the standard options.
 This is handled by a callback function that takes the request as a parameter:
 
 .. doctest::
@@ -255,11 +255,11 @@ Using this mechanism lets you do custom handling such as parsing yaml or XML str
 Custom Matching
 ===============
 
-Internally calling :py:meth:`~requests_mock.Adapter.register_uri` creates a *matcher* object for you and adds it to the list of matchers to check against.
+Internally, calling :py:meth:`~requests_mock.Adapter.register_uri` creates a *matcher* object for you and adds it to the list of matchers to check against.
 
-A *matcher* is any callable that takes a :py:class:`requests.Request` and returns a :py:class:`requests.Response` on a successful match or *None* if it does not handle the request.
+A *matcher* is any callable that takes a :py:class:`requests.Request` and returns a :py:class:`requests.Response` on a successful match or :py:const:`None` if it does not handle the request.
 
-If you need more flexibility than provided by :py:meth:`~requests_mock.Adapter.register_uri` then you can add your own *matcher* to the :py:class:`~requests_mock.Adapter`. Custom *matchers* can be used in conjunction with the inbuilt *matchers*. If a matcher returns *None* then the request will be passed to the next *matcher* as with using :py:meth:`~requests_mock.Adapter.register_uri`.
+If you need more flexibility than provided by :py:meth:`~requests_mock.Adapter.register_uri` then you can add your own *matcher* to the :py:class:`~requests_mock.Adapter`. Custom *matchers* can be used in conjunction with the inbuilt *matchers*. If a matcher returns :py:const:`None` then the request will be passed to the next *matcher* as with using :py:meth:`~requests_mock.Adapter.register_uri`.
 
 .. doctest::
     :hide:
