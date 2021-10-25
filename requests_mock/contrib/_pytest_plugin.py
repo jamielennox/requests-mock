@@ -23,6 +23,8 @@ except Exception:
 if not _pytest29:
     _case_type = None
     _case_default = 'false'
+    _real_http_type = None
+    _real_http_default = 'false'
 
     # Copied from pytest 2.9.0 where bool was introduced. It's what happens
     # internally if we specify a bool type argument.
@@ -49,6 +51,8 @@ if not _pytest29:
 else:
     _case_type = 'bool'
     _case_default = False
+    _real_http_type = 'bool'
+    _real_http_default = False
 
     def _bool_value(value):
         return value
@@ -65,6 +69,10 @@ def pytest_addoption(parser):
                   'Use case sensitive matching in requests_mock',
                   type=_case_type,
                   default=_case_default)
+    parser.addini('requests_mock_real_http',
+                  'Forward requests to the real server if not mocked',
+                  type=_real_http_type,
+                  default=_real_http_default)
 
 
 @_fixture_type(scope='function')  # executed on every test
@@ -76,7 +84,11 @@ def requests_mock(request):
     https://requests-mock.readthedocs.io/en/latest/
     """
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
-    kw = {'case_sensitive': _bool_value(case_sensitive)}
+    real_http = request.config.getini('requests_mock_real_http')
+    kw = {
+        'case_sensitive': _bool_value(case_sensitive),
+        'real_http': _bool_value(real_http)
+    }
 
     with rm_module.Mocker(**kw) as m:
         yield m

@@ -14,6 +14,19 @@ def test_simple(requests_mock):
     assert 'data' == requests.get('https://httpbin.org/get').text
 
 
+def test_real_http(requests_mock):
+    requests_mock.get('https://httpbin.org/get', text='data')
+    assert 'data' == requests.get('https://httpbin.org/get').text
+
+    test_response = requests.post(
+        'https://httpbin.org/post',
+        json={'test': 'val'}
+    )
+
+    assert test_response.status_code == 200
+    assert test_response.json()['json'] == {'test': 'val'}
+
+
 def test_redirect_and_nesting():
     url_inner = "inner-mock://example.test/"
     url_middle = "middle-mock://example.test/"
