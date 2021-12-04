@@ -11,10 +11,11 @@ import requests_mock as rm_module
 # can now just use @fixture, so we handle both of those cases as well.
 
 try:
-    from distutils import version
-    _pytest_version = version.StrictVersion(pytest.__version__)
-    _pytest29 = _pytest_version >= version.StrictVersion('2.9.0')
-    _pytest30 = _pytest_version >= version.StrictVersion('3.0.0')
+    _pytest_version = tuple([
+        int(x) for x in pytest.__version__.split('.')[:2]
+    ])
+    _pytest29 = _pytest_version >= (2, 9)
+    _pytest30 = _pytest_version >= (3, 0)
 except Exception:
     _pytest29 = False
     _pytest30 = False
