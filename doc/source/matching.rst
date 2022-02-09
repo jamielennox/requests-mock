@@ -242,7 +242,7 @@ This is handled by a callback function that takes the request as a parameter:
     ...     return 'hello' in (request.text or '')
     ...
     >>> adapter.register_uri('POST', 'mock://test.com/additional', additional_matcher=match_request_text, text='resp')
-    >>> session.post('mock://test.com/headers', data='hello world').text
+    >>> session.post('mock://test.com/additional', data='hello world').text
     'resp'
     >>> resp = session.post('mock://test.com/additional', data='goodbye world')
     Traceback (most recent call last):
