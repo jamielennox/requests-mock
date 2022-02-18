@@ -1,5 +1,4 @@
 import pytest
-import requests_mock as rm_module
 
 
 # RHEL 7 ships pytest 2.7 which doesn't have the 'bool' type to addini. This
@@ -76,6 +75,8 @@ def requests_mock(request):
     responses for unit testing. See:
     https://requests-mock.readthedocs.io/en/latest/
     """
+    import requests_mock as rm_module
+
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
     kw = {'case_sensitive': _bool_value(case_sensitive)}
 
