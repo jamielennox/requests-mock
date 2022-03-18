@@ -1,0 +1,9 @@
+---
+fixes:
+  - |
+    pytest should respect the `requests_mock.mock.case_sensitive` value. We
+    read this from the pytest.ini file currently and fall back to a default of
+    false if not set. We need to detect if this value is unset and if not fall
+    back to the global default. I'm unsure how well pytest handles a
+    non-boolean default value for a boolean type, but it seems ok for now.
+    https://github.com/jamielennox/requests-mock/issues/75

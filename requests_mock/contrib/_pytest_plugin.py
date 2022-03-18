@@ -49,7 +49,7 @@ if not _pytest29:
 
 else:
     _case_type = 'bool'
-    _case_default = False
+    _case_default = None
 
     def _bool_value(value):
         return value
@@ -76,8 +76,13 @@ def requests_mock(request):
     responses for unit testing. See:
     https://requests-mock.readthedocs.io/en/latest/
     """
+    kw = {}
+
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
-    kw = {'case_sensitive': _bool_value(case_sensitive)}
+    case_sensitive = _bool_value(case_sensitive)
+
+    if case_sensitive in (True, False):
+        kw['case_sensitive'] = case_sensitive
 
     with rm_module.Mocker(**kw) as m:
         yield m
