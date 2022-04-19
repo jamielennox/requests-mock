@@ -75,6 +75,8 @@ def requests_mock(request):
     responses for unit testing. See:
     https://requests-mock.readthedocs.io/en/latest/
     """
+    # pytest plugins get loaded immediately. If we import requests_mock it
+    # imports requests and then SSL which prevents gevent patching. Late load.
     import requests_mock as rm_module
 
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
