@@ -168,15 +168,16 @@ class MockerCore(object):
                 # are doing here.
                 _set_method(session, "get_adapter", _fake_get_adapter)
 
-                # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
-                # seems like here we would use _last_send there is the possibility
-                # that the user has messed up and is somehow nesting their mockers.
-                # If we call last_send at this point then we end up calling this
-                # function again and the outer level adapter ends up winning.
-                # All we really care about here is that our adapter is in place
-                # before calling send so we always jump directly to the real
-                # function so that our most recently patched send call ends up
-                # putting in the most recent adapter. It feels funny, but it works.
+                # NOTE(jamielennox): self._last_send vs _original_send. Whilst
+                # it seems like here we would use _last_send there is the
+                # possibility that the user has messed up and is somehow
+                # nesting their mockers.  If we call last_send at this point
+                # then we end up calling this function again and the outer
+                # level adapter ends up winning.  All we really care about here
+                # is that our adapter is in place before calling send so we
+                # always jump directly to the real function so that our most
+                # recently patched send call ends up putting in the most recent
+                # adapter. It feels funny, but it works.
 
                 try:
                     return _original_send(session, request, **kwargs)
