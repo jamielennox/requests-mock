@@ -130,6 +130,7 @@ class MockerCore(object):
             adapter.Adapter(case_sensitive=self.case_sensitive)
         )
 
+        self._json_encoder = kwargs.pop('json_encoder', None)
         self.real_http = kwargs.pop('real_http', False)
         self._last_send = None
 
@@ -230,6 +231,7 @@ class MockerCore(object):
         # you can pass real_http here, but it's private to pass direct to the
         # adapter, because if you pass direct to the adapter you'll see the exc
         kwargs['_real_http'] = kwargs.pop('real_http', False)
+        kwargs.setdefault('json_encoder', self._json_encoder)
         return self._adapter.register_uri(*args, **kwargs)
 
     def request(self, *args, **kwargs):
