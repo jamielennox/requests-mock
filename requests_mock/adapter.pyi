@@ -2,13 +2,14 @@
 
 from http.cookiejar import CookieJar
 from io import IOBase
-from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Union
+from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Type, Union
 
+from requests import Request, Response
 from requests.adapters import BaseAdapter
 from requests.packages.urllib3.response import HTTPResponse
 
+from requests_mock.request import _RequestObjectProxy
 from requests_mock.response import _Context
-from requests_mock import _RequestObjectProxy
 
 AnyMatcher = NewType("AnyMatcher", object)
 
@@ -30,7 +31,7 @@ class _RunRealHTTP(Exception): ...
 
 class _Matcher(_RequestHistoryTracker):
     def __init__(self, method: Any, url: Any, responses: Any, complete_qs: Any, request_headers: Any, additional_matcher: Any, real_http: Any, case_sensitive: Any) -> None: ...
-    def __call__(self, request: Any) -> Any: ...
+    def __call__(self, request: Request) -> Optional[Response]: ...
 
 class Adapter(BaseAdapter, _RequestHistoryTracker):
     def __init__(self, case_sensitive: bool = ...) -> None: ...
@@ -51,8 +52,9 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
         body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
         raw: HTTPResponse = ...,
-        exc: Exception = ...,
-        additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
+        exc: Union[Exception, Type[Exception]] = ...,
+        additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
         **kwargs: Any
-    ) -> Any: ...
-    def add_matcher(self, matcher: Any) -> None: ...
+    ) -> _Matcher: ...
+    def add_matcher(self, matcher: Callable[[Request], Optional[Response]]) -> None: ...
+    def reset(self) -> None: ...

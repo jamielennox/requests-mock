@@ -4,10 +4,10 @@ from http.cookiejar import CookieJar
 from io import IOBase
 from typing import Any, Callable, Dict, List, Optional, Pattern, Type, TypeVar, Union
 
-from requests import Response
+from requests import Request, Response, Session
 from requests.packages.urllib3.response import HTTPResponse
 
-from requests_mock.adapter import AnyMatcher
+from requests_mock.adapter import AnyMatcher, _Matcher
 from requests_mock.request import _RequestObjectProxy
 from requests_mock.response import _Context
 
@@ -24,7 +24,7 @@ class MockerCore:
     def __init__(self, **kwargs: Any) -> None: ...
     def start(self) -> None: ...
     def stop(self) -> None: ...
-    def add_matcher(self, matcher: Any) -> None: ...
+    def add_matcher(self, matcher: Callable[[Request], Optional[Response]]) -> None: ...
     @property
     def request_history(self) -> List[_RequestObjectProxy]: ...
     @property
@@ -37,6 +37,7 @@ class MockerCore:
     def call_count(self) -> int: ...
     def reset(self) -> None: ...
     def reset_mock(self) -> None: ...
+
     def register_uri(
       self,
       method: Union[str, AnyMatcher],
@@ -54,9 +55,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def request(
       self,
       method: Union[str, AnyMatcher],
@@ -74,9 +77,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def get(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -93,9 +98,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def head(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -112,9 +119,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def options(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -131,9 +140,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def post(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -150,9 +161,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def put(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -169,9 +182,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def patch(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -188,9 +203,11 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
+
     def delete(
       self,
       url: Union[str, Pattern[str], AnyMatcher],
@@ -207,24 +224,30 @@ class MockerCore:
       content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
       body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
       raw: HTTPResponse = ...,
-      exc: Exception = ...,
-      additional_matcher: Optional[Callable[[_RequestObjectProxy], bool]] = ...,
-      **kwargs: Any) -> Response: ...
+      exc: Union[Exception, Type[Exception]] = ...,
+      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      **kwargs: Any,
+    ) -> _Matcher: ...
 
 _T = TypeVar('_T')
 
 class Mocker(MockerCore):
     TEST_PREFIX: str = ...
+    real_http: bool = ...
+
     def __init__(
       self,
       kw: str = ...,
       case_sensitive: bool = ...,
       adapter: Any = ...,
-      real_http: bool = ...) -> None: ...
+      session: Optional[Session] = ...,
+      real_http: bool = ...) -> None:
+        ...
     def __enter__(self) -> Any: ...
     def __exit__(self, type: Any, value: Any, traceback: Any) -> None: ...
     def __call__(self, obj: Any) -> Any: ...
     def copy(self) -> Mocker: ...
     def decorate_callable(self, func: Callable[..., _T]) -> Callable[..., _T]: ...
     def decorate_class(self, klass: Type[_T]) -> Type[_T]: ...
+
 mock = Mocker

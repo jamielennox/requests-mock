@@ -13,8 +13,8 @@
 import pickle
 import six
 
-from requests_mock import adapter
 from requests_mock import exceptions
+from requests_mock import request
 from requests_mock import response
 from . import base
 
@@ -25,7 +25,7 @@ class ResponseTests(base.TestCase):
         super(ResponseTests, self).setUp()
         self.method = 'GET'
         self.url = 'http://test.url/path'
-        self.request = adapter._RequestObjectProxy._create(self.method,
+        self.request = request._RequestObjectProxy._create(self.method,
                                                            self.url,
                                                            {})
 

@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    A series of type hint fixes, most importantly the register_uri return value is not a response but a usable Matcher object.
