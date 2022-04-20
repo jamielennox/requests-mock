@@ -149,6 +149,9 @@ def create_response(request, **kwargs):
         returned upon a successful match.
     :param CookieJar cookies: A cookie jar with cookies to set on the
         response.
+
+    :returns requests.Response: A response object that can
+        be returned to requests.
     """
     connection = kwargs.pop('connection', _FakeConnection())
 
