@@ -273,6 +273,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         additional_matcher = kwargs.pop('additional_matcher', None)
         request_headers = kwargs.pop('request_headers', {})
         real_http = kwargs.pop('_real_http', False)
+        json_encoder = kwargs.pop('json_encoder', None)
 
         if response_list and kwargs:
             raise RuntimeError('You should specify either a list of '
@@ -281,6 +282,8 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             raise RuntimeError('You should specify either response data '
                                'OR real_http. Not both.')
         elif not response_list:
+            if json_encoder is not None:
+                kwargs['json_encoder'] = json_encoder
             response_list = [] if real_http else [kwargs]
 
         # NOTE(jamielennox): case_sensitive is not present as a kwarg because i

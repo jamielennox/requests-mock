@@ -7,9 +7,10 @@ Using the Mocker
 The mocker is a loading mechanism to ensure the adapter is correctly in place to intercept calls from requests.
 Its goal is to provide an interface that is as close to the real requests library interface as possible.
 
-:py:class:`requests_mock.Mocker` takes two optional parameters:
+:py:class:`requests_mock.Mocker` takes optional parameters:
 
 :real_http (bool): If :py:const:`True` then any requests that are not handled by the mocking adapter will be forwarded to the real server (see :ref:`RealHTTP`), or the containing Mocker if applicable (see :ref:`NestingMockers`). Defaults to :py:const:`False`.
+:json_encoder (json.JSONEncoder): If set uses the provided json encoder for all JSON responses compiled as part of the mocker.
 :session (requests.Session): If set, only the given session instance is mocked (see :ref:`SessionMocking`).
 
 Activation
@@ -165,6 +166,33 @@ Similarly when using a mocker you can register an individual URI to bypass the m
     ...
     'resp'
     200
+
+
+.. _JsonEncoder:
+
+JSON Encoder
+============
+
+In python's json module you can customize the way data is encoded by subclassing the :py:class:`~json.JSONEncoder` object and passing it to encode.
+A common example of this might be to use `DjangoJSONEncoder <https://docs.djangoproject.com/en/3.2/topics/serialization/#djangojsonencoder>` for responses.
+
+You can specify this encoder object either when creating the :py:class:`requests_mock.Mocker` or individually at the mock creation time.
+
+.. doctest::
+
+    >>> import django.core.serializers.json.DjangoJSONEncoder as DjangoJSONEncoder
+    >>> with requests_mock.Mocker(json_encoder=DjangoJSONEncoder) as m:
+    ...     m.register_uri('GET', 'http://test.com', json={'hello': 'world'})
+    ...     print(requests.get('http://test.com').text)
+
+or
+
+.. doctest::
+
+    >>> import django.core.serializers.json.DjangoJSONEncoder as DjangoJSONEncoder
+    >>> with requests_mock.Mocker() as m:
+    ...     m.register_uri('GET', 'http://test.com', json={'hello': 'world'}, json_encoder=DjangoJSONEncoder)
+    ...     print(requests.get('http://test.com').text)
 
 .. _NestingMockers:
 

@@ -24,7 +24,13 @@ from requests_mock import compat
 from requests_mock import exceptions
 
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
-_HTTP_ARGS = frozenset(['status_code', 'reason', 'headers', 'cookies'])
+_HTTP_ARGS = frozenset([
+    'status_code',
+    'reason',
+    'headers',
+    'cookies',
+    'json_encoder',
+])
 
 _DEFAULT_STATUS = 200
 _http_adapter = HTTPAdapter()
@@ -145,6 +151,7 @@ def create_response(request, **kwargs):
     :param unicode text: A text string to return upon a successful match.
     :param object json: A python object to be converted to a JSON string
         and returned upon a successful match.
+    :param class json_encoder: Encoder object to use for JOSON.
     :param dict headers: A dictionary object containing headers that are
         returned upon a successful match.
     :param CookieJar cookies: A cookie jar with cookies to set on the
@@ -171,7 +178,8 @@ def create_response(request, **kwargs):
         raise TypeError('Text should be string data')
 
     if json is not None:
-        text = jsonutils.dumps(json)
+        encoder = kwargs.pop('json_encoder', None) or jsonutils.JSONEncoder
+        text = jsonutils.dumps(json, cls=encoder)
     if text is not None:
         encoding = get_encoding_from_headers(headers) or 'utf-8'
         content = text.encode(encoding)
@@ -265,6 +273,7 @@ class _MatcherResponse(object):
                                content=_call(self._params.get('content')),
                                body=_call(self._params.get('body')),
                                raw=self._params.get('raw'),
+                               json_encoder=self._params.get('json_encoder'),
                                status_code=context.status_code,
                                reason=context.reason,
                                headers=context.headers,

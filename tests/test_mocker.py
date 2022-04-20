@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import pickle
 
 import mock
@@ -600,3 +601,27 @@ class MockerHttpMethodsTests(base.TestCase):
 
         full_val = res.raw.read()
         self.assertEqual(content, full_val)
+
+    def test_with_json_encoder_on_mocker(self):
+        test_val = 'hello world'
+
+        class MyJsonEncoder(json.JSONEncoder):
+            def encode(s, o):
+                return test_val
+
+        with requests_mock.Mocker(json_encoder=MyJsonEncoder) as m:
+            m.get("http://test", json={"a": "b"})
+            res = requests.get("http://test")
+            self.assertEqual(test_val, res.text)
+
+    @requests_mock.mock()
+    def test_with_json_encoder_on_endpoint(self, m):
+        test_val = 'hello world'
+
+        class MyJsonEncoder(json.JSONEncoder):
+            def encode(s, o):
+                return test_val
+
+        m.get("http://test", json={"a": "b"}, json_encoder=MyJsonEncoder)
+        res = requests.get("http://test")
+        self.assertEqual(test_val, res.text)
