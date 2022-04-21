@@ -5,4 +5,3 @@ pytest
 sphinx
 testrepository>=0.0.18
 testtools
-requests_futures

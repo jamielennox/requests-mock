@@ -75,40 +75,6 @@ def test_mixed_mocks():
             assert text == 'global'  # nosec
 
 
-def test_threaded_sessions():
-    """
-    When using requests_futures.FuturesSession() with a ThreadPoolExecutor
-    there is a race condition where one threaded request removes the
-    monkeypatched get_adapter() method from the Session before another threaded
-    request is finished using it.
-    """
-    from requests_futures.sessions import FuturesSession
-
-    url1 = 'http://www.example.com/requests-mock-fake-url1'
-    url2 = 'http://www.example.com/requests-mock-fake-url2'
-
-    with requests_mock.Mocker() as m:
-        # respond with 204 so we know its us
-        m.get(url1, status_code=204)
-        m.get(url2, status_code=204)
-
-        # NOTE(phodge): just firing off two .get() requests right after each
-        # other was a pretty reliable way to reproduce the race condition on my
-        # intel Macbook Pro but YMMV. Guaranteeing the race condition to
-        # reappear might require replacing the Session.send() with a wrapper
-        # that delays kicking off the request for url1 until the request for
-        # url2 has restored the original session.get_adapter(), but replacing
-        # Session.send() could be difficult because the requests_mock.Mocker()
-        # context manager has *already* monkeypatched this method.
-        session = FuturesSession()
-        future1 = session.get(url1)
-        future2 = session.get(url2)
-
-        # verify both requests were handled by the mock dispatcher
-        assert future1.result().status_code == 204
-        assert future2.result().status_code == 204
-
-
 class TestClass(object):
 
     def configure(self, requests_mock):
