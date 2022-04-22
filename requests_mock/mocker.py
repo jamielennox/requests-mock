@@ -142,6 +142,15 @@ class MockerCore(object):
 
             try:
                 # mock get_adapter
+                #
+                # NOTE(phodge): requests.Session.send() is actually
+                # reentrant due to how it resolves redirects with nested
+                # calls to send(), however the reentry occurs _after_ the
+                # call to self.get_adapter(), so it doesn't matter that we
+                # will restore _last_get_adapter before a nested send() has
+                # completed as long as we monkeypatch get_adapter() each
+                # time immediately before calling original send() like we
+                # are doing here.
                 _set_method(session, "get_adapter", _fake_get_adapter)
 
                 # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
