@@ -30,7 +30,10 @@ PUT = 'PUT'
 
 _original_send = requests.Session.send
 
-_send_lock = threading.Lock()
+# NOTE(phodge): we need to use an RLock (reentrant lock) here because
+# requests.Session.send() is reentrant. See further comments where we
+# monkeypatch get_adapter()
+_send_lock = threading.RLock()
 
 
 def _is_bound_method(method):
@@ -134,7 +137,10 @@ class MockerCore(object):
             # are multiple threads running - one thread could restore the
             # original get_adapter() just as a second thread is about to
             # execute _original_send() below
-            with _send_lock:
+            if not _send_lock.acquire(timeout=10):
+                raise Exception("Could not acquire threading lock - possible deadlock scenario")
+
+            try:
                 # mock get_adapter
                 _set_method(session, "get_adapter", _fake_get_adapter)
 
@@ -160,6 +166,8 @@ class MockerCore(object):
                 finally:
                     # restore get_adapter
                     _set_method(session, "get_adapter", self._last_get_adapter)
+            finally:
+                _send_lock.release()
 
             # if we are here it means we must run the real http request
             # Or, with nested mocks, to the parent mock, that is why we use
