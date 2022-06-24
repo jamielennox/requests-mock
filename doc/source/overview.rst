@@ -11,8 +11,8 @@ This is particularly useful in unit tests where you want to return known respons
 As the `requests`_ library has very limited options for how to load and use adapters *requests-mock* also provides a number of ways to make sure the mock adapter is used.
 These are only loading mechanisms, they do not contain any logic and can be used as a reference to load the adapter in whatever ways works best for your project.
 
-.. _requests: http://python-requests.org
-.. _pluggable transport adapters: http://docs.python-requests.org/en/latest/user/advanced/#transport-adapters
+.. _requests: https://requests.readthedocs.io
+.. _pluggable transport adapters: https://requests.readthedocs.io/en/latest/user/advanced/#transport-adapters
 
 Installation
 ============

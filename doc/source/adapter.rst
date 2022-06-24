@@ -31,6 +31,6 @@ If you are not familiar with adapters, prefer the mocker approach (see :ref:`Moc
 
 At this point any requests made by the session to a URI starting with `mock://` will be sent to our adapter.
 
-.. _requests: http://python-requests.org
+.. _requests: https://requests.readthedocs.io
 .. _transport adapter: https://requests.readthedocs.io/en/master/user/advanced/#transport-adapters
 .. _mount: https://requests.readthedocs.io/en/master/api/#requests.Session.mount

@@ -255,7 +255,7 @@ texinfo_documents = [
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-requests_uri = 'http://docs.python-requests.org/en/latest/'
+requests_uri = 'https://requests.readthedocs.io/en/latest/'
 urllib3_uri = 'https://urllib3.readthedocs.io/en/latest/'
 python_uri = 'https://docs.python.org/3/'
 intersphinx_mapping = {'requests': (requests_uri, None),
