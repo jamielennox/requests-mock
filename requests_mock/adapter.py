@@ -276,6 +276,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         """
         complete_qs = kwargs.pop('complete_qs', False)
         additional_matcher = kwargs.pop('additional_matcher', None)
+        additional_matcher_kwargs = kwargs.pop('additional_matcher_kwargs', None)
         request_headers = kwargs.pop('request_headers', {})
         real_http = kwargs.pop('_real_http', False)
 
@@ -302,7 +303,8 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
                            complete_qs=complete_qs,
                            additional_matcher=additional_matcher,
                            request_headers=request_headers,
-                           real_http=real_http)
+                           real_http=real_http,
+                           additional_matcher_kwargs=additional_matcher_kwargs)
         self.add_matcher(matcher)
         return matcher
 
