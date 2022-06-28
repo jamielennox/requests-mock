@@ -81,7 +81,7 @@ class _Matcher(_RequestHistoryTracker):
     """Contains all the information about a provided URL to match."""
 
     def __init__(self, method, url, responses, complete_qs, request_headers,
-                 additional_matcher, real_http, case_sensitive):
+                 additional_matcher, real_http, case_sensitive, additional_matcher_kwargs):
         """
         :param bool complete_qs: Match the entire query string. By default URLs
             match if all the provided matcher query arguments are matched and
@@ -97,6 +97,7 @@ class _Matcher(_RequestHistoryTracker):
         self._request_headers = request_headers
         self._real_http = real_http
         self._additional_matcher = additional_matcher
+        self._additional_matcher_kwargs = additional_matcher_kwargs
 
         # url can be a regex object or ANY so don't always run urlparse
         if isinstance(url, six.string_types):
@@ -197,10 +198,14 @@ class _Matcher(_RequestHistoryTracker):
 
     def _match_additional(self, request):
         if callable(self._additional_matcher):
-            return self._additional_matcher(request)
+            if self._additional_matcher_kwargs:
+                return self._additional_matcher(request, **self._additional_matcher_kwargs)
+            else:
+                return self._additional_matcher(request)
 
         if self._additional_matcher is not None:
             raise TypeError("Unexpected format of additional matcher.")
+            
 
         return True
 
