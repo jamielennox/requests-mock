@@ -573,6 +573,23 @@ class MockerHttpMethodsTests(base.TestCase):
                           data='goodbye world')
 
     @requests_mock.mock()
+    def test_mocker_additional_with_kwargs(self, m):
+        url = 'http://www.example.com'
+        good_text = 'success'
+
+        def additional_cb(req, match_text):
+            return match_text in req.text
+
+        m.post(url, additional_matcher=additional_cb, text=good_text, additional_matcher_kwargs={"match_text": "hello"})
+
+        self.assertEqual(good_text,
+                         requests.post(url, data='hello world').text)
+        self.assertRaises(exceptions.NoMockAddress,
+                          requests.post,
+                          url,
+                          data='goodbye world')
+
+    @requests_mock.mock()
     def test_mocker_pickle(self, m):
         url = 'http://www.example.com'
         text = 'hello world'

@@ -31,6 +31,7 @@ class TestMatcher(base.TestCase):
               request_data=None,
               request_headers={},
               additional_matcher=None,
+              additional_matcher_kwargs=None,
               real_http=False,
               case_sensitive=False):
         matcher = adapter._Matcher(matcher_method,
@@ -38,6 +39,7 @@ class TestMatcher(base.TestCase):
                                    [],
                                    complete_qs=complete_qs,
                                    additional_matcher=additional_matcher,
+                                   additional_matcher_kwargs=additional_matcher_kwargs,
                                    request_headers=request_headers,
                                    real_http=real_http,
                                    case_sensitive=case_sensitive)
@@ -310,6 +312,7 @@ class TestMatcher(base.TestCase):
                                    [_MatcherResponse()],
                                    complete_qs=False,
                                    additional_matcher=None,
+                                   additional_matcher_kwargs=None,
                                    request_headers={},
                                    real_http=False,
                                    case_sensitive=False)
