@@ -46,7 +46,8 @@ def threading_rlock(timeout):
         kwargs['timeout'] = timeout
 
     if not _send_lock.acquire(**kwargs):
-        raise Exception("Could not acquire threading lock - possible deadlock scenario")
+        m = "Could not acquire threading lock - possible deadlock scenario"
+        raise Exception(m)
 
     try:
         yield
