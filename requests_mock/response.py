@@ -227,7 +227,7 @@ class _MatcherResponse(object):
         # If the user is asking for an exception to be thrown then prevent them
         # specifying any sort of body or status response as it won't be used.
         # This may be protecting the user too much but can be removed later.
-        if self._exc and kwargs:
+        if self._exc and [x for x in kwargs if x != "json_encoder"]:
             raise TypeError('Cannot provide other arguments with exc.')
 
         _check_body_arguments(**kwargs)
