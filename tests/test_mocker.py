@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 import pickle
 
 import mock
@@ -61,7 +62,8 @@ class MockerTests(base.TestCase):
 
             session_a_original_send = session_a.send
             session_b_original_send = session_b.send
-            self.assertNotEqual(session_a_original_send, session_b_original_send)
+            self.assertNotEqual(session_a_original_send,
+                                session_b_original_send)
 
             mocker_a = requests_mock.Mocker(session=session_a)
             mocker_b = requests_mock.Mocker(session=session_b)
@@ -75,27 +77,29 @@ class MockerTests(base.TestCase):
 
             with requests_mock.Mocker(session=session_b) as mocker_b_inner:
                 mocker_b_inner.register_uri('GET', url, real_http=True)
-                mocker_b_inner.register_uri('GET', url_inner, text='resp_b_inner')
+                mocker_b_inner.register_uri('GET',
+                                            url_inner,
+                                            text='resp_b_inner')
 
                 self.assertEqual('resp_a', session_a.get(url).text)
                 self.assertEqual('resp_b', session_b.get(url).text)
                 self.assertRaises(exceptions.NoMockAddress,
-                                session_a.get,
-                                url_inner)
+                                  session_a.get,
+                                  url_inner)
                 self.assertEqual('resp_b_inner', session_b.get(url_inner).text)
 
             self.assertEqual('resp_a', session_a.get(url).text)
             self.assertEqual('resp_b', session_b.get(url).text)
             self.assertRaises(exceptions.NoMockAddress,
-                                session_a.get,
-                                url_inner)
+                              session_a.get,
+                              url_inner)
             self.assertRaises(exceptions.NoMockAddress,
-                                session_b.get,
-                                url_inner)
+                              session_b.get,
+                              url_inner)
             self.assertEqual('global', session_a.get(url_outer).text)
             self.assertRaises(exceptions.NoMockAddress,
-                                session_b.get,
-                                url_outer)
+                              session_b.get,
+                              url_outer)
 
             self.assertNotEqual(session_a.send, session_a_original_send)
             self.assertNotEqual(session_b.send, session_b_original_send)
@@ -106,8 +110,8 @@ class MockerTests(base.TestCase):
 
             self.assertEqual(session_a.send, session_a_original_send)
             self.assertEqual(session_b.send, session_b_original_send)
-        self.assertEqual(requests.Session.send, original_send)
 
+        self.assertEqual(requests.Session.send, original_send)
 
     def test_with_context_manager(self):
         self.assertMockStopped()
@@ -166,6 +170,24 @@ class MockerTests(base.TestCase):
 
         self.assertEqual(1, real_send.call_count)
         self.assertEqual(url, real_send.call_args[0][0].url)
+
+        self.assertEqual(test_text, resp.text)
+        self.assertEqual(test_bytes, resp.content)
+
+    @mock.patch('requests.adapters.HTTPAdapter.send')
+    def test_real_http_and_session(self, real_send):
+        url = 'http://www.google.com/'
+        test_text = 'real http data'
+        test_bytes = test_text.encode('utf-8')
+
+        req = requests.Request(method='GET', url=url)
+        real_send.return_value = response.create_response(req.prepare(),
+                                                          status_code=200,
+                                                          content=test_bytes)
+
+        session = requests.Session()
+        with requests_mock.Mocker(session=session, real_http=True):
+            resp = session.get(url)
 
         self.assertEqual(test_text, resp.text)
         self.assertEqual(test_bytes, resp.content)
@@ -566,3 +588,40 @@ class MockerHttpMethodsTests(base.TestCase):
         self.assertEqual(text, new_resp.text)
         self.assertIsInstance(orig_resp.request.matcher, adapter._Matcher)
         self.assertIsNone(new_resp.request.matcher)
+
+    @requests_mock.mock()
+    def test_stream_zero_bytes(self, m):
+        content = b'blah'
+
+        m.get("http://test", content=content)
+        res = requests.get("http://test", stream=True)
+        zero_val = res.raw.read(0)
+        self.assertEqual(b'', zero_val)
+        self.assertFalse(res.raw.closed)
+
+        full_val = res.raw.read()
+        self.assertEqual(content, full_val)
+
+    def test_with_json_encoder_on_mocker(self):
+        test_val = 'hello world'
+
+        class MyJsonEncoder(json.JSONEncoder):
+            def encode(s, o):
+                return test_val
+
+        with requests_mock.Mocker(json_encoder=MyJsonEncoder) as m:
+            m.get("http://test", json={"a": "b"})
+            res = requests.get("http://test")
+            self.assertEqual(test_val, res.text)
+
+    @requests_mock.mock()
+    def test_with_json_encoder_on_endpoint(self, m):
+        test_val = 'hello world'
+
+        class MyJsonEncoder(json.JSONEncoder):
+            def encode(s, o):
+                return test_val
+
+        m.get("http://test", json={"a": "b"}, json_encoder=MyJsonEncoder)
+        res = requests.get("http://test")
+        self.assertEqual(test_val, res.text)

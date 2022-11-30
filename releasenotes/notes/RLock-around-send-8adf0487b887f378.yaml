@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    In some multithreading situations the mocker might try and replace an
+    already patched object from a different thread. To make this thread safe we
+    will put a lock around the mocker so that only one thread can work with the
+    mocker at any time. This has to be a reentrant lock as the same thread can
+    go through it multiple times.

@@ -31,13 +31,6 @@ def match_all(request):
     return requests_mock.create_response(request, content=six.b('data'))
 
 
-def test_a(request):
-    if 'a' in request.url:
-        return match_all(request)
-
-    return None
-
-
 class CustomMatchersTests(base.TestCase):
 
     def assertMatchAll(self, resp):
@@ -65,7 +58,14 @@ class CustomMatchersTests(base.TestCase):
 
     @requests_mock.Mocker()
     def test_some_pass(self, mocker):
-        mocker.add_matcher(test_a)
+
+        def matcher_a(request):
+            if 'a' in request.url:
+                return match_all(request)
+
+            return None
+
+        mocker.add_matcher(matcher_a)
 
         resp = requests.get('http://any/thing')
         self.assertMatchAll(resp)

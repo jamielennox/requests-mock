@@ -13,6 +13,7 @@
 import weakref
 
 from requests.adapters import BaseAdapter
+from requests.utils import requote_uri
 import six
 from six.moves.urllib import parse as urlparse
 
@@ -102,7 +103,7 @@ class _Matcher(_RequestHistoryTracker):
             url_parts = urlparse.urlparse(url)
             self._scheme = url_parts.scheme.lower()
             self._netloc = url_parts.netloc.lower()
-            self._path = url_parts.path or '/'
+            self._path = requote_uri(url_parts.path or '/')
             self._query = url_parts.query
 
             if not case_sensitive:
@@ -252,7 +253,9 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             if resp is not None:
                 request._matcher = weakref.ref(matcher)
                 resp.connection = self
-                logger.debug('{} {} {}'.format(request._request.method,request._request.url, resp.status_code))
+                logger.debug('{} {} {}'.format(request._request.method,
+                                               request._request.url,
+                                               resp.status_code))
                 return resp
 
         raise exceptions.NoMockAddress(request)
@@ -270,6 +273,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         additional_matcher = kwargs.pop('additional_matcher', None)
         request_headers = kwargs.pop('request_headers', {})
         real_http = kwargs.pop('_real_http', False)
+        json_encoder = kwargs.pop('json_encoder', None)
 
         if response_list and kwargs:
             raise RuntimeError('You should specify either a list of '
@@ -278,6 +282,8 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
             raise RuntimeError('You should specify either response data '
                                'OR real_http. Not both.')
         elif not response_list:
+            if json_encoder is not None:
+                kwargs['json_encoder'] = json_encoder
             response_list = [] if real_http else [kwargs]
 
         # NOTE(jamielennox): case_sensitive is not present as a kwarg because i

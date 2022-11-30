@@ -1,5 +1,4 @@
 import pytest
-import requests_mock as rm_module
 
 
 # RHEL 7 ships pytest 2.7 which doesn't have the 'bool' type to addini. This
@@ -11,10 +10,11 @@ import requests_mock as rm_module
 # can now just use @fixture, so we handle both of those cases as well.
 
 try:
-    from distutils import version
-    _pytest_version = version.StrictVersion(pytest.__version__)
-    _pytest29 = _pytest_version >= version.StrictVersion('2.9.0')
-    _pytest30 = _pytest_version >= version.StrictVersion('3.0.0')
+    _pytest_version = tuple([
+        int(x) for x in pytest.__version__.split('.')[:2]
+    ])
+    _pytest29 = _pytest_version >= (2, 9)
+    _pytest30 = _pytest_version >= (3, 0)
 except Exception:
     _pytest29 = False
     _pytest30 = False
@@ -75,6 +75,10 @@ def requests_mock(request):
     responses for unit testing. See:
     https://requests-mock.readthedocs.io/en/latest/
     """
+    # pytest plugins get loaded immediately. If we import requests_mock it
+    # imports requests and then SSL which prevents gevent patching. Late load.
+    import requests_mock as rm_module
+
     case_sensitive = request.config.getini('requests_mock_case_sensitive')
     kw = {'case_sensitive': _bool_value(case_sensitive)}
 

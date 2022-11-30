@@ -24,7 +24,13 @@ from requests_mock import compat
 from requests_mock import exceptions
 
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
-_HTTP_ARGS = frozenset(['status_code', 'reason', 'headers', 'cookies'])
+_HTTP_ARGS = frozenset([
+    'status_code',
+    'reason',
+    'headers',
+    'cookies',
+    'json_encoder',
+])
 
 _DEFAULT_STATUS = 200
 _http_adapter = HTTPAdapter()
@@ -116,6 +122,11 @@ class _IOReader(six.BytesIO):
         if self.closed:
             return six.b('')
 
+        # if the file is open, but you asked for zero bytes read you should get
+        # back zero without closing the stream.
+        if len(args) > 0 and args[0] == 0:
+            return six.b('')
+
         # not a new style object in python 2
         result = six.BytesIO.read(self, *args, **kwargs)
 
@@ -158,10 +169,14 @@ def create_response(request, **kwargs):
     :param unicode text: A text string to return upon a successful match.
     :param object json: A python object to be converted to a JSON string
         and returned upon a successful match.
+    :param class json_encoder: Encoder object to use for JOSON.
     :param dict headers: A dictionary object containing headers that are
         returned upon a successful match.
     :param CookieJar cookies: A cookie jar with cookies to set on the
         response.
+
+    :returns requests.Response: A response object that can
+        be returned to requests.
     """
     connection = kwargs.pop('connection', _FakeConnection())
 
@@ -181,7 +196,8 @@ def create_response(request, **kwargs):
         raise TypeError('Text should be string data')
 
     if json is not None:
-        text = jsonutils.dumps(json)
+        encoder = kwargs.pop('json_encoder', None) or jsonutils.JSONEncoder
+        text = jsonutils.dumps(json, cls=encoder)
     if text is not None:
         encoding = get_encoding_from_headers(headers) or 'utf-8'
         content = text.encode(encoding)
@@ -279,6 +295,7 @@ class _MatcherResponse(object):
                                content=_call(self._params.get('content')),
                                body=_call(self._params.get('body')),
                                raw=self._params.get('raw'),
+                               json_encoder=self._params.get('json_encoder'),
                                status_code=context.status_code,
                                reason=context.reason,
                                headers=context.headers,

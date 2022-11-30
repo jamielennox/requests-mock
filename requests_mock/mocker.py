@@ -10,7 +10,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import contextlib
 import functools
+import sys
+import threading
+import types
 
 import requests
 import six
@@ -28,14 +32,48 @@ PUT = 'PUT'
 
 _original_send = requests.Session.send
 
+# NOTE(phodge): we need to use an RLock (reentrant lock) here because
+# requests.Session.send() is reentrant. See further comments where we
+# monkeypatch get_adapter()
+_send_lock = threading.RLock()
+
+
+@contextlib.contextmanager
+def threading_rlock(timeout):
+    kwargs = {}
+    if sys.version_info.major >= 3:
+        # python2 doesn't support the timeout argument
+        kwargs['timeout'] = timeout
+
+    if not _send_lock.acquire(**kwargs):
+        m = "Could not acquire threading lock - possible deadlock scenario"
+        raise Exception(m)
+
+    try:
+        yield
+    finally:
+        _send_lock.release()
+
+
+def _is_bound_method(method):
+    """
+    bound_method 's self is a obj
+    unbound_method 's self is None
+    """
+    if isinstance(method, types.MethodType) and six.get_method_self(method):
+        return True
+    return False
+
 
 def _set_method(target, name, method):
     """ Set a mocked method onto the target.
 
     Target may be either an instance of a Session object of the
     requests.Session class. First we Bind the method if it's an instance.
+
+    If method is a bound_method, can direct setattr
     """
-    if not isinstance(target, type):
+    if not isinstance(target, type) and not _is_bound_method(method):
         method = six.create_bound_method(method, target)
 
     setattr(target, name, method)
@@ -92,6 +130,7 @@ class MockerCore(object):
             adapter.Adapter(case_sensitive=self.case_sensitive)
         )
 
+        self._json_encoder = kwargs.pop('json_encoder', None)
         self.real_http = kwargs.pop('real_http', False)
         self._last_send = None
 
@@ -114,31 +153,46 @@ class MockerCore(object):
             return self._adapter
 
         def _fake_send(session, request, **kwargs):
-            # mock get_adapter
-            _set_method(session, "get_adapter", _fake_get_adapter)
+            # NOTE(phodge): we need to use a threading lock here in case there
+            # are multiple threads running - one thread could restore the
+            # original get_adapter() just as a second thread is about to
+            # execute _original_send() below
+            with threading_rlock(timeout=10):
+                # mock get_adapter
+                #
+                # NOTE(phodge): requests.Session.send() is actually
+                # reentrant due to how it resolves redirects with nested
+                # calls to send(), however the reentry occurs _after_ the
+                # call to self.get_adapter(), so it doesn't matter that we
+                # will restore _last_get_adapter before a nested send() has
+                # completed as long as we monkeypatch get_adapter() each
+                # time immediately before calling original send() like we
+                # are doing here.
+                _set_method(session, "get_adapter", _fake_get_adapter)
 
-            # NOTE(jamielennox): self._last_send vs _original_send. Whilst it
-            # seems like here we would use _last_send there is the possibility
-            # that the user has messed up and is somehow nesting their mockers.
-            # If we call last_send at this point then we end up calling this
-            # function again and the outer level adapter ends up winning.
-            # All we really care about here is that our adapter is in place
-            # before calling send so we always jump directly to the real
-            # function so that our most recently patched send call ends up
-            # putting in the most recent adapter. It feels funny, but it works.
+                # NOTE(jamielennox): self._last_send vs _original_send. Whilst
+                # it seems like here we would use _last_send there is the
+                # possibility that the user has messed up and is somehow
+                # nesting their mockers.  If we call last_send at this point
+                # then we end up calling this function again and the outer
+                # level adapter ends up winning.  All we really care about here
+                # is that our adapter is in place before calling send so we
+                # always jump directly to the real function so that our most
+                # recently patched send call ends up putting in the most recent
+                # adapter. It feels funny, but it works.
 
-            try:
-                return _original_send(session, request, **kwargs)
-            except exceptions.NoMockAddress:
-                if not self.real_http:
-                    raise
-            except adapter._RunRealHTTP:
-                # this mocker wants you to run the request through the real
-                # requests library rather than the mocking. Let it.
-                pass
-            finally:
-                # restore get_adapter
-                _set_method(session, "get_adapter", self._last_get_adapter)
+                try:
+                    return _original_send(session, request, **kwargs)
+                except exceptions.NoMockAddress:
+                    if not self.real_http:
+                        raise
+                except adapter._RunRealHTTP:
+                    # this mocker wants you to run the request through the real
+                    # requests library rather than the mocking. Let it.
+                    pass
+                finally:
+                    # restore get_adapter
+                    _set_method(session, "get_adapter", self._last_get_adapter)
 
             # if we are here it means we must run the real http request
             # Or, with nested mocks, to the parent mock, that is why we use
@@ -177,6 +231,7 @@ class MockerCore(object):
         # you can pass real_http here, but it's private to pass direct to the
         # adapter, because if you pass direct to the adapter you'll see the exc
         kwargs['_real_http'] = kwargs.pop('real_http', False)
+        kwargs.setdefault('json_encoder', self._json_encoder)
         return self._adapter.register_uri(*args, **kwargs)
 
     def request(self, *args, **kwargs):
@@ -238,7 +293,7 @@ class Mocker(MockerCore):
     def copy(self):
         """Returns an exact copy of current mock
         """
-        m = Mocker(
+        m = type(self)(
             kw=self._kw,
             real_http=self.real_http,
             case_sensitive=self.case_sensitive

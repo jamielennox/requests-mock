@@ -141,7 +141,6 @@ class TestMatcher(base.TestCase):
                              'http://www.test.com/abc')
         self.assertMatchBoth('http://www.test.com:5000/abc',
                              'http://www.test.com:5000/abc')
-
         self.assertNoMatchBoth('https://www.test.com',
                                'http://www.test.com')
         self.assertNoMatchBoth('http://www.test.com/abc',
@@ -158,6 +157,14 @@ class TestMatcher(base.TestCase):
                                'http://www.test.com/abc')
         self.assertNoMatchBoth('http://test.com/abc/',
                                'http://www.test.com:5000/abc')
+
+    def test_quotation(self):
+        self.assertMatchBoth('http://www.test.com/a string%url',
+                             'http://www.test.com/a string%url')
+        self.assertMatchBoth('http://www.test.com/ABC 123',
+                             'http://www.test.com/ABC%20123')
+        self.assertMatchBoth('http://www.test.com/user@example.com',
+                             'http://www.test.com/user@example.com')
 
     def test_subset_match(self):
         self.assertMatch('/path', 'http://www.test.com/path')

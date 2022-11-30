@@ -1,0 +1,5 @@
+---
+fixes:
+  - Issue 144 - When performing a read we handled an empty byte return as an
+    indication to close the file pointer. This is not true when you actually
+    ask for a zero byte read so we should allow it.

@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    You can now set the JSON encoder for use by the json= parameter on either
+    the mocker or an individual mocked response. This will make it easier to
+    work with systems that encode in a specific way.

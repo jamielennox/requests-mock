@@ -1,0 +1,3 @@
+---
+fixes:
+  - Improvements to some type annotations that were making it confusing to use the library in an IDE. #173

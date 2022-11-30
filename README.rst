@@ -5,9 +5,6 @@ requests-mock
 .. image:: https://badge.fury.io/py/requests-mock.png
     :target: https://pypi.org/project/requests-mock/
 
-.. image:: https://circleci.com/gh/jamielennox/requests-mock.svg?style=svg
-    :target: https://circleci.com/gh/jamielennox/requests-mock
-
 Intro
 =====
 
@@ -98,7 +95,7 @@ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 License for the specific language governing permissions and limitations
 under the License.
 
-.. _requests: http://python-requests.org
+.. _requests: https://requests.readthedocs.io
 .. _docs: https://requests-mock.readthedocs.io/
 .. _GitHub: https://github.com/jamielennox/requests-mock
 .. _StackOverflow: https://stackoverflow.com/questions/tagged/requests-mock
