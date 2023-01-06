@@ -146,10 +146,10 @@ def create_set_cookie_header(response, jar):
     :param requests.cookies.RequestsCookieJar jar: a CookieJar containing all
         cookies to be converted in a Set-Cookie header
     """
-    set_cookie_items = []
-    for cookie_name, cookie_value in response.cookies.items():
-        encoded = six.moves.urllib.parse.quote(cookie_value)
-        set_cookie_items.append(cookie_name + '=' + encoded)
+    set_cookie_items = [
+        cookie_name + '=' + six.moves.urllib.parse.quote(cookie_value)
+        for cookie_name, cookie_value in response.cookies.items()
+    ]
 
     if set_cookie_items:
         response.headers["Set-Cookie"] = set_cookie_items
