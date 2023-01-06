@@ -1,0 +1,4 @@
+---
+features:
+  - |
+    Cookies set in the response are now visible in a `requests` session.
