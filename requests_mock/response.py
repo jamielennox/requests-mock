@@ -139,7 +139,7 @@ class _IOReader(six.BytesIO):
         return result
 
 
-def create_set_cookie_header(response):
+def _create_set_cookie_header(response):
     """
     :param requests.packages.urllib3.response response: the Response that will
         be updated with the Set-Cookie header
@@ -220,7 +220,7 @@ def create_response(request, **kwargs):
 
     _extract_cookies(request, response, kwargs.get('cookies'))
 
-    create_set_cookie_header(response)
+    _create_set_cookie_header(response)
     response.raw._original_response = \
         compat._FakeHTTPResponse(response.headers)
 
