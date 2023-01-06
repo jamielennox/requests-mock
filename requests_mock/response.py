@@ -151,10 +151,8 @@ def create_set_cookie_header(response, jar):
         encoded = six.moves.urllib.parse.quote(cookie_value)
         set_cookie_items.append(cookie_name + '=' + encoded)
 
-    set_cookie_header = "; ".join(set_cookie_items)
-
-    if set_cookie_header:
-        response.headers["Set-Cookie"] = set_cookie_header
+    if set_cookie_items:
+        response.headers["Set-Cookie"] = set_cookie_items
 
 
 def create_response(request, **kwargs):
