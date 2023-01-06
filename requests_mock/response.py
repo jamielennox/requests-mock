@@ -139,12 +139,10 @@ class _IOReader(six.BytesIO):
         return result
 
 
-def create_set_cookie_header(response, jar):
+def create_set_cookie_header(response):
     """
     :param requests.packages.urllib3.response response: the Response that will
         be updated with the Set-Cookie header
-    :param requests.cookies.RequestsCookieJar jar: a CookieJar containing all
-        cookies to be converted in a Set-Cookie header
     """
     set_cookie_items = [
         cookie_name + '=' + six.moves.urllib.parse.quote(cookie_value)
@@ -222,7 +220,7 @@ def create_response(request, **kwargs):
 
     _extract_cookies(request, response, kwargs.get('cookies'))
 
-    create_set_cookie_header(response, response.cookies)
+    create_set_cookie_header(response)
     response.raw._original_response = \
         compat._FakeHTTPResponse(response.headers)
 
