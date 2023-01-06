@@ -32,24 +32,3 @@ will become the default in future releases.
 
 Note that even with case_sensitive enabled the protocol and netloc of a mock
 are still matched in a case insensitive way.
-
-Cookies in Sessions
--------------------
-
-If a mocked response sets a cookie, the cookie will be accessible through the
-Response object as expected.
-
-If, however, the mocked response is requested through a Session, the cookie will
-not reach the Session instance.
-
-The problem is that the Requests library adds cookies to Session objects by
-reading the ``httplib`` response object, not the ``requests`` Response object.
-Mock responses naturally don't use ``httplib``.
-
-To fix this issue, the *requests-mock* library needs to convert all acceptable
-forms of mocked cookies into ``Set-Cookie`` headers to enable the Requests
-library to properly process them.
-
-This issue is being tracked on GitHub:
-
-https://github.com/jamielennox/requests-mock/issues/17
