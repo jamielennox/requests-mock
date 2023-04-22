@@ -20,6 +20,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install flake8
+        pip install -r typing-requirements.txt
 
     - name: Lint with flake8
       run: flake8 requests_mock tests
+
+    - name: Lint type hinting with MyPy
+      run: mypy requests_mock
