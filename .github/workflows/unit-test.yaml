@@ -38,7 +38,7 @@ jobs:
           pip install -e .
 
       - name: Test Testtools
-        run: python setup.py testr
+        run: python -m testtools.run discover
 
       - name: Test PyTest
         run: pytest tests/pytest
@@ -66,7 +66,7 @@ jobs:
           pip install -e .
 
       - name: Test Testtools
-        run: python setup.py testr
+        run: python -m testtools.run discover
 
       - name: Test PyTest
         run: pytest tests/pytest

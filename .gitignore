@@ -45,7 +45,6 @@ output/*/index.html
 doc/build
 doc/source/_build
 
-.testrepository
 .pytest_cache
 tests/pytest/.cache/
 
