@@ -3,6 +3,5 @@ mock; python_version < '3.3'
 purl
 pytest
 sphinx
-testrepository>=0.0.18
 testtools
 requests_futures
