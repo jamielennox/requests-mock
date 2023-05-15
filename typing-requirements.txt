@@ -1,0 +1,3 @@
+mypy
+types-requests
+types-six

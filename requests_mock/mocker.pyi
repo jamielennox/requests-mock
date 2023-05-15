@@ -5,12 +5,11 @@ from http.cookiejar import CookieJar
 from io import IOBase
 from typing import Any, Callable, Dict, List, Optional, Pattern, Type, TypeVar, Union
 
-from requests import Request, Response, Session
-from requests.packages.urllib3.response import HTTPResponse
+from requests import Response, Session
+from urllib3.response import HTTPResponse
 
-from requests_mock.adapter import AnyMatcher, _Matcher
-from requests_mock.request import _RequestObjectProxy
-from requests_mock.response import _Context
+from requests_mock.adapter import AnyMatcher, _Matcher, Callback, AdditionalMatcher
+from requests_mock.request import Request
 
 DELETE: str
 GET: str
@@ -27,9 +26,9 @@ class MockerCore:
     def stop(self) -> None: ...
     def add_matcher(self, matcher: Callable[[Request], Optional[Response]]) -> None: ...
     @property
-    def request_history(self) -> List[_RequestObjectProxy]: ...
+    def request_history(self) -> List[Request]: ...
     @property
-    def last_request(self) -> Optional[_RequestObjectProxy]: ...
+    def last_request(self) -> Optional[Request]: ...
     @property
     def called(self) -> bool: ...
     @property
@@ -51,13 +50,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -74,13 +73,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -96,13 +95,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -118,13 +117,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -140,13 +139,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -162,13 +161,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -184,13 +183,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -206,13 +205,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...
@@ -228,13 +227,13 @@ class MockerCore:
       reason: str = ...,
       headers: Dict[str, str] = ...,
       cookies: Union[CookieJar, Dict[str, str]] = ...,
-      json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-      text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-      content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-      body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+      json: Union[Any, Callback[Any]] = ...,
+      text: Union[str, Callback[str]] = ...,
+      content: Union[bytes, Callback[bytes]] = ...,
+      body: Union[IOBase, Callback[IOBase]] = ...,
       raw: HTTPResponse = ...,
       exc: Union[Exception, Type[Exception]] = ...,
-      additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+      additional_matcher: AdditionalMatcher = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
       **kwargs: Any,
     ) -> _Matcher: ...

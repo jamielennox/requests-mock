@@ -2,24 +2,29 @@
 
 from http.cookiejar import CookieJar
 from io import IOBase
-from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Type, Union
+from typing import Any, Callable, Dict, List, NewType, Optional, Pattern, Type, TypeVar, Union
 
-from requests import Request, Response
+from requests import Response
 from requests.adapters import BaseAdapter
-from requests.packages.urllib3.response import HTTPResponse
+from urllib3.response import HTTPResponse
 
-from requests_mock.request import _RequestObjectProxy
-from requests_mock.response import _Context
+from requests_mock.request import Request
+from requests_mock.response import Context
 
 AnyMatcher = NewType("AnyMatcher", object)
 
 ANY: AnyMatcher = ...
 
+T = TypeVar('T')
+Callback = Callable[[Request, Context], T]
+Matcher = Callable[[Request], Optional[Response]]
+AdditionalMatcher = Callable[[Request], bool]
+
 class _RequestHistoryTracker:
-    request_history: List[_RequestObjectProxy] = ...
+    request_history: List[Request] = ...
     def __init__(self) -> None: ...
     @property
-    def last_request(self) -> Optional[_RequestObjectProxy]: ...
+    def last_request(self) -> Optional[Request]: ...
     @property
     def called(self) -> bool: ...
     @property
@@ -30,9 +35,19 @@ class _RequestHistoryTracker:
 class _RunRealHTTP(Exception): ...
 
 class _Matcher(_RequestHistoryTracker):
-    def __init__(self, method: Any, url: Any, responses: Any, complete_qs: Any, request_headers: Any, additional_matcher: Any, real_http: Any, case_sensitive: Any) -> None: ...
+    def __init__(
+        self, 
+        method: Any, 
+        url: Any, 
+        responses: Any, 
+        complete_qs: Any, 
+        request_headers: Any, 
+        additional_matcher: AdditionalMatcher, 
+        real_http: Any, 
+        case_sensitive: Any
+    ) -> None: ...
     def __call__(self, request: Request) -> Optional[Response]: ...
-
+    
 class Adapter(BaseAdapter, _RequestHistoryTracker):
     def __init__(self, case_sensitive: bool = ...) -> None: ...
     def register_uri(
@@ -47,14 +62,14 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         reason: str = ...,
         headers: Dict[str, str] = ...,
         cookies: Union[CookieJar, Dict[str, str]] = ...,
-        json: Union[Any, Callable[[_RequestObjectProxy, _Context], Any]] = ...,
-        text: Union[str, Callable[[_RequestObjectProxy, _Context], str]] = ...,
-        content: Union[bytes, Callable[[_RequestObjectProxy, _Context], bytes]] = ...,
-        body: Union[IOBase, Callable[[_RequestObjectProxy, _Context], IOBase]] = ...,
+        json: Union[Any, Callback[Any]] = ...,
+        text: Union[str, Callback[str]] = ...,
+        content: Union[bytes, Callback[bytes]] = ...,
+        body: Union[IOBase, Callback[IOBase]] = ...,
         raw: HTTPResponse = ...,
         exc: Union[Exception, Type[Exception]] = ...,
-        additional_matcher: Callable[[_RequestObjectProxy], bool] = ...,
+        additional_matcher: AdditionalMatcher = ...,
         **kwargs: Any
     ) -> _Matcher: ...
-    def add_matcher(self, matcher: Callable[[Request], Optional[Response]]) -> None: ...
+    def add_matcher(self, matcher: Matcher) -> None: ...
     def reset(self) -> None: ...

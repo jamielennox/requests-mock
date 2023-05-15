@@ -36,3 +36,6 @@ class _RequestObjectProxy:
     def json(self, **kwargs: Any) -> Any: ...
     @property
     def matcher(self) -> Any: ...
+    
+
+Request = _RequestObjectProxy

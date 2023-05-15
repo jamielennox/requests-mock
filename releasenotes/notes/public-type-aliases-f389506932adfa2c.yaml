@@ -1,0 +1,14 @@
+---
+features:
+  - |
+    Exposes some public type aliases (for type hinting only, they can't be instanciated) 
+    for the types intended to be used by `requests_mock` users. 
+    The following types are now exposed:
+    - `requests_mock.Context` used in callbacks
+    - `requests_mock.Request` used in callbacks, which is a `requests.PreparedRequest` proxy.
+    - `requests_mock.Callback[T]` which is the callbacks type.
+
+fixes:
+  - |
+    Some typing inconsistencies have been fixed. 
+    Especially for `request` object in signatures which is in fact a `requests_mock.Request` object.

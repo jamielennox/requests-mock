@@ -1,6 +1,6 @@
 # Stubs for requests_mock.response
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import six
 
@@ -34,3 +34,5 @@ class _Context:
 class _MatcherResponse:
     def __init__(self, **kwargs: Any) -> None: ...
     def get_response(self, request: Request) -> Response: ...
+
+Context = _Context
