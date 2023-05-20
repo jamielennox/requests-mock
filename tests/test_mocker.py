@@ -13,7 +13,10 @@
 import json
 import pickle
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import requests
 
 import requests_mock
