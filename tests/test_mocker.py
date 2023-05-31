@@ -628,3 +628,19 @@ class MockerHttpMethodsTests(base.TestCase):
         m.get("http://test", json={"a": "b"}, json_encoder=MyJsonEncoder)
         res = requests.get("http://test")
         self.assertEqual(test_val, res.text)
+
+    @requests_mock.mock()
+    def test_mismatch_content_length_streaming(self, m):
+        url = "https://test/package.tar.gz"
+
+        def f(request, context):
+            context.headers["Content-Length"] = "300810"
+            return None
+
+        m.head(
+            url=url,
+            status_code=200,
+            text=f,
+        )
+
+        requests.head(url)

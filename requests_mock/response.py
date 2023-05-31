@@ -195,6 +195,7 @@ def create_response(request, **kwargs):
                            headers=headers,
                            body=body or _IOReader(six.b('')),
                            decode_content=False,
+                           enforce_content_length=False,
                            preload_content=False,
                            original_response=None)
 
