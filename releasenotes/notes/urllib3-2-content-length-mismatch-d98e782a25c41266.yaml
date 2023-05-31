@@ -1,0 +1,7 @@
+---
+fixes:
+  - |
+    Fix incompatibility with urllib3 >2.0.0. In 2.0.0 they default to enforcing
+    content length checking on returned bodies in responses from the previous
+    default of false. However the flag is still available so for compatibility
+    we can just default the other way.
