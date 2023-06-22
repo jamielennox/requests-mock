@@ -10,12 +10,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import http.client
+import io
 import json
 import re
 import urllib.parse
 
 import purl
 import requests
+from urllib3 import HTTPResponse
 
 import requests_mock
 from . import base
@@ -116,6 +119,27 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(data, resp.text)
         self.assertEqual(data.encode('utf-8'), resp.content)
         self.assertEqual('utf-8', resp.encoding)
+        self.assertHeaders(resp)
+        self.assertLastRequest()
+
+    def test_raw_callback(self):
+        status_code = 401
+        data = 'testdata'
+
+        def _raw_cb(request, context):
+            return HTTPResponse(
+                status=status_code,
+                headers=self.headers,
+                body=io.BytesIO(data.encode('utf-8')),
+                preload_content=False,
+                reason=http.client.responses.get(status_code),
+            )
+
+        self.adapter.register_uri('GET', self.url, raw=_raw_cb)
+        resp = self.session.get(self.url)
+        self.assertEqual(status_code, resp.status_code)
+        self.assertEqual(data, resp.text)
+        self.assertEqual(data.encode('utf-8'), resp.content)
         self.assertHeaders(resp)
         self.assertLastRequest()
 

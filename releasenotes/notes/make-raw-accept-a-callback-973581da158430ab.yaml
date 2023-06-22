@@ -1,0 +1,6 @@
+---
+features:
+  - |
+    When using dynamic responses, you can now use a callback function for the
+    raw HTTPResponse object. This aligns it with all the other parameters that
+    can be mocked.

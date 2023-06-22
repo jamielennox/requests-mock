@@ -270,7 +270,7 @@ class _MatcherResponse(object):
                                text=_call(self._params.get('text')),
                                content=_call(self._params.get('content')),
                                body=_call(self._params.get('body')),
-                               raw=self._params.get('raw'),
+                               raw=_call(self._params.get('raw')),
                                json_encoder=self._params.get('json_encoder'),
                                status_code=context.status_code,
                                reason=context.reason,
