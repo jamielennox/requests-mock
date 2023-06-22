@@ -172,20 +172,20 @@ def create_response(request, **kwargs):
     headers = kwargs.pop('headers', {})
     encoding = None
 
-    if content is not None and not isinstance(content, six.binary_type):
-        raise TypeError('Content should be binary data')
-    if text is not None and not isinstance(text, six.string_types):
-        raise TypeError('Text should be string data')
-
-    if json is not None:
-        encoder = kwargs.pop('json_encoder', None) or jsonutils.JSONEncoder
-        text = jsonutils.dumps(json, cls=encoder)
-    if text is not None:
-        encoding = get_encoding_from_headers(headers) or 'utf-8'
-        content = text.encode(encoding)
-    if content is not None:
-        body = _IOReader(content)
     if not raw:
+        if content is not None and not isinstance(content, six.binary_type):
+            raise TypeError('Content should be binary data')
+        if text is not None and not isinstance(text, six.string_types):
+            raise TypeError('Text should be string data')
+
+        if json is not None:
+            encoder = kwargs.pop('json_encoder', None) or jsonutils.JSONEncoder
+            text = jsonutils.dumps(json, cls=encoder)
+        if text is not None:
+            encoding = get_encoding_from_headers(headers) or 'utf-8'
+            content = text.encode(encoding)
+        if content is not None:
+            body = _IOReader(content)
         status = kwargs.get('status_code', _DEFAULT_STATUS)
         reason = kwargs.get('reason',
                             six.moves.http_client.responses.get(status))
@@ -273,7 +273,7 @@ class _MatcherResponse(object):
                                text=_call(self._params.get('text')),
                                content=_call(self._params.get('content')),
                                body=_call(self._params.get('body')),
-                               raw=self._params.get('raw'),
+                               raw=_call(self._params.get('raw')),
                                json_encoder=self._params.get('json_encoder'),
                                status_code=context.status_code,
                                reason=context.reason,

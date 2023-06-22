@@ -70,6 +70,9 @@ Dynamic Response
 ================
 
 A callback can be provided in place of any of the body elements.
+raw attribute also accepts callable that returns HTTPResponse.
+The HTTPResponse should have `preload_content=False` or it may not work properly.
+
 Callbacks must be a function in the form of
 
 .. code:: python

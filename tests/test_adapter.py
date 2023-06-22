@@ -17,6 +17,7 @@ import purl
 import requests
 import six
 from six.moves.urllib import parse as urlparse
+from urllib3 import HTTPResponse
 
 import requests_mock
 from . import base
@@ -117,6 +118,27 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(six.u(data), resp.text)
         self.assertEqual(six.b(data), resp.content)
         self.assertEqual('utf-8', resp.encoding)
+        self.assertHeaders(resp)
+        self.assertLastRequest()
+
+    def test_raw_callback(self):
+        status_code = 401
+        data = 'testdata'
+
+        def _raw_cb(request, context):
+            return HTTPResponse(
+                status=status_code,
+                headers=self.headers,
+                body=six.BytesIO(six.b(data)),
+                preload_content=False,
+                reason=six.moves.http_client.responses.get(status_code),
+            )
+
+        self.adapter.register_uri('GET', self.url, raw=_raw_cb)
+        resp = self.session.get(self.url)
+        self.assertEqual(status_code, resp.status_code)
+        self.assertEqual(six.u(data), resp.text)
+        self.assertEqual(six.b(data), resp.content)
         self.assertHeaders(resp)
         self.assertLastRequest()
 
