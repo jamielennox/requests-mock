@@ -11,6 +11,12 @@
 # under the License.
 
 
+def _always_list(item):
+    if isinstance(item, list):
+        return item
+    return [item]
+
+
 class _FakeHTTPMessage(object):
 
     def __init__(self, headers):
@@ -18,13 +24,23 @@ class _FakeHTTPMessage(object):
 
     def getheaders(self, name):
         try:
-            return [self.headers[name]]
+            return _always_list(self.headers[name])
         except KeyError:
             return []
 
     def get_all(self, name, failobj=None):
         # python 3 only, overrides email.message.Message.get_all
         try:
-            return [self.headers[name]]
+            return _always_list(self.headers[name])
         except KeyError:
             return failobj
+
+
+class _FakeHTTPResponse(object):
+
+    def __init__(self, headers):
+        self._headers = headers
+        self.msg = _FakeHTTPMessage(headers)
+
+    def isclosed(self):
+        return True

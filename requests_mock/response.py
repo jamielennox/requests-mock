@@ -109,6 +109,15 @@ def _extract_cookies(request, response, cookies):
     if cookies:
         merge_cookies(response.cookies, cookies)
 
+    # Re-generate Set-Cookie headers for requests.Session
+    set_cookie_items = [
+        cookie_name + '=' + six.moves.urllib.parse.quote(cookie_value)
+        for cookie_name, cookie_value in response.cookies.items()
+    ]
+
+    if set_cookie_items:
+        response.headers["Set-Cookie"] = set_cookie_items
+
 
 class _IOReader(six.BytesIO):
     """A reader that makes a BytesIO look like a HTTPResponse.
@@ -206,6 +215,9 @@ def create_response(request, **kwargs):
         response.encoding = encoding
 
     _extract_cookies(request, response, kwargs.get('cookies'))
+
+    response.raw._original_response = \
+        compat._FakeHTTPResponse(response.headers)
 
     return response
 
