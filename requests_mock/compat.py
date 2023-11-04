@@ -28,3 +28,13 @@ class _FakeHTTPMessage(object):
             return [self.headers[name]]
         except KeyError:
             return failobj
+
+
+class _FakeHTTPResponse(object):
+
+    def __init__(self, headers):
+        self._headers = headers
+        self.msg = _FakeHTTPMessage(headers)
+
+    def isclosed(self):
+        return True
