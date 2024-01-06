@@ -303,7 +303,26 @@ class TestMatcher(base.TestCase):
                            request_data='goodbye world',
                            additional_matcher=test_match_body)
 
-    def test_reset_reverts_count(self):
+    def test_exhausted(self):
+        url = 'mock://test/site/'
+        matcher = adapter._Matcher('GET',
+                                   url,
+                                   [_MatcherResponse(), _MatcherResponse()],
+                                   complete_qs=False,
+                                   additional_matcher=None,
+                                   request_headers={},
+                                   real_http=False,
+                                   case_sensitive=False)
+        request = adapter._RequestObjectProxy._create('GET', url)
+
+        matcher(request)
+        self.assertEqual(matcher.exhausted, False)
+        matcher(request)
+        self.assertEqual(matcher.exhausted, True)
+        matcher(request)
+        self.assertEqual(matcher.exhausted, True)
+
+    def test_reset(self):
         url = 'mock://test/site/'
         matcher = adapter._Matcher('GET',
                                    url,
@@ -320,5 +339,7 @@ class TestMatcher(base.TestCase):
             matcher(request)
 
         self.assertEqual(matcher.call_count, call_count)
+        self.assertEqual(matcher.exhausted, True)
         matcher.reset()
         self.assertEqual(matcher.call_count, 0)
+        self.assertEqual(matcher.exhausted, False)

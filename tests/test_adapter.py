@@ -405,6 +405,16 @@ class SessionAdapterTests(base.TestCase):
         for matcher in self.adapter._matchers:
             self.assertEqual(matcher.call_count, 0)
 
+    def test_all_exhausted(self):
+        self.adapter.register_uri('GET', self.url, text='resp')
+        self.assertFalse(self.adapter.all_exhausted)
+
+        self.session.get(self.url)
+        self.assertTrue(self.adapter.all_exhausted)
+
+        self.adapter.reset()
+        self.assertFalse(self.adapter.all_exhausted)
+
     def test_adapter_picks_correct_adapter(self):
         good = '%s://test3.url/' % self.PREFIX
         self.adapter.register_uri('GET',
