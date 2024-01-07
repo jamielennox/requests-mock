@@ -49,12 +49,12 @@ class ResponseTests(base.TestCase):
 
         # this only works on python 2 because bytes is a string
         if six.PY3:
-            self.assertRaises(TypeError, self.create_response, text=six.b(''))
+            self.assertRaises(TypeError, self.create_response, text=b'')
 
     def test_text_type(self):
-        self.assertRaises(TypeError, self.create_response, content=six.u('t'))
+        self.assertRaises(TypeError, self.create_response, content=u't')
         self.assertRaises(TypeError, self.create_response, content={'a': 1})
-        self.assertRaises(TypeError, self.create_response, content=six.u(''))
+        self.assertRaises(TypeError, self.create_response, content=u'')
 
     def test_json_body(self):
         data = {'a': 1}

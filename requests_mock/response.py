@@ -120,12 +120,12 @@ class _IOReader(six.BytesIO):
 
     def read(self, *args, **kwargs):
         if self.closed:
-            return six.b('')
+            return b''
 
         # if the file is open, but you asked for zero bytes read you should get
         # back zero without closing the stream.
         if len(args) > 0 and args[0] == 0:
-            return six.b('')
+            return b''
 
         # not a new style object in python 2
         result = six.BytesIO.read(self, *args, **kwargs)
@@ -133,7 +133,7 @@ class _IOReader(six.BytesIO):
         # when using resp.iter_content(None) it'll go through a different
         # request path in urllib3. This path checks whether the object is
         # marked closed instead of the return value. see gh124.
-        if result == six.b(''):
+        if result == b'':
             self.close()
 
         return result
@@ -193,7 +193,7 @@ def create_response(request, **kwargs):
         raw = HTTPResponse(status=status,
                            reason=reason,
                            headers=headers,
-                           body=body or _IOReader(six.b('')),
+                           body=body or _IOReader(b''),
                            decode_content=False,
                            enforce_content_length=False,
                            preload_content=False,
