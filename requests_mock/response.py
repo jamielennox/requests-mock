@@ -11,6 +11,7 @@
 # under the License.
 
 import io
+import http.client
 import json as jsonutils
 
 from requests.adapters import HTTPAdapter
@@ -19,7 +20,6 @@ from requests.cookies import RequestsCookieJar
 from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.packages.urllib3.response import HTTPResponse
 from requests.utils import get_encoding_from_headers
-import six
 
 from requests_mock import compat
 from requests_mock import exceptions
@@ -126,7 +126,7 @@ class _IOReader(io.BytesIO):
         # if the file is open, but you asked for zero bytes read you should get
         # back zero without closing the stream.
         if len(args) > 0 and args[0] == 0:
-            return six.b('')
+            return b''
 
         result = io.BytesIO.read(self, *args, **kwargs)
 
@@ -174,7 +174,7 @@ def create_response(request, **kwargs):
 
     if content is not None and not isinstance(content, bytes):
         raise TypeError('Content should be binary data')
-    if text is not None and not isinstance(text, six.string_types):
+    if text is not None and not isinstance(text, str):
         raise TypeError('Text should be string data')
 
     if json is not None:
@@ -187,8 +187,7 @@ def create_response(request, **kwargs):
         body = _IOReader(content)
     if not raw:
         status = kwargs.get('status_code', _DEFAULT_STATUS)
-        reason = kwargs.get('reason',
-                            six.moves.http_client.responses.get(status))
+        reason = kwargs.get('reason', http.client.responses.get(status))
 
         raw = HTTPResponse(status=status,
                            reason=reason,
@@ -245,7 +244,7 @@ class _MatcherResponse(object):
             raise TypeError('Content should be a callback or binary data')
 
         if text is not None and not (callable(text) or
-                                     isinstance(text, six.string_types)):
+                                     isinstance(text, str)):
             raise TypeError('Text should be a callback or string data')
 
     def get_response(self, request):

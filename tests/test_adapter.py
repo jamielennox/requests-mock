@@ -12,11 +12,10 @@
 
 import json
 import re
+import urllib.parse
 
 import purl
 import requests
-import six
-from six.moves.urllib import parse as urlparse
 
 import requests_mock
 from . import base
@@ -41,7 +40,7 @@ class SessionAdapterTests(base.TestCase):
         self.headers = {'header_a': 'A', 'header_b': 'B'}
 
     def assertHeaders(self, resp):
-        for k, v in six.iteritems(self.headers):
+        for k, v in self.headers.items():
             self.assertEqual(v, resp.headers[k])
 
     def assertLastRequest(self, method='GET', body=None):
@@ -49,8 +48,8 @@ class SessionAdapterTests(base.TestCase):
         self.assertEqual(method, self.adapter.last_request.method)
         self.assertEqual(body, self.adapter.last_request.body)
 
-        url_parts = urlparse.urlparse(self.url)
-        qs = urlparse.parse_qs(url_parts.query)
+        url_parts = urllib.parse.urlparse(self.url)
+        qs = urllib.parse.parse_qs(url_parts.query)
         self.assertEqual(url_parts.scheme, self.adapter.last_request.scheme)
         self.assertEqual(url_parts.netloc, self.adapter.last_request.netloc)
         self.assertEqual(url_parts.path, self.adapter.last_request.path)
@@ -177,11 +176,11 @@ class SessionAdapterTests(base.TestCase):
         out = [self.session.get(self.url) for i in range(0, len(inp))]
 
         for i, o in zip(inp, out):
-            for k, v in six.iteritems(i):
+            for k, v in i.items():
                 self.assertEqual(v, getattr(o, k))
 
         last = self.session.get(self.url)
-        for k, v in six.iteritems(inp[-1]):
+        for k, v in inp[-1].items():
             self.assertEqual(v, getattr(last, k))
 
     def test_callback_optional_status(self):
@@ -198,7 +197,7 @@ class SessionAdapterTests(base.TestCase):
         resp = self.session.get(self.url)
         self.assertEqual(300, resp.status_code)
 
-        for k, v in six.iteritems(headers):
+        for k, v in headers.items():
             self.assertEqual(v, resp.headers[k])
 
     def test_callback_optional_headers(self):
@@ -216,7 +215,7 @@ class SessionAdapterTests(base.TestCase):
         resp = self.session.get(self.url)
         self.assertEqual(300, resp.status_code)
 
-        for k, v in six.iteritems(headers):
+        for k, v in headers.items():
             self.assertEqual(v, resp.headers[k])
 
     def test_latest_register_overrides(self):
@@ -274,9 +273,6 @@ class SessionAdapterTests(base.TestCase):
                           content=u'')
 
     def test_dont_pass_bytes_as_text(self):
-        if six.PY2:
-            self.skipTest('Cannot enforce byte behaviour in PY2')
-
         self.assertRaises(TypeError,
                           self.adapter.register_uri,
                           'GET',
@@ -284,9 +280,6 @@ class SessionAdapterTests(base.TestCase):
                           text=b'bytes')
 
     def test_dont_pass_empty_string_as_text(self):
-        if six.PY2:
-            self.skipTest('Cannot enforce byte behaviour in PY2')
-
         self.assertRaises(TypeError,
                           self.adapter.register_uri,
                           'GET',

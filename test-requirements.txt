@@ -1,5 +1,4 @@
 fixtures
-mock; python_version < '3.3'
 purl
 pytest
 sphinx
