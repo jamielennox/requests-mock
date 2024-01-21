@@ -18,8 +18,8 @@ from requests.adapters import HTTPAdapter
 from requests.cookies import MockRequest, MockResponse
 from requests.cookies import RequestsCookieJar
 from requests.cookies import merge_cookies, cookiejar_from_dict
-from requests.packages.urllib3.response import HTTPResponse
 from requests.utils import get_encoding_from_headers
+from urllib3.response import HTTPResponse
 
 from requests_mock import exceptions
 
