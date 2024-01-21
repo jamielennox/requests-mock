@@ -21,7 +21,6 @@ from requests.cookies import merge_cookies, cookiejar_from_dict
 from requests.packages.urllib3.response import HTTPResponse
 from requests.utils import get_encoding_from_headers
 
-from requests_mock import compat
 from requests_mock import exceptions
 
 _BODY_ARGS = frozenset(['raw', 'body', 'content', 'text', 'json'])
@@ -101,8 +100,7 @@ def _extract_cookies(request, response, cookies):
     """
     # This will add cookies set manually via the Set-Cookie or Set-Cookie2
     # header but this only allows 1 cookie to be set.
-    http_message = compat._FakeHTTPMessage(response.headers)
-    response.cookies.extract_cookies(MockResponse(http_message),
+    response.cookies.extract_cookies(MockResponse(response.raw.headers),
                                      MockRequest(request))
 
     # This allows you to pass either a CookieJar or a dictionary to request_uri
