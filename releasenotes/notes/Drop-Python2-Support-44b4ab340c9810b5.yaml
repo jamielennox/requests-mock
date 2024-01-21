@@ -1,0 +1,12 @@
+---
+prelude: >
+  Python 2 support has been deprecated in the wider community for many years.
+  There have been requests for it to be dropped in requests-mock for a while,
+  however it has never caused enough development pain to remove it. It is now
+  getting more difficult to package things like six for operating system and we
+  should remove it.
+upgrade:
+  - Python 2 is no longer supported. Please move to Python 3.
+  - The minimum version of requests has been bumped to 2.22.
+critical:
+  - Python 2 is no longer supported. Please move to Python 3.
