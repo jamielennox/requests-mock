@@ -50,7 +50,7 @@ jobs:
 
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
+          python-version: '3.8'
           architecture: 'x64'
 
       - uses: actions/cache@v3
