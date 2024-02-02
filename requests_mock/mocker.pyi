@@ -247,6 +247,7 @@ class Mocker(MockerCore):
 
     def __init__(
       self,
+      *,
       kw: str = ...,
       case_sensitive: bool = ...,
       adapter: Any = ...,
