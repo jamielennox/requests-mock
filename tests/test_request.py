@@ -137,3 +137,7 @@ class RequestTests(base.TestCase):
     def test_empty_query_string(self):
         req = self.do_request(url='https://host.example.com/path?key')
         self.assertEqual([''], req.qs['key'])
+    
+    def test_query_string(self):
+        req = self.do_request(url='https://host.example.com/path?key=value')
+        self.assertEqual('value', req.qs['key'])
