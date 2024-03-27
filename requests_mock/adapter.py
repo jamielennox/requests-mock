@@ -96,6 +96,7 @@ class _Matcher(_RequestHistoryTracker):
         self._request_headers = request_headers
         self._real_http = real_http
         self._additional_matcher = additional_matcher
+        self._exhausted = False
 
         # url can be a regex object or ANY so don't always run urlparse
         if isinstance(url, str):
@@ -223,9 +224,18 @@ class _Matcher(_RequestHistoryTracker):
             response_matcher = self._responses.pop(0)
         else:
             response_matcher = self._responses[0]
+            self._exhausted = True
 
         self._add_to_history(request)
         return response_matcher.get_response(request)
+
+    @property
+    def exhausted(self):
+        return self._exhausted
+
+    def reset(self):
+        super(_Matcher, self).reset()
+        self._exhausted = False
 
 
 class Adapter(BaseAdapter, _RequestHistoryTracker):
@@ -313,6 +323,11 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         :param callable matcher: The matcher to execute.
         """
         self._matchers.append(matcher)
+
+    @property
+    def all_exhausted(self):
+        """Return if all matchers have been exhausted."""
+        return all(m.exhausted for m in self._matchers)
 
     def reset(self):
         super(Adapter, self).reset()

@@ -18,6 +18,7 @@ try:
 except ImportError:
     import mock
 import requests
+import testtools
 
 import requests_mock
 from requests_mock import adapter
@@ -120,6 +121,20 @@ class MockerTests(base.TestCase):
         self.assertMockStopped()
         with requests_mock.Mocker() as m:
             self._do_test(m)
+        self.assertMockStopped()
+
+    def test_strict_with_context_manager(self):
+        self.assertMockStopped()
+        with requests_mock.Mocker(strict=True) as m:
+            self._do_test(m)
+        self.assertMockStopped()
+
+    def test_strict_with_context_manager_raises(self):
+        self.assertMockStopped()
+        with testtools.ExpectedException(AssertionError):
+            with requests_mock.Mocker(strict=True) as m:
+                m.register_uri('GET', 'http://www.example.com', text='resp')
+                self._do_test(m)
         self.assertMockStopped()
 
     @mock.patch('requests.adapters.HTTPAdapter.send')
