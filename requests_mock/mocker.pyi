@@ -3,9 +3,11 @@
 from json import JSONEncoder
 from http.cookiejar import CookieJar
 from io import IOBase
+from types import TracebackType
 from typing import Any, Callable, Dict, List, Optional, Pattern, Type, TypeVar, Union, overload
 
 from requests import Response, Session
+from typing_extensions import Self
 from urllib3.response import HTTPResponse
 
 from requests_mock.adapter import AnyMatcher, _Matcher, Callback, AdditionalMatcher
@@ -255,8 +257,8 @@ class Mocker(MockerCore):
       real_http: bool = ...,
       json_encoder: Optional[Type[JSONEncoder]] = ...,
     ) -> None: ...
-    def __enter__(self) -> Any: ...
-    def __exit__(self, type: Any, value: Any, traceback: Any) -> None: ...
+    def __enter__(self) -> Self: ...
+    def __exit__(self, type: type[BaseException] | None, value: BaseException | None, traceback: TracebackType | None) -> None: ...
     @overload
     def __call__(self, obj: type[_T]) -> type[_T]: ...
     @overload
