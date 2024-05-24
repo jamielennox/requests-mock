@@ -132,6 +132,7 @@ class MockerCore(object):
 
         self._json_encoder = kwargs.pop('json_encoder', None)
         self.real_http = kwargs.pop('real_http', False)
+        self.strict = kwargs.pop('strict', False)
         self._last_send = None
 
         if kwargs:
@@ -213,6 +214,8 @@ class MockerCore(object):
         if self._last_send:
             self._mock_target.send = self._last_send
             self._last_send = None
+            if self.strict:
+                assert self._adapter.all_exhausted
 
     # for familiarity with MagicMock
     def reset_mock(self):
