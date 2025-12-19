@@ -12,6 +12,7 @@
 
 import contextlib
 import functools
+import inspect
 import sys
 import threading
 import types
@@ -305,18 +306,31 @@ class Mocker(MockerCore):
 
         :param callable func: callable to decorate
         """
-        @functools.wraps(func)
-        def inner(*args, **kwargs):
-            with self.copy() as m:
-                if self._kw:
-                    kwargs[self._kw] = m
-                else:
-                    args = list(args)
-                    args.append(m)
+        is_async = inspect.iscoroutinefunction(func)
 
-                return func(*args, **kwargs)
+        def prepare_args(args, kwargs, m):
+            if self._kw:
+                kwargs[self._kw] = m
+            else:
+                args = list(args)
+                args.append(m)
+            return args, kwargs
+
+        if is_async:
+            @functools.wraps(func)
+            async def inner(*args, **kwargs):
+                with self.copy() as m:
+                    args, kwargs = prepare_args(args, kwargs, m)
+                    return await func(*args, **kwargs)
+        else:
+            @functools.wraps(func)
+            def inner(*args, **kwargs):
+                with self.copy() as m:
+                    args, kwargs = prepare_args(args, kwargs, m)
+                    return func(*args, **kwargs)
 
         return inner
+
 
     def decorate_class(self, klass):
         """Decorates methods in a class with request_mock

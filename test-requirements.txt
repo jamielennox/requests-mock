@@ -1,6 +1,7 @@
 fixtures
 purl
 pytest
+pytest-asyncio
 sphinx
 testtools
 requests_futures
