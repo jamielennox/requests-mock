@@ -108,6 +108,25 @@ def test_threaded_sessions():
         assert future1.result().status_code == 204
         assert future2.result().status_code == 204
 
+def test_sync_callable_with_decorator():
+    @requests_mock.mock()
+    def inner(requests_mock):
+        requests_mock.get('https://httpbin.org/get', text='data')
+        return requests.get('https://httpbin.org/get').text
+
+    text = inner()
+    assert "data" == text
+
+@pytest.mark.asyncio
+async def test_async_callable_with_decorator():
+    @requests_mock.mock()
+    async def inner(requests_mock):
+        requests_mock.get('https://httpbin.org/get', text='data')
+        return requests.get('https://httpbin.org/get').text
+
+    text = await inner()
+    assert "data" == text
+
 
 class TestClass(object):
 
