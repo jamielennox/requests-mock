@@ -238,6 +238,7 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
         self._matchers = []
 
     def send(self, request, **kwargs):
+         """Send a mocked request and return a mocked response."""
         request = _RequestObjectProxy(request,
                                       case_sensitive=self._case_sensitive,
                                       **kwargs)
