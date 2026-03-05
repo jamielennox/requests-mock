@@ -43,6 +43,12 @@ class _RequestObjectProxy(object):
         # to True (or simply removed) in a major version bump.
         self._case_sensitive = kwargs.pop('case_sensitive', False)
 
+        if self._timeout is not None:
+            # Timeout can be actually tuple, float, urllib3 Timeout, or
+            # compatible types like int. Just check for a common error here.
+            if isinstance(self._timeout, str):
+                raise TypeError("timeout should be a tuple or float.")
+
     def __getattr__(self, name):
         # there should be a better way to exclude this, but I don't want to
         # implement __setstate__ just not forward it to the request. You can't
