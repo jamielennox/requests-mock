@@ -74,19 +74,17 @@ class _RequestObjectProxy(object):
 
     @property
     def hostname(self):
-        try:
-            return self.netloc.split(':')[0]
-        except IndexError:
-            return ''
+        return self._url_parts.hostname or ''
 
     @property
     def port(self):
-        components = self.netloc.split(':')
-
         try:
-            return int(components[1])
-        except (IndexError, ValueError):
-            pass
+            port = self._url_parts.port
+        except ValueError:
+            port = None
+
+        if port is not None:
+            return port
 
         if self.scheme == 'https':
             return 443
