@@ -1,0 +1,5 @@
+---
+fixes:
+  - |
+    Request history now reports the correct hostname and port for bracketed
+    IPv6 URLs, including the scheme's default port when none is explicit.

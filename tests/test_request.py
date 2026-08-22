@@ -130,6 +130,20 @@ class RequestTests(base.TestCase):
         self.assertEqual('host.example.com', req.hostname)
         self.assertEqual(443, req.port)
 
+    def test_ipv6_hostname_and_explicit_port(self):
+        req = self.do_request(url='http://[2001:db8::1]:8080/path')
+
+        self.assertEqual('[2001:db8::1]:8080', req.netloc)
+        self.assertEqual('2001:db8::1', req.hostname)
+        self.assertEqual(8080, req.port)
+
+    def test_ipv6_hostname_and_default_port(self):
+        req = self.do_request(url='https://[2001:db8::1]/path')
+
+        self.assertEqual('[2001:db8::1]', req.netloc)
+        self.assertEqual('2001:db8::1', req.hostname)
+        self.assertEqual(443, req.port)
+
     def test_to_string(self):
         req = self.do_request(url='https://host.example.com/path')
         self.assertEqual('GET https://host.example.com/path', str(req))
