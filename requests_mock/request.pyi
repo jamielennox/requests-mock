@@ -1,6 +1,8 @@
 # Stubs for requests_mock.request
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+_Timeout = Optional[Union[float, Tuple[float, float], Tuple[float, None]]]
 
 class _RequestObjectProxy:
     def __init__(self, request: Any, **kwargs: Any) -> None: ...
@@ -20,7 +22,7 @@ class _RequestObjectProxy:
     @property
     def qs(self) -> Dict[str, List[str]]: ...
     @property
-    def timeout(self) -> int: ...
+    def timeout(self) -> _Timeout: ...
     @property
     def allow_redirects(self) -> bool: ...
     @property
