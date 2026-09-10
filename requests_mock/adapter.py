@@ -317,7 +317,8 @@ class Adapter(BaseAdapter, _RequestHistoryTracker):
     def reset(self):
         super(Adapter, self).reset()
         for matcher in self._matchers:
-            matcher.reset()
+            if hasattr(matcher, 'reset'):
+                matcher.reset()
 
 
 __all__ = ['Adapter']
