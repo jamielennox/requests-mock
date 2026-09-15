@@ -104,6 +104,29 @@ class SessionAdapterTests(base.TestCase):
         self.assertHeaders(resp)
         self.assertLastRequest()
 
+    def test_status_code_sets_reason(self):
+        self.adapter.register_uri('GET', self.url, status_code=404)
+
+        resp = self.session.get(self.url)
+        self.assertEqual('Not Found', resp.reason)
+
+    def test_explicit_reason(self):
+        self.adapter.register_uri('GET', self.url, status_code=404,
+                                  reason='Missing on purpose')
+
+        resp = self.session.get(self.url)
+        self.assertEqual('Missing on purpose', resp.reason)
+
+    def test_callback_status_code_sets_reason(self):
+        def _text_cb(request, context):
+            context.status_code = 404
+            return ''
+
+        self.adapter.register_uri('GET', self.url, text=_text_cb)
+
+        resp = self.session.get(self.url)
+        self.assertEqual('Not Found', resp.reason)
+
     def test_text_callback(self):
         status_code = 401
         data = u'testdata'
