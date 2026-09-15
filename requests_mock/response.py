@@ -265,14 +265,24 @@ class _MatcherResponse(object):
         def _call(f, *args, **kwargs):
             return f(request, context, *args, **kwargs) if callable(f) else f
 
+        json = _call(self._params.get('json'))
+        text = _call(self._params.get('text'))
+        content = _call(self._params.get('content'))
+        body = _call(self._params.get('body'))
+        raw = _call(self._params.get('raw'))
+
+        reason = context.reason
+        if reason is None and 'reason' not in self._params:
+            reason = http.client.responses.get(context.status_code)
+
         return create_response(request,
-                               json=_call(self._params.get('json')),
-                               text=_call(self._params.get('text')),
-                               content=_call(self._params.get('content')),
-                               body=_call(self._params.get('body')),
-                               raw=_call(self._params.get('raw')),
+                               json=json,
+                               text=text,
+                               content=content,
+                               body=body,
+                               raw=raw,
                                json_encoder=self._params.get('json_encoder'),
                                status_code=context.status_code,
-                               reason=context.reason,
+                               reason=reason,
                                headers=context.headers,
                                cookies=context.cookies)
